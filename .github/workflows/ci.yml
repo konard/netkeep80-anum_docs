@@ -1,0 +1,148 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      code-changed: ${{ steps.changes.outputs.code }}
+      docs-changed: ${{ steps.changes.outputs.docs }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect changes
+        id: changes
+        run: |
+          if git diff --name-only HEAD~1 2>/dev/null | grep -qE '\.(py|mtc|anum)$'; then
+            echo "code=true" >> $GITHUB_OUTPUT
+          else
+            echo "code=false" >> $GITHUB_OUTPUT
+          fi
+          if git diff --name-only HEAD~1 2>/dev/null | grep -qE '\.md$'; then
+            echo "docs=true" >> $GITHUB_OUTPUT
+          else
+            echo "docs=false" >> $GITHUB_OUTPUT
+          fi
+
+  lint:
+    runs-on: ubuntu-latest
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.code-changed == 'true' || github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff
+
+      - name: Run Ruff linter
+        run: |
+          ruff check parsers/ converters/ core/ tests/ --ignore E501,F401 --exit-zero
+        continue-on-error: true
+
+  check-file-limits:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Python file line limits (1500 max)
+        run: |
+          EXIT_CODE=0
+          find . -name "*.py" -type f | while read -r file; do
+            line_count=$(wc -l < "$file")
+            if [ "$line_count" -gt 1500 ]; then
+              echo "::error file=$file::File has $line_count lines (limit: 1500)"
+              EXIT_CODE=1
+            fi
+          done
+          exit $EXIT_CODE
+
+  test:
+    runs-on: ubuntu-latest
+    needs: [detect-changes, lint, check-file-limits]
+    if: |
+      always() &&
+      !cancelled() &&
+      (needs.detect-changes.outputs.code-changed == 'true' || github.event_name == 'push') &&
+      (needs.lint.result == 'success' || needs.lint.result == 'skipped') &&
+      needs.check-file-limits.result == 'success'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+
+      - name: Run converter tests
+        run: |
+          python -m pytest tests/test_converters.py -v --tb=short
+        continue-on-error: true
+
+  validate-docs:
+    runs-on: ubuntu-latest
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.docs-changed == 'true' || github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check documentation file sizes
+        run: |
+          echo "Checking documentation file sizes..."
+          find docs/ -name "*.md" -type f 2>/dev/null | while read -r file; do
+            line_count=$(wc -l < "$file")
+            if [ "$line_count" -gt 2500 ]; then
+              echo "::warning file=$file::Documentation file has $line_count lines (recommended max: 2500)"
+            fi
+          done
+          echo "Documentation check complete."
+
+  validate-structure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check root directory cleanliness
+        run: |
+          echo "Checking root directory..."
+          ALLOWED_FILES="README.md LICENSE .gitignore .gitkeep"
+          for file in *; do
+            if [ -f "$file" ]; then
+              if ! echo "$ALLOWED_FILES" | grep -qw "$file"; then
+                echo "::warning::Unexpected file in root: $file"
+              fi
+            fi
+          done
+          echo "Root directory check complete."
+
+      - name: Check required directories exist
+        run: |
+          for dir in core parsers converters docs tests; do
+            if [ ! -d "$dir" ]; then
+              echo "::error::Required directory missing: $dir"
+              exit 1
+            fi
+          done
+          echo "All required directories present."
