@@ -1,455 +1,341 @@
-# Протокол ачисел МТС: Полнофункциональная реализация Метатеории связей
+# Метатеория связей (МТС) — Документация и инструменты
 
-> **ПРОЕКТНЫЙ ФАЙЛ-ПРОМПТ**: Этот README является центральным контекстным документом для всей работы над протоколом ачисел МТС
+## Описание
 
-## 🚨 **AI PROMPT GUIDELINES - MANDATORY COMPLIANCE**
+**Метатеория связей (МТС)** — это формальная система, в которой всё есть связь. Система является онтологически замкнутой: не существует внешних сущностей, которые не могут быть выражены через связи. МТС устраняет традиционный дуализм между «объектами» и «отношениями», сводя их к единой категории — направленным связям.
 
-### 🔒 **STRICT FILE CREATION RULES**
-**CRITICAL**: AI assistants working with this project MUST follow these rules:
+Данный репозиторий содержит документацию, инструменты и реализацию протокола **ачисел** (ассоциативных чисел) на основе МТС.
 
-#### ❌ **FORBIDDEN ACTIONS:**
-1. **NO UNAUTHORIZED FILE CREATION**: Never create files without explicit user permission
-2. **NO ROOT CLUTTER**: Never place files in project root - use appropriate subdirectories
-3. **NO RANDOM PLACEMENT**: Never guess where files should go - ask for clarification
-4. **NO DUPLICATE SYSTEMS**: Never create parallel implementations without consultation
-5. **NO LEGACY NOTATION**: Never use old abit notation (♂, ♀, →, ,) - only use correct notation: `(`, `)`, `+`, `-`
-6. **NO ∞ AS ABIT**: Never treat ∞ as an abit - it's a meta-theoretical construct expressed as `() ≡ ∞`
-7. **⚠️ CRITICAL: NO FILES IN ROOT**: Never create ANY files in project root directory - ALL files must go in appropriate subdirectories!
-8. **🚫 NO TEST FILES IN ROOT**: Test files (.anum) must ONLY be created in tests/ directory
-9. **🚫 NO TEMPORARY FILES IN ROOT**: Any temporary files must be created in appropriate subdirectories
+## Основные концепции
 
-#### ✅ **REQUIRED ACTIONS:**
-1. **ASK BEFORE CREATING**: Always request permission and location before creating any file
-2. **USE EXISTING STRUCTURE**: Respect the established directory structure below
-3. **FOLLOW NOTATION**: Use only the corrected quaternary abit system: `(`, `)`, `+`, `-`
-4. **PRESERVE ARCHITECTURE**: Maintain the clean separation between practical and theoretical levels
-5. **UPDATE EXISTING**: Prefer updating existing files over creating new ones
-6. **VALIDATE CHANGES**: Always use get_problems tool after file modifications
-7. **✅ ENFORCE DIRECTORY STRUCTURE**: 
-   - Tests (.anum files) → tests/ directory ONLY
-   - Documentation → docs/ directory
-   - Code components → parsers/, tools/, examples/, core/ directories
-   - Archive old files → archive/ directory
-   - NEVER put any files in project root except README.md, LICENSE, .gitignore
+### Два домена МТС
 
-#### 📁 **APPROVED DIRECTORY STRUCTURE:**
+| Домен | Уровень | Символы | Назначение |
+|-------|---------|---------|------------|
+| **Формы связей** | Теоретический | `⟼`, `∞`, `♂`, `♀`, `¬` | Аксиомы, теоремы, формальные конструкции |
+| **Сериализация** | Практический | `(`, `)`, `+`, `-` | Представление данных в виде последовательностей |
+
+### Абиты
+
+**Абиты** (ассоциативные биты) — четыре базовые связи вокруг акорня `∞`, формирующие четверичную систему сериализации:
+
+| Абит | Форма | Описание |
+|------|-------|----------|
+| `(` | `♂∞` | Начало смысла — самозамкнутое начало акорня |
+| `)` | `∞♀` | Конец смысла — самозамкнутый конец акорня |
+| `+` | `♂∞ ⟼ ∞♀` | Единица смысла — связь от начала к концу |
+| `-` | `∞♀ ⟼ ♂∞` | Нуль смысла — инверсия единицы |
+
+> **Важно:** `∞` (акорень) **не является абитом**. Это мета-конструкт, выражаемый через комбинацию абитов: `() ≡ ∞`.
+
+### Ачисла
+
+**Ачисло** (ассоциативное число) — конечная последовательность абитов, являющаяся уникальным идентификатором связи. Используется для кодирования данных, сериализации структур МТС и преобразования UTF-8 текста в связи.
+
+### Система аксиом
+
+МТС основана на 12 аксиомах (А0–А11):
+
+| Аксиома | Формула | Описание |
+|---------|---------|----------|
+| А0. Определение | `(s : F) ⟼ (s = F)` | Знак как запрос по форме |
+| А1. Тождественность | `x = x` | Структурная неразличимость |
+| А2. Конгруэнция | `{(a = c), (b = d)} ⟼ ((a⟼b) = (c⟼d))` | Структурная прозрачность |
+| А3. Связь | `rv : r ⟼ v` | Базовый конструктор |
+| А4. Смысл | `∞ : ∞ ⟼ ∞` | Полное самозамыкание (акорень) |
+| А5. Самозамыкание начала | `♂v : ♂v ⟼ v` | Начало замкнуто на связь |
+| А6. Самозамыкание конца | `r♀ : r ⟼ r♀` | Конец замкнут на связь |
+| А7. Инверсия | `¬(a ⟼ b) = b ⟼ a` | Обращение направления |
+| А8. Единица смысла | `+ : ♂∞ ⟼ ∞♀` | Направленная связь |
+| А9. Нуль смысла | `- : ¬+` | Инверсия единицы |
+| А10. Абиты | `( : ♂∞`, `) : ∞♀`, `+ : +`, `- : -` | Четверичная система |
+| А11. Левоассоциативность | `abc = (a ⟼ b) ⟼ c` | Порядок группировки |
+
+Подробное описание аксиом и теорем: [`docs/theory/Метатеория связей.md`](docs/theory/Метатеория%20связей.md)
+
+## Структура репозитория
+
 ```
-ROOT/                           # Keep minimal - only README.md, LICENSE, .gitignore
-├── core/                       # Core system components
-│   └── axioms/                 # MTC axiom definitions and validation
-├── parsers/                    # All anum parsing components
-├── converters/                 # Конвертеры между форматами нотаций
-├── tools/                      # Calculators and utilities
-├── examples/                   # Demonstration code
-├── tests/                      # Test files and .anum test cases
-├── docs/                       # All documentation
-│   ├── theory/                 # Core MTC theory documents
-│   ├── specs/                  # Technical specifications
-│   └── research/               # Research and planning docs
-├── archive/                    # Deprecated/old files
-├── faq/                        # FAQ documents
-├── pics/                       # Images and diagrams
-└── pdf/                        # PDF documents
+anum_docs/
+├── README.md                     # Описание проекта (этот файл)
+├── LICENSE                       # Лицензия (Unlicense)
+├── .gitignore
+│
+├── core/                         # Ядро системы
+│   ├── axioms/                   # Валидация аксиом МТС
+│   │   └── validate_axioms.py
+│   └── notation_system.py        # Система нотации абитов
+│
+├── parsers/                      # Парсеры ачисел и формул МТС
+│   ├── anum_prover.py            # Основной движок доказательств
+│   ├── mtc_formula_prover.py     # Движок доказательств формул МТС
+│   ├── complex_anum_parser.py    # Парсер сложных ачисел
+│   ├── extended_anum_parser.py   # Расширенный парсер
+│   └── mtc_original_abit_parser.py
+│
+├── converters/                   # Конвертеры между форматами нотаций
+│   ├── text_to_anum.py           # UTF-8 текст → четверичное ачисло
+│   ├── anum_to_text.py           # Четверичное ачисло → UTF-8 текст
+│   └── ascii_unicode.py          # ASCII ↔ Unicode нотации
+│
+├── tests/                        # Тесты
+│   ├── test_converters.py        # Тесты конвертеров
+│   └── mtc_formulas.mtc          # Тестовые формулы МТС
+│
+├── docs/                         # Документация
+│   ├── theory/                   # Теория МТС
+│   │   └── Метатеория связей.md  # Чистовик теории (А0–А11)
+│   ├── specs/                    # Спецификации
+│   ├── research/                 # Исследования
+│   ├── CONTRIBUTING.md           # Руководство по вкладу
+│   ├── BEST-PRACTICES.md         # Лучшие практики
+│   └── CI-CD-BEST-PRACTICES.md   # Практики CI/CD
+│
+├── faq/                          # Часто задаваемые вопросы
+├── pics/                         # Изображения
+├── pdf/                          # PDF-документы
+└── archive/                      # Архив старых файлов
 ```
 
-#### 🎯 **PROJECT GOALS & CONSTRAINTS:**
-- **Primary Goal**: Implement MTC (Metatheory of links) using correct quaternary abit system
-- **Critical Constraint**: Only 4 abits exist: `(`, `)`, `+`, `-`
-- **Architecture**: Pure quaternary system with ∞ at meta-theoretical level
-- **Quality Standard**: Every change must be validated and tested
-- **Documentation**: All changes must be reflected in documentation
+## Быстрый старт
 
-#### ⚠️ **CRITICAL: ROOT DIRECTORY MUST STAY CLEAN!**
+### Требования
 
-**🚫 ZERO TOLERANCE POLICY FOR ROOT CLUTTER:**
+- Python 3.11+
 
-The project root directory (`d:\Projects\anum_protocol\anum_docs\`) must contain ONLY these files:
-- ✅ `README.md` (this file)
-- ✅ `LICENSE` 
-- ✅ `.gitignore`
-- ✅ Subdirectories (tests/, parsers/, tools/, etc.)
+### Запуск тестов
 
-**❌ ABSOLUTELY FORBIDDEN IN ROOT:**
-- ❌ Any `.anum` test files
-- ❌ Any `.anum` test files
-- ❌ Any temporary files
-- ❌ Any Python scripts
-- ❌ Any output files
-- ❌ Any logs or debug files
-- ❌ Any configuration files
+```bash
+# Тесты конвертеров
+python3 -m pytest tests/test_converters.py -v
 
-**📝 CORRECT FILE PLACEMENT:**
-- Test files (.anum) → `tests/` directory
-- Parser scripts → `parsers/` directory
-- Documentation → `docs/` directory
-- Examples → `examples/` directory
-- Tools → `tools/` directory
+# Запуск движка формул МТС
+python3 parsers/mtc_formula_prover.py tests/mtc_formulas.mtc
+```
 
-**⚡ IMMEDIATE ACTION REQUIRED:**
-Any files found in the root directory (except the allowed ones) will be:
-1. Immediately moved to appropriate subdirectories
-2. Or deleted if they are temporary/duplicate files
+### Конвертация текста
 
-#### ⚙️ **SCRIPTS MUST BE FIXED:**
-All scripts must be updated to:
-- Never create files in the project root
-- Always specify full paths to appropriate subdirectories
-- Use `os.path.join()` for proper path construction
+```bash
+# UTF-8 текст → ачисло
+python3 converters/text_to_anum.py
+
+# Ачисло → UTF-8 текст
+python3 converters/anum_to_text.py
+
+# ASCII ↔ Unicode нотация
+python3 converters/ascii_unicode.py
+```
+
+## Три нотации МТС
+
+| Нотация | Расширение | Описание |
+|---------|------------|----------|
+| **Формальная** | `.mtl` | Язык запросов по форме связей (основной язык теории) |
+| **Строковая** | `.astr` | UTF-8 представление как левоассоциативная цепочка |
+| **Четверичная** | `.anum` | Алфавит из 4 абитов: `(`, `)`, `+`, `-` |
+
+### Соответствие нотаций anum_docs и aprover
+
+| anum_docs | aprover | Описание |
+|-----------|---------|----------|
+| `⟼` | `->` | Конструктор связи |
+| `¬⟼` | `!->` | Отрицание стрелки |
+| `¬` | `!` | Инверсия |
+| `(` | `[` | Абит начала смысла |
+| `)` | `]` | Абит конца смысла |
+| `+` | `1` | Абит единицы смысла |
+| `-` | `0` | Абит нуля смысла |
+
+Подробнее: [netkeep80/aprover](https://github.com/netkeep80/aprover)
+
+## Документация
+
+- **Теория МТС** — [`docs/theory/Метатеория связей.md`](docs/theory/Метатеория%20связей.md)
+- **Формальная нотация** — [`docs/specs/Формальная нотация МТС.md`](docs/specs/Формальная%20нотация%20МТС.md)
+- **FAQ** — [`faq/`](faq/)
+- **Руководство по вкладу** — [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md)
+
+## CI/CD
+
+Проект использует GitHub Actions для непрерывной интеграции:
+
+- **Lint** — проверка кода с помощью [Ruff](https://github.com/astral-sh/ruff)
+- **Tests** — запуск тестов конвертеров через pytest
+- **Structure** — проверка чистоты корневой директории и наличия обязательных каталогов
+- **Docs** — проверка размера файлов документации
+
+## Лицензия
+
+Проект распространяется под лицензией [Unlicense](LICENSE) (общественное достояние).
 
 ---
 
-**✅ CRITICAL CORRECTION COMPLETED SUCCESSFULLY!**
+# Metatheory of Links (MTC) — Documentation and Tools
 
-### 🎉 Key correction completed:
-✅ **CORRECT understanding**: 
-- ∞ (associative root) **is NOT an abit**
-- ∞ is not part of the quaternary achisla
-- ∞ can be expressed through abit combination: `() ≡ ∞`
-- Only 4 symbols are abits: `(`, `)`, `+`, `-`
-- Pure quaternary system consists only of these 4 abits
-- ∞ is at the meta-theoretical level
+## Description
 
-### 📊 Correction results:
-- ✅ **Basic functionality**: 100% working (basic tests 9/9)
-- ✅ **Complex tests**: 82% success (42/51 tests)
-- ✅ **New parser**: `parsers/anum_prover_corrected.py`
-- ✅ **Full documentation**: `docs/КРИТИЧЕСКАЯ_КОРРЕКЦИЯ_ОТЧЁТ.md`
+**Metatheory of Links (MTC)** is a formal system where everything is a link. The system is ontologically closed: there are no external entities that cannot be expressed through links. MTC eliminates the traditional dualism between "objects" and "relations" by reducing them to a single category — directed links.
 
-### 🛠️ Correction plan:
-- ✅ Complete architecture restart with correct understanding
-- ✅ Update all documentation
-- ✅ Rework all system components
-- ✅ Rework parsers for pure quaternary system
-- ✅ Update converters and tools
-- ✅ Rework examples for correct usage
-- ✅ Comprehensive validation of corrected system
+This repository contains documentation, tools, and the implementation of the **anumber** (associative number) protocol based on MTC.
 
-✨ **System ready for further development!**
+## Core Concepts
 
----
+### Two Domains of MTC
 
-## 🎯 PROJECT STATUS
+| Domain | Level | Symbols | Purpose |
+|--------|-------|---------|---------|
+| **Link forms** | Theoretical | `⟼`, `∞`, `♂`, `♀`, `¬` | Axioms, theorems, formal constructions |
+| **Serialization** | Practical | `(`, `)`, `+`, `-` | Data representation as sequences |
 
-### ✅ CURRENT ACHIEVEMENTS (as of 2025-08-26)
+### Abits
 
-**🎉 MILESTONE: First Computational Implementation of MTC!**
+**Abits** (associative bits) are four basic links around the aroot `∞`, forming a quaternary serialization system:
 
-We have successfully created the **world's first working computational engine** for the Metatheory of links (MTC)!
+| Abit | Form | Description |
+|------|------|-------------|
+| `(` | `♂∞` | Start of meaning — self-closed start of aroot |
+| `)` | `∞♀` | End of meaning — self-closed end of aroot |
+| `+` | `♂∞ ⟼ ∞♀` | Unit of meaning — link from start to end |
+| `-` | `∞♀ ⟼ ♂∞` | Zero of meaning — inversion of unit |
 
-#### Core Functionality - Production Ready:
-- ✅ **Unified Prover**: Single consolidated [`parsers/anum_prover.py`](file://d:\Projects\anum_protocol\anum_docs\parsers\anum_prover.py) 
-- ✅ **MTC Formula Prover**: New [`parsers/mtc_formula_prover.py`](file://d:\Projects\anum_protocol\anum_docs\parsers\mtc_formula_prover.py) for full MTC formula notation
-- ✅ **Test Results**: 83.3% success rate (40/48 comprehensive tests passing)
-- ✅ **Complex Formulas**: Full support for ♂∞♀ patterns, recursive closures, merger of recursions
-- ✅ **Dual Notation**: Complete Unicode (♂♀→∞) and ASCII (MF->INF) compatibility
-- ✅ **Core Test Suite**: 71.4% success (5/7 fundamental axiom tests passing)
-- ✅ **Extended Axioms**: All 9 MTC axioms including advanced patterns
-- ✅ **Clean Architecture**: Consolidated from multiple parsers into unified solution
+> **Important:** `∞` (aroot) **is not an abit**. It is a meta-theoretical construct expressed through a combination of abits: `() ≡ ∞`.
 
-#### Key Technical Achievements:
-- **Merger of Recursions Theorem**: ♂♀ ≡ ∞ (computational proof)
-- **Extended Self-Closure**: ∞ ≡ ∞→∞→∞→... (infinite chain equivalence)
-- **Complex Decomposition**: ♂∞♀ ≡ (♂∞)♀ (structural analysis)
-- **Left-Associative Parsing**: Proper ((a→b)→c) grouping
-- **Unicode Preservation**: Full MTC symbol support with UTF-8 encoding
-- **Multiline Formula Support**: Process .mtc files with full MTC notation
-- **Recursive Pattern Matching**: Advanced support for ♂♂v ≡ ♂♂v → ♂v patterns
+### Anumbers
 
-#### Testing Results:
-- **Comprehensive Suite**: 40/48 formula tests passing (83.3% success rate)
-- **Axiom Validation**: 5/7 core axioms verified (71.4%)
-- **Complex Patterns**: Advanced recursive and closure patterns working
-- **File Processing**: Batch .mtc file validation operational
-- **MTC Formula Tests**: Full support for Unicode MTC notation in .mtc files
+An **anumber** (associative number) is a finite sequence of abits serving as a unique link identifier. It is used for data encoding, MTC structure serialization, and UTF-8 text-to-link conversion.
 
-## 📋 МЕТОДОЛОГИЯ РАБОТЫ
+### Axiom System
 
-### Принципы разработки
-- **Итеративность**: Пошаговое развитие от простого к сложному
-- **Тестируемость**: Каждый компонент должен иметь тесты
-- **Документированность**: Все решения фиксируются в документации
-- **Соответствие МТС**: Строгое следование аксиомам теории
+MTC is based on 12 axioms (A0–A11):
 
-### Нотация абитов (ОКОНЧАТЕЛЬНАЯ ВЕРСИЯ)
+| Axiom | Formula | Description |
+|-------|---------|-------------|
+| A0. Definition | `(s : F) ⟼ (s = F)` | Sign as a form query |
+| A1. Identity | `x = x` | Structural indistinguishability |
+| A2. Congruence | `{(a = c), (b = d)} ⟼ ((a⟼b) = (c⟼d))` | Structural transparency |
+| A3. Link | `rv : r ⟼ v` | Basic constructor |
+| A4. Meaning | `∞ : ∞ ⟼ ∞` | Complete self-closure (aroot) |
+| A5. Start self-closure | `♂v : ♂v ⟼ v` | Start closed on link |
+| A6. End self-closure | `r♀ : r ⟼ r♀` | End closed on link |
+| A7. Inversion | `¬(a ⟼ b) = b ⟼ a` | Direction reversal |
+| A8. Unit of meaning | `+ : ♂∞ ⟼ ∞♀` | Directed link |
+| A9. Zero of meaning | `- : ¬+` | Inversion of unit |
+| A10. Abits | `( : ♂∞`, `) : ∞♀`, `+ : +`, `- : -` | Quaternary system |
+| A11. Left-associativity | `abc = (a ⟼ b) ⟼ c` | Grouping order |
 
-**Абиты** - четыре базовые связи вокруг акорня, формирующие элементарные "строительные блоки" ассоциативной памяти:
+Full axiom descriptions and theorems: [`docs/theory/Метатеория связей.md`](docs/theory/Метатеория%20связей.md)
+
+## Repository Structure
 
 ```
-( - абит ♂∞ ≡ ♂∞ → ∞     (начало связи, ссылка)
-) - абит ∞♀ ≡ ∞ → ∞♀      (конец связи, значение)  
-+ - абит → ≡ ♂∞ → ∞♀      (наличие связи, истина)
-- - абит ↛ ≡ ∞♀ → ♂∞      (отсутствие связи, ложь)
+anum_docs/
+├── README.md                     # Project description (this file)
+├── LICENSE                       # License (Unlicense)
+├── .gitignore
+│
+├── core/                         # Core system
+│   ├── axioms/                   # MTC axiom validation
+│   │   └── validate_axioms.py
+│   └── notation_system.py        # Abit notation system
+│
+├── parsers/                      # Anumber and MTC formula parsers
+│   ├── anum_prover.py            # Main proof engine
+│   ├── mtc_formula_prover.py     # MTC formula proof engine
+│   ├── complex_anum_parser.py    # Complex anumber parser
+│   ├── extended_anum_parser.py   # Extended parser
+│   └── mtc_original_abit_parser.py
+│
+├── converters/                   # Notation format converters
+│   ├── text_to_anum.py           # UTF-8 text → quaternary anumber
+│   ├── anum_to_text.py           # Quaternary anumber → UTF-8 text
+│   └── ascii_unicode.py          # ASCII ↔ Unicode notation
+│
+├── tests/                        # Tests
+│   ├── test_converters.py        # Converter tests
+│   └── mtc_formulas.mtc          # MTC test formulas
+│
+├── docs/                         # Documentation
+│   ├── theory/                   # MTC theory
+│   │   └── Метатеория связей.md  # Final theory document (A0–A11)
+│   ├── specs/                    # Specifications
+│   ├── research/                 # Research
+│   ├── CONTRIBUTING.md           # Contributing guide
+│   ├── BEST-PRACTICES.md         # Best practices
+│   └── CI-CD-BEST-PRACTICES.md   # CI/CD practices
+│
+├── faq/                          # Frequently asked questions
+├── pics/                         # Images
+├── pdf/                          # PDF documents
+└── archive/                      # Archived files
 ```
 
-**Критическое различие:** 
-- **Абиты** `(`, `)`, `+`, `-` - практические символы для четверичных последовательностей
-- **Формы связей** `∞`, `♂`, `♀`, `→` - теоретические категории для анализа
-- ∞ (ассоциативный корень) **НЕ является абитом** - это мета-конструкт
-- ∞ выражается через комбинацию абитов: `() ≡ ∞`
-- Только 4 символа являются абитами для четверичной системы
+## Quick Start
 
-**Виды форм связей** - теоретические категории (НЕ абиты!):
-```
-∞ - полностью самозамкнутая связь (нульарный оператор) [выражается как ()]
-♂ - связь с самозамкнутым началом (унарный оператор)
-♀ - связь с самозамкнутым концом (унарный оператор)  
-→ - связь без самозамыканий (бинарный левоассоциативный оператор)
-```
+### Requirements
 
-### ASCII совместимость
-```
-(   ≡ (   (начало связи - абит)
-)   ≡ )   (конец связи - абит)
-+   ≡ +   (связь - абит)
--   ≡ -   (несвязь - абит)
-()
-≡ ∞   (акорень - выражается через комбинацию абитов)
-M   ≡ ♂   (самозамкнутое начало - форма связи)
-F   ≡ ♀   (самозамкнутый конец - форма связи)
-->  ≡ →   (направленная связь - форма связи)
+- Python 3.11+
+
+### Running Tests
+
+```bash
+# Converter tests
+python3 -m pytest tests/test_converters.py -v
+
+# Run MTC formula engine
+python3 parsers/mtc_formula_prover.py tests/mtc_formulas.mtc
 ```
 
-**Ключевая коррекция:**
-- ∞ НЕ является ASCII символом для абита
-- ∞ выражается через комбинацию абитов `()`
-- Только `(`, `)`, `+`, `-` являются абитами
-- Символы `M`, `F`, `->` представляют формы связей для анализа
+### Text Conversion
 
-## 📁 СТРУКТУРА ПРОЕКТА
+```bash
+# UTF-8 text → anumber
+python3 converters/text_to_anum.py
 
-```
-anum_docs/                              # Корневая директория проекта
-├── README.md                           # Центральный документ проекта (этот файл)
-├── LICENSE                             # Лицензия
-├── .gitignore                          # Настройки git
-├── CLAUDE.md                           # Руководство для AI-ассистентов
-│
-├── .github/                            # GitHub конфигурация
-│   └── workflows/                      # CI/CD пайплайны
-│       └── ci.yml                      # Основной CI workflow
-│
-├── core/                               # Ядро системы MTC
-│   ├── axioms/                         # Аксиомы и их валидация
-│   │   └── validate_axioms.py          # Валидатор аксиом MTC
-│   └── notation_system.py              # Система нотации абитов
-│
-├── converters/                         # Конвертеры между форматами нотаций
-│   ├── __init__.py                     # Описание модуля конвертеров
-│   ├── text_to_anum.py                 # UTF-8 текст → четверичное ачисло
-│   ├── anum_to_text.py                 # Четверичное ачисло → UTF-8 текст
-│   └── ascii_unicode.py                # ASCII (aprover) ↔ Unicode (anum_docs)
-│
-├── parsers/                            # Парсеры ачисел и формул MTC
-│   ├── anum_prover.py                  # Основной движок доказательств
-│   ├── mtc_formula_prover.py           # Движок доказательств формул MTC
-│   ├── complex_anum_parser.py          # Парсер сложных ачисел
-│   ├── extended_anum_parser.py         # Расширенный парсер
-│   └── mtc_original_abit_parser.py     # Оригинальный парсер абитов
-│
-├── docs/                               # Документация
-│   ├── plan.md                         # План наведения порядка
-│   ├── BEST-PRACTICES.md               # Лучшие практики AI-разработки
-│   ├── CI-CD-BEST-PRACTICES.md         # Лучшие практики CI/CD
-│   ├── CONTRIBUTING.md                 # Руководство по вкладу
-│   ├── theory/                         # Теория МТС
-│   │   ├── Метатеория связей.md        # ← ЧИСТОВИК (финальная версия, А0–А11)
-│   │   ├── Шаблон аксиом МТС.md       # Шаблон формулировки аксиом
-│   │   ├── Переосмысление операторов начала и конца связи.md
-│   │   ├── Ответ на вопрос о связи и ролях в МТС.md
-│   │   └── Анализ формулы связи ♂∞♀.md
-│   ├── specs/                          # Спецификации
-│   │   └── Формальная нотация МТС.md
-│   └── research/                       # Исследования
-│       ├── Вопросы и ответы.md
-│       └── Отличия между знаками равенства.md
-│
-├── faq/                                # Часто задаваемые вопросы (FAQ)
-│   ├── Аксиома степени петли.md
-│   ├── Аксиоматизация натуральных чисел в МТС.md
-│   ├── Введение бинарного квантора существования.md
-│   ├── Доказательство уникальности ∞.md
-│   ├── Обозначения связей и мультиссылок в теории.md
-│   ├── Развёрнутая последовательность ♂♂v.md
-│   ├── Рекомендации по изложению метатеории связей.md
-│   ├── Формулы МТС.md
-│   ├── Функция и множество как бинарное отношение.md
-│   └── Чем отличаются кванторы от операторов.md
-│
-├── tests/                              # Тесты
-│   ├── mtc_formulas.mtc                # Тестовые формулы MTC
-│   ├── test_converters.py              # Тесты конвертеров (43 теста)
-│   └── test.bat                        # Скрипт запуска тестов
-│
-├── pics/                               # Изображения
-│   ├── pic1.jpg
-│   └── 1.jpeg
-│
-├── pdf/                                # PDF-документы
-│   └── (7 файлов)
-│
-└── archive/                            # Архив старых/черновых файлов
-    ├── Черновик МТС.md
-    ├── Введение в МТС.md
-    ├── Нотации МТС.md
-    ├── Система аксиом Метатеории Связей.md
-    ├── Система логических уравнений МТС.md
-    ├── Разрыв между знаком и связью.md
-    ├── Аксиоматическое определение начала и конца связи.md
-    ├── О природе самозамыкания и его возможности.md
-    ├── Требования к изложению системы аксиом.md
-    ├── смысл.md
-    ├── 1.md
-    ├── 2.md
-    ├── Метатеории связей.md
-    └── Метатеория связей - Чистовой вариант.md
+# Anumber → UTF-8 text
+python3 converters/anum_to_text.py
+
+# ASCII ↔ Unicode notation
+python3 converters/ascii_unicode.py
 ```
 
-### 📂 Описание директорий:
+## Three MTC Notations
 
-#### `/core/` - Ядро системы
-- Аксиомы, система нотации, базовые структуры данных
-- Валидация корректности теоретических основ
+| Notation | Extension | Description |
+|----------|-----------|-------------|
+| **Formal** | `.mtl` | Link form query language (main theory language) |
+| **String** | `.astr` | UTF-8 representation as left-associative chain |
+| **Quaternary** | `.anum` | Alphabet of 4 abits: `(`, `)`, `+`, `-` |
 
-#### `/converters/` - Конвертеры форматов
-- Конвертация между тремя нотациями МТС (формальная, строковая, четверичная)
-- `text_to_anum.py` — UTF-8 текст в четверичные ачисла (абитовую нотацию)
-- `anum_to_text.py` — четверичные ачисла обратно в UTF-8 текст
-- `ascii_unicode.py` — ASCII (aprover: M, F, ->, INF, [], 10) ↔ Unicode (anum_docs: ♂, ♀, ⟼, ∞, (), +-)
+### Notation Correspondence: anum_docs vs aprover
 
-#### `/parsers/` - Парсеры и движки
-- Основной движок доказательств и парсеры ачисел
-- Поддержка Unicode (♂♀→∞) и ASCII (MF->INF) нотаций
+| anum_docs | aprover | Description |
+|-----------|---------|-------------|
+| `⟼` | `->` | Link constructor |
+| `¬⟼` | `!->` | Arrow negation |
+| `¬` | `!` | Inversion |
+| `(` | `[` | Start-of-meaning abit |
+| `)` | `]` | End-of-meaning abit |
+| `+` | `1` | Unit-of-meaning abit |
+| `-` | `0` | Zero-of-meaning abit |
 
-#### `/docs/` - Документация
-- **theory/** — теория МТС, включая финальный чистовик `Метатеория связей.md`
-- **specs/** — формальные спецификации
-- **research/** — исследования и вспомогательные материалы
+More details: [netkeep80/aprover](https://github.com/netkeep80/aprover)
 
-#### `/faq/` - База знаний
-- Разъяснения сложных концепций МТС
-- Практические примеры и методические материалы
+## Documentation
 
-#### `/archive/` - Архив
-- Черновики и рабочие документы, перемещённые из корня для порядка
+- **MTC Theory** — [`docs/theory/Метатеория связей.md`](docs/theory/Метатеория%20связей.md)
+- **Formal Notation** — [`docs/specs/Формальная нотация МТС.md`](docs/specs/Формальная%20нотация%20МТС.md)
+- **FAQ** — [`faq/`](faq/)
+- **Contributing Guide** — [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md)
 
-### 🎯 Ключевые файлы:
+## CI/CD
 
-1. **`README.md`** — центральный документ проекта
-2. **`docs/theory/Метатеория связей.md`** — чистовик МТС (финальная версия теории)
-3. **`parsers/anum_prover.py`** — основной движок вычислений MTC
-4. **`parsers/mtc_formula_prover.py`** — движок для формул MTC в полной нотации
-5. **`converters/text_to_anum.py`** — конвертер текста в ачисла
-6. **`converters/anum_to_text.py`** — конвертер ачисел в текст
-7. **`converters/ascii_unicode.py`** — конвертер ASCII ↔ Unicode нотаций
-8. **`tests/mtc_formulas.mtc`** — тестовые формулы MTC
-9. **`tests/test_converters.py`** — тесты конвертеров (43 теста)
-10. **`docs/plan.md`** — план разработки
+The project uses GitHub Actions for continuous integration:
 
-### 📊 Статус компонентов:
-- ✅ **Core**: Базовая функциональность реализована
-- ✅ **Parsers**: Унифицированный движок работает (78% тестов)
-- ✅ **MTC Formula Prover**: Новый движок для полной нотации MTC (83.3% тестов)
-- ✅ **Tests**: Комплексное тестирование настроено
-- ✅ **Documentation**: Полная теоретическая база
-- ✅ **Converters**: Конвертеры форматов реализованы (text↔anum, ASCII↔Unicode, 43 теста)
-- 🔄 **Future**: Планируется добавление `/tools/`, `/examples/`
+- **Lint** — code checking with [Ruff](https://github.com/astral-sh/ruff)
+- **Tests** — running converter tests via pytest
+- **Structure** — checking root directory cleanliness and required directories
+- **Docs** — checking documentation file sizes
 
-## ⚠️ **CRITICAL: PYTHON EXECUTION REQUIREMENTS** ⚠️
+## License
 
-**🚨 MANDATORY RULE: ALWAYS USE `py` COMMAND**
-
-This project **REQUIRES** using the [py](file://d:\Projects\anum_protocol\anum_docs\parsers\anum_prover.py) launcher instead of direct `python` commands:
-
-- ✅ **CORRECT**: `py script.py`
-- ❌ **WRONG**: `python script.py` or `python3 script.py`
-
-**Why this matters:**
-- Windows Python 3.13.1 environment requires the Python launcher
-- Direct `python` commands may fail or use wrong Python version
-- All documentation assumes [py](file://d:\Projects\anum_protocol\anum_docs\parsers\anum_prover.py) command usage
-- PowerShell compatibility requires [py](file://d:\Projects\anum_protocol\anum_docs\parsers\anum_prover.py) instead of `&&` chaining
-
-**📝 Memory Note**: This is specifically noted because of recurring issues with Python execution in this environment.
-
-**Дополнительно для MTC Formula Prover:**
-- Для запуска нового движка формул MTC: `py parsers/mtc_formula_prover.py tests/mtc_formulas.mtc`
-- Поддерживает обработку многострочных файлов формул в полной нотации MTC
-- Работает с Unicode символами ♂, ♀, →, ∞ в кодировке UTF-8
-- Текущая эффективность: 83.3% успешных тестов (40/48)
-
----
-
-## 📋 РАБОЧИЙ КОНТЕКСТ ДЛЯ ИИ
-
-### При работе с проектом всегда помни:
-1. **Нотация абитов**: Используй обновлённую нотацию `(`, `)`, `+`, `-`
-2. **Различие**: Абиты `(`,`)`,`+`,`-` - конкретные символы, виды форм `♂`,`♀`,`→`,`∞` - теоретические категории
-3. **Структура**: Все новые файлы в соответствующие каталоги
-4. **Тестирование**: Каждый компонент должен иметь тесты
-5. **Совместимость**: ASCII версии для кроссплатформенности
-6. **Документация**: Обновляй документацию при изменениях
-
-### Приоритеты разработки:
-1. ✅ **Core** - базовые компоненты (абиты, связи, аксиомы)
-2. ✅ **Parsers** - парсинг всех типов ачисел
-3. ✅ **MTC Formula Prover** - обработка формул в полной нотации MTC
-4. ✅ **Converters** - конвертация между форматами
-5. 🔄 **Tools** - пользовательские инструменты
-6. 🔄 **Examples** - демонстрации и обучающие материалы
-
-### Командная строка:
-- Используй `py` вместо `python`
-- Избегай `&&` в PowerShell
-- Python 3.13.1 через launcher
-- Для MTC формул: `py parsers/mtc_formula_prover.py tests/mtc_formulas.mtc`
-
-### Качество кода:
-- UTF-8 encoding для всех файлов
-- Docstrings на русском языке
-- Типизация где возможно
-- Error handling обязателен
-
-# Метатеория связей: Теоретические основы
-
-Метатеория связей (МТС) представляет собой фундаментальную формальную систему, основанную на единственном примитивном понятии направленной связи. Основной постулат: всё существование редуцируется к связям между элементами.
-
-## Основные принципы
-
-1. **Аксиома существования**: rv ≡ r ⟼ v - связь как конструктор существования
-2. **Рекурсивные замыкания**: ♂v (ссылка) и r♀ (значение)
-3. **Ассоциативный корень**: ∞ - единственная полностью самозамкнутая связь
-4. **Левоассоциативность**: abc ≡ (a ⟼ b) ⟼ c
-
-## Ачисла (ассоциативные числа)
-
-Ачисла - это четверичные последовательности абитов, используемые для:
-- Кодирования данных и логических состояний
-- Сериализации структур МТС
-- Преобразования UTF-8 текста в связи
-
-**Различие между абитами и видами форм связей:**
-
-- **Абиты** `(`, `)`, `+`, `-` - это конкретные символы для построения ачисел и операций (практический уровень)
-- **Виды форм связей** `∞`, `♂`, `♀`, `→` - это теоретические категории для анализа структуры связей (метатеоретический уровень)
-
-**Примеры взаимодействия:**
-- Абит `+` (♂∞ → ∞♀) относится к виду **связей без самозамыканий**
-- Абит `(` (♂∞ → ∞) относится к виду **связей с самозамкнутым началом**
-- Акорень (∞ → ∞) — это **полностью самозамкнутая связь**
-
-**Пример**: слово "hello" преобразуется в ачисло через UTF-8 байты в четверичной записи
-
----
-
-### 📚 Документация:
-- **Чистовик МТС**: `docs/theory/Метатеория связей.md` — финальная версия теории
-- **Спецификации**: `docs/specs/` — формальная нотация МТС
-- **Исследования**: `docs/research/` — вспомогательные исследования
-- **FAQ**: `faq/` — часто задаваемые вопросы
-- **Архив**: `archive/` — старые черновики и рабочие документы
-
-### 📋 Руководства для разработчиков:
-- **Лучшие практики**: `docs/BEST-PRACTICES.md` — универсальные промпты и рекомендации для AI-разработки
-- **CI/CD практики**: `docs/CI-CD-BEST-PRACTICES.md` — настройка непрерывной интеграции
-- **Руководство по вкладу**: `docs/CONTRIBUTING.md` — как вносить изменения в проект
-- **Руководство для AI**: `CLAUDE.md` — инструкции для AI-ассистентов
+The project is released under the [Unlicense](LICENSE) (public domain).
