@@ -15,16 +15,16 @@
   =                    |  =                |  Тождественность
   ≠                    |  !=               |  Отрицание тождества
   :                    |  :                |  Оператор определения
-  (                    |  [                |  Абит начала смысла
-  )                    |  ]                |  Абит конца смысла
-  +                    |  1                |  Абит единицы смысла
-  -                    |  0                |  Абит нуля смысла
+  [                    |  [                |  Абит начала смысла
+  ]                    |  ]                |  Абит конца смысла
+  1                    |  1                |  Абит единицы смысла
+  0                    |  0                |  Абит нуля смысла
+
+Примечание: Символы абитов в anum_docs и aprover теперь унифицированы.
 
 Использование:
   python3 converters/ascii_unicode.py --to-ascii "♂∞♀ = (♂∞)♀"
   python3 converters/ascii_unicode.py --to-unicode "M INF F = (M INF) F"
-  python3 converters/ascii_unicode.py --to-aprover "(+-)"
-  python3 converters/ascii_unicode.py --to-anum "[10]"
 """
 
 import sys
@@ -56,20 +56,21 @@ _ASCII_TO_UNICODE = [
     ('F', '♀'),
 ]
 
-# Абиты: anum_docs → aprover
+# Абиты: anum_docs и aprover теперь используют одинаковые символы
+# Конвертация — тождественная (для обратной совместимости)
 _ABIT_TO_APROVER = [
-    ('(', '['),
-    (')', ']'),
-    ('+', '1'),
-    ('-', '0'),
+    ('[', '['),
+    (']', ']'),
+    ('1', '1'),
+    ('0', '0'),
 ]
 
-# Абиты: aprover → anum_docs
+# Абиты: aprover → anum_docs (тождественная конвертация)
 _APROVER_TO_ABIT = [
-    ('[', '('),
-    (']', ')'),
-    ('1', '+'),
-    ('0', '-'),
+    ('[', '['),
+    (']', ']'),
+    ('1', '1'),
+    ('0', '0'),
 ]
 
 
@@ -158,8 +159,10 @@ def ascii_to_unicode(formula: str) -> str:
 def abits_to_aprover(anum: str) -> str:
     """Конвертация абитовой нотации anum_docs → aprover.
 
+    После унификации символов абитов конвертация является тождественной.
+
     Args:
-        anum: Абитовая запись: (, ), +, -
+        anum: Абитовая запись: [, ], 1, 0
 
     Returns:
         Абитовая запись: [, ], 1, 0
@@ -170,11 +173,13 @@ def abits_to_aprover(anum: str) -> str:
 def aprover_to_abits(aprover_anum: str) -> str:
     """Конвертация абитовой нотации aprover → anum_docs.
 
+    После унификации символов абитов конвертация является тождественной.
+
     Args:
         aprover_anum: Абитовая запись: [, ], 1, 0
 
     Returns:
-        Абитовая запись: (, ), +, -
+        Абитовая запись: [, ], 1, 0
     """
     return _replace_tokens(aprover_anum, _APROVER_TO_ABIT)
 
@@ -194,11 +199,11 @@ def main():
     )
     group.add_argument(
         '--to-aprover', type=str, default=None,
-        help='Конвертировать абиты anum_docs → aprover: (, ), +, - → [, ], 1, 0'
+        help='Конвертировать абиты anum_docs → aprover (тождественная операция после унификации)'
     )
     group.add_argument(
         '--to-anum', type=str, default=None,
-        help='Конвертировать абиты aprover → anum_docs: [, ], 1, 0 → (, ), +, -'
+        help='Конвертировать абиты aprover → anum_docs (тождественная операция после унификации)'
     )
 
     args = parser.parse_args()

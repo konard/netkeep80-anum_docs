@@ -3,8 +3,8 @@
 MTC Notation System - Система разграничения и обработки нотаций МТС
 
 Реализует три типа нотаций:
-1. Четверичные ачисла (Quaternary Anums) - только (, ), +, -
-2. Строковые ачисла (String Anums) - текст с ссылками на абиты {+}, {-}, etc.
+1. Четверичные ачисла (Quaternary Anums) - только [, ], 1, 0
+2. Строковые ачисла (String Anums) - текст с ссылками на абиты {1}, {0}, etc.
 3. Формулы МТС (MTC Formulas) - математические выражения с операторами
 
 Использование:
@@ -18,8 +18,8 @@ from dataclasses import dataclass
 
 class NotationType(enum.Enum):
     """Типы нотаций МТС"""
-    QUATERNARY = "quaternary"     # Четверичные ачисла: ()+- только
-    STRING = "string"             # Строковые ачисла: текст с {абит} ссылками
+    QUATERNARY = "quaternary"     # Четверичные ачисла: []10 только
+    STRING = "string"             # Строковые ачисла: текст с {1}, {0}, {[}, {]} ссылками
     FORMULA = "formula"           # Формулы МТС: выражения с операторами
 
 @dataclass
@@ -45,10 +45,10 @@ class NotationDetector:
     FORMULA_SYMBOLS = ['♂', '♀', '∞']
     
     # Четверичные абиты
-    QUATERNARY_ABITS = set('()+- ')
+    QUATERNARY_ABITS = set('[]10 ')
     
     # Паттерн для ссылок на абиты в строках (исправлен)
-    ABIT_REFERENCE_PATTERN = r'\{([+\-()∞])\}'
+    ABIT_REFERENCE_PATTERN = r'\{([10\[\]∞])\}'
     
     @classmethod
     def detect_notation_type(cls, input_text: str) -> NotationType:
@@ -132,13 +132,13 @@ class NotationDetector:
 class AbitReferenceResolver:
     """Резолвер ссылок на абиты"""
     
-    # Карта ссылок на абиты - ИСПРАВЛЕНО согласно документации
+    # Карта ссылок на абиты - обновлено для унификации с aprover
     ABIT_MAP = {
-        '+': '+',        # абит связи (истина)
-        '-': '-',        # абит несвязи (ложь) 
-        '(': '(',        # абит начала связи
-        ')': ')',        # абит конца связи
-        '∞': '()',       # ассоциативный корень выражается как () - КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ
+        '1': '1',        # абит связи (истина)
+        '0': '0',        # абит несвязи (ложь)
+        '[': '[',        # абит начала связи
+        ']': ']',        # абит конца связи
+        '∞': '[]',       # ассоциативный корень выражается как [] ≡ ∞
     }
     
     @classmethod
@@ -169,7 +169,7 @@ class AbitReferenceResolver:
             abit_ref = match.group(1)
             return cls.resolve_abit_reference(abit_ref)
         
-        pattern = r'\{([+\-()∞])\}'
+        pattern = r'\{([10\[\]∞])\}'
         return re.sub(pattern, replace_reference, text)
 
 class NotationConverter:
@@ -213,7 +213,7 @@ class NotationConverter:
     
     def _char_to_quaternary(self, char: str) -> str:
         """Конвертация символа в четверичное представление"""
-        if char in '()+- ':
+        if char in '[]10 ':
             return char  # Уже четверичный символ
         
         # UTF-8 -> binary -> quaternary mapping
@@ -223,8 +223,8 @@ class NotationConverter:
             for byte in utf8_bytes:
                 binary = format(byte, '08b')
                 for bit in binary:
-                    quaternary += '+' if bit == '1' else '-'
-            return f'({quaternary})'  # Группировка в скобки для разделения
+                    quaternary += '1' if bit == '1' else '0'
+            return f'[{quaternary}]'  # Группировка в квадратные скобки для разделения
         except Exception:
             return ''  # Неконвертируемый символ
     
@@ -254,13 +254,13 @@ class NotationValidator:
         if not text:
             return ValidationResult(True, "Пустое четверичное ачисло валидно")
         
-        invalid_chars = [c for c in text if c not in '()+- ']
+        invalid_chars = [c for c in text if c not in '[]10 ']
         
         if invalid_chars:
             return ValidationResult(
                 False, 
                 f"Недопустимые символы в четверичном ачисле: {set(invalid_chars)}",
-                ["Используйте только символы: (, ), +, -, пробел"]
+                ["Используйте только символы: [, ], 1, 0, пробел"]
             )
         
         return ValidationResult(True, "Валидное четверичное ачисло")
@@ -404,19 +404,19 @@ def demonstrate_notation_system():
     
     test_cases = [
         # Четверичные ачисла
-        "++--",
-        "(())",
-        "+-+()",
-        
-        # Строковые ачисла  
-        '"hello{+}world"',
-        '"начало{(}данные{)}конец"',
+        "1100",
+        "[[]]",
+        "10[]",
+
+        # Строковые ачисла
+        '"hello{1}world"',
+        '"начало{[}данные{]}конец"',
         '"test{∞}infinity"',
-        
+
         # Формулы МТС
-        "+ == +",
-        "♂♀ ≡ ∞", 
-        "() == ∞",
+        "1 == 1",
+        "♂♀ ≡ ∞",
+        "[] == ∞",
         "♂∞♀ == (♂∞)♀",
         
         # Неоднозначные случаи

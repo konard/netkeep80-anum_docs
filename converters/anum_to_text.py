@@ -6,14 +6,14 @@
 последовательности абитов.
 
 Формат ачисла:
-  - Символ закодирован как '(' абиты ')' где абиты — '+'/'-' (биты 1/0)
+  - Символ закодирован как '[' абиты ']' где абиты — '1'/'0' (биты 1/0)
   - Каждые 8 абитов — один байт UTF-8
   - Строка — конкатенация закодированных символов
 
 Использование:
-  python3 converters/anum_to_text.py "(+--+---+)(+-+--+--)(+--+-+--)(+--+-+--)(+--+-+++)"
+  python3 converters/anum_to_text.py "[10010001][10100100][10010100][10010100][10010111]"
   python3 converters/anum_to_text.py --file output.anum
-  python3 converters/anum_to_text.py --verbose "(+--+---+)"
+  python3 converters/anum_to_text.py --verbose "[10010001]"
 """
 
 import sys
@@ -24,7 +24,7 @@ def abits_to_byte(abits: str) -> int:
     """Конвертация 8 абитов в значение байта.
 
     Args:
-        abits: Строка из 8 символов '+' (1) и '-' (0).
+        abits: Строка из 8 символов '1' (единица) и '0' (нуль).
 
     Returns:
         Значение байта (0–255).
@@ -38,22 +38,22 @@ def abits_to_byte(abits: str) -> int:
         )
     binary = ''
     for a in abits:
-        if a == '+':
+        if a == '1':
             binary += '1'
-        elif a == '-':
+        elif a == '0':
             binary += '0'
         else:
-            raise ValueError(f'Недопустимый абит: "{a}" (ожидается "+" или "-")')
+            raise ValueError(f'Недопустимый абит: "{a}" (ожидается "1" или "0")')
     return int(binary, 2)
 
 
 def extract_char_anums(anum: str) -> list:
     """Извлечение отдельных ачисел символов из строки.
 
-    Парсит вложенные контексты '(' ... ')' верхнего уровня.
+    Парсит вложенные контексты '[' ... ']' верхнего уровня.
 
     Args:
-        anum: Четверичное ачисло (строка из '(', ')', '+', '-').
+        anum: Четверичное ачисло (строка из '[', ']', '1', '0').
 
     Returns:
         Список строк — содержимое каждого контекста верхнего уровня.
@@ -66,24 +66,24 @@ def extract_char_anums(anum: str) -> list:
     current = []
 
     for c in anum:
-        if c == '(':
+        if c == '[':
             depth += 1
             if depth > 1:
                 current.append(c)
-        elif c == ')':
+        elif c == ']':
             depth -= 1
             if depth < 0:
-                raise ValueError('Лишняя закрывающая скобка ")"')
+                raise ValueError('Лишняя закрывающая скобка "]"')
             if depth == 0:
                 chars.append(''.join(current))
                 current = []
             else:
                 current.append(c)
-        elif c in '+-':
+        elif c in '10':
             if depth == 0:
                 raise ValueError(
                     f'Абит "{c}" вне контекста (вне скобок). '
-                    f'Ожидается формат: (абиты)'
+                    f'Ожидается формат: [абиты]'
                 )
             current.append(c)
         elif c in ' \t\n\r':
@@ -92,7 +92,7 @@ def extract_char_anums(anum: str) -> list:
             raise ValueError(f'Недопустимый символ: "{c}"')
 
     if depth != 0:
-        raise ValueError(f'Незакрытые скобки: глубина = {depth}')
+        raise ValueError(f'Незакрытые скобки []: глубина = {depth}')
 
     return chars
 
@@ -101,7 +101,7 @@ def anum_to_char(abits: str) -> str:
     """Конвертация ачисла одного символа в UTF-8 символ.
 
     Args:
-        abits: Строка абитов ('+' и '-'), кратная 8 по длине.
+        abits: Строка абитов ('1' и '0'), кратная 8 по длине.
 
     Returns:
         Декодированный UTF-8 символ.
@@ -123,7 +123,7 @@ def anum_to_text(anum: str) -> str:
     """Конвертация четверичного ачисла в UTF-8 текст.
 
     Args:
-        anum: Четверичное ачисло в формате (абиты)(абиты)...
+        anum: Четверичное ачисло в формате [абиты][абиты]...
 
     Returns:
         Декодированный UTF-8 текст.
@@ -149,7 +149,7 @@ def anum_to_text_verbose(anum: str) -> list:
             byte_values.append(abits_to_byte(abits[i:i+8]))
         char = bytes(byte_values).decode('utf-8')
         entry = {
-            'anum': f'({abits})',
+            'anum': f'[{abits}]',
             'abits': abits,
             'utf8_bytes': [f'0x{b:02X}' for b in byte_values],
             'codepoint': f'U+{ord(char):04X}',

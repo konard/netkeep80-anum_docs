@@ -15,45 +15,45 @@ import os
 
 class AbitNotation:
     """Специальные обозначения для абитов в строковых ачислах
-    
+
     КРИТИЧНОЕ ПОНИМАНИЕ:
-    - Только 4 символа являются абитами: (, ), +, -
+    - Только 4 символа являются абитами: [, ], 1, 0
     - ∞ (ассоциативный корень) НЕ является абитом!
-    - ∞ может быть выражен через комбинацию абитов: () ≡ ∞
+    - ∞ может быть выражен через комбинацию абитов: [] ≡ ∞
     - ∞ находится на мета-теоретическом уровне
     """
     
     # Варианты обозначений для абитов связь/несвязь
     VARIANTS = {
         'symbols': {
-            'connection': '⊤',      # ⊤ (истина, наличие связи) 
+            'connection': '⊤',      # ⊤ (истина, наличие связи)
             'no_connection': '⊥',   # ⊥ (ложь, отсутствие связи)
-            'open_context': '(',    # ( (открытие контекста)
-            'close_context': ')'    # ) (закрытие контекста)
+            'open_context': '[',    # [ (открытие контекста)
+            'close_context': ']'    # ] (закрытие контекста)
         },
         'words': {
             'connection': 'true',
-            'no_connection': 'false', 
+            'no_connection': 'false',
             'open_context': 'open',
             'close_context': 'close'
         },
         'compact': {
-            'connection': '+',      # + (положительная связь) - ОБНОВЛЕНО!
-            'no_connection': '-',   # - (отрицательная связь) - ОБНОВЛЕНО!
-            'open_context': '(',    # ( (открытие)
-            'close_context': ')'    # ) (закрытие)
+            'connection': '1',      # 1 (единица смысла)
+            'no_connection': '0',   # 0 (нуль смысла)
+            'open_context': '[',    # [ (начало смысла)
+            'close_context': ']'    # ] (конец смысла)
         },
         'brackets': {
             'connection': '[1]',    # [1] (в квадратных скобках)
             'no_connection': '[0]', # [0] (в квадратных скобках)
-            'open_context': '(',    # ( (обычные скобки)
-            'close_context': ')'    # ) (обычные скобки)
+            'open_context': '[',    # [ (квадратные скобки)
+            'close_context': ']'    # ] (квадратные скобки)
         },
         'new_abit_notation': {
-            'connection': '+',      # + (абит наличия связи)
-            'no_connection': '-',   # - (абит отсутствия связи)
-            'open_context': '(',    # ( (абит начала связи)
-            'close_context': ')'    # ) (абит конца связи)
+            'connection': '1',      # 1 (абит единицы смысла)
+            'no_connection': '0',   # 0 (абит нуля смысла)
+            'open_context': '[',    # [ (абит начала смысла)
+            'close_context': ']'    # ] (абит конца смысла)
         }
     }
     
@@ -105,8 +105,8 @@ class AbitNotation:
 
 class UTF8ByteProcessor:
     """Обработчик UTF-8 байтов для чистой четверичной системы ачисел
-    
-    КРИТИЧНО: Использует только 4 абита: (, ), +, -
+
+    КРИТИЧНО: Использует только 4 абита: [, ], 1, 0
     ∞ НЕ сериализуется как абит, он находится на мета-уровне
     """
     
@@ -168,7 +168,7 @@ class UTF8ByteProcessor:
     @staticmethod 
     def validate_pure_quaternary_output(anum_sequence):
         """Валидация что выходная последовательность содержит только абиты"""
-        valid_abits = {'+', '-', '(', ')'}
+        valid_abits = {'1', '0', '[', ']'}
         for char in anum_sequence:
             if char not in valid_abits and not char.isspace():
                 if char == '∞':
@@ -259,13 +259,13 @@ class ExtendedAnumLexer:
                 self.skip_whitespace()
                 continue
             
-            # Проверка на абиты в квадратных скобках
+            # Проверка на абиты в квадратных скобках (для variant 'brackets')
             if self.current_char == '[' and self.abit_notation.variant_name == 'brackets':
                 bracketed = self.read_bracketed_abit()
                 if bracketed:
                     abit_type = self.abit_notation.get_abit_type(bracketed)
                     return ExtendedAnumToken('ABIT', bracketed, self.position, abit_type)
-            
+
             # Проверка на простые символы абитов (single character)
             if self.abit_notation.is_abit_symbol(self.current_char):
                 abit_type = self.abit_notation.get_abit_type(self.current_char)
@@ -290,32 +290,18 @@ class ExtendedAnumLexer:
                 self.advance()
                 return ExtendedAnumToken('EQUALS', '=', self.position)
             
-            # Обработка минуса: может быть абитом '-' или стрелкой '->'
+            # Обработка минуса: стрелка '->' или простой минус
+            # Примечание: '-' больше не является абитом (абит нуля теперь '0')
             if self.current_char == '-':
-                # Проверяем, является ли это абитом
-                if self.abit_notation.is_abit_symbol('-'):
-                    # Проверяем, не является ли это стрелкой '->'
-                    next_char = self.peek()
-                    if next_char == '>':
-                        # Это стрелка
-                        self.advance()
-                        self.advance()
-                        return ExtendedAnumToken('ARROW', '->', self.position)
-                    else:
-                        # Это абит
-                        abit_type = self.abit_notation.get_abit_type('-')
-                        self.advance()
-                        return ExtendedAnumToken('ABIT', '-', self.position, abit_type)
+                next_char = self.peek()
+                if next_char == '>':
+                    # Это стрелка
+                    self.advance()
+                    self.advance()
+                    return ExtendedAnumToken('ARROW', '->', self.position)
                 else:
-                    # Обычное поведение для старой нотации
-                    next_char = self.peek()
-                    if next_char == '>':
-                        self.advance()
-                        self.advance()
-                        return ExtendedAnumToken('ARROW', '->', self.position)
-                    else:
-                        self.advance()
-                        return ExtendedAnumToken('MINUS', '-', self.position)
+                    self.advance()
+                    return ExtendedAnumToken('MINUS', '-', self.position)
             
             # Специальные операторы
             if self.current_char == 'M':
@@ -326,28 +312,14 @@ class ExtendedAnumLexer:
                 self.advance()
                 return ExtendedAnumToken('RECURSIVE_VAL', 'F', self.position)
             
-            # Обычные скобки (не путать с абитами)
+            # Круглые скобки — используются для приоритета, НЕ абиты
             if self.current_char == '(':
-                # Проверяем, не является ли это абитом
-                if not self.abit_notation.is_abit_symbol('('):
-                    self.advance()
-                    return ExtendedAnumToken('LPAREN', '(', self.position)
-                else:
-                    # Это абит, обрабатываем выше
-                    abit_type = self.abit_notation.get_abit_type('(')
-                    self.advance()
-                    return ExtendedAnumToken('ABIT', '(', self.position, abit_type)
-            
+                self.advance()
+                return ExtendedAnumToken('LPAREN', '(', self.position)
+
             if self.current_char == ')':
-                # Проверяем, не является ли это абитом
-                if not self.abit_notation.is_abit_symbol(')'):
-                    self.advance()
-                    return ExtendedAnumToken('RPAREN', ')', self.position)
-                else:
-                    # Это абит, обрабатываем выше
-                    abit_type = self.abit_notation.get_abit_type(')')
-                    self.advance()
-                    return ExtendedAnumToken('ABIT', ')', self.position, abit_type)
+                self.advance()
+                return ExtendedAnumToken('RPAREN', ')', self.position)
             
             # Цифры (не абиты!)
             if self.current_char.isdigit():
@@ -375,11 +347,11 @@ def test_abit_notations():
     """Тестирование различных вариантов нотации абитов"""
     
     test_expressions = [
-        "INF + - ( + )",      # new_abit_notation - ОБНОВЛЕНО!
+        "INF 1 0 [ 1 ]",      # new_abit_notation
         "INF true false open true close",  # words notation
-        "INF ⊤ ⊥ ( ⊤ )",       # symbols notation  
-        "INF [1] [0] ( [1] )", # brackets notation
-        "INF + - ( + )"       # new_abit_notation
+        "INF ⊤ ⊥ [ ⊤ ]",       # symbols notation
+        "INF [1] [0] [ [1] ]", # brackets notation
+        "INF 1 0 [ 1 ]"       # compact notation
     ]
     
     variants = ['new_abit_notation', 'words', 'symbols', 'brackets', 'compact']
