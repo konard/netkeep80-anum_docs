@@ -28,18 +28,18 @@ class TestByteToAbits(unittest.TestCase):
     """Тесты конвертации байтов в абиты."""
 
     def test_zero(self):
-        self.assertEqual(byte_to_abits(0), '--------')
+        self.assertEqual(byte_to_abits(0), '00000000')
 
     def test_max(self):
-        self.assertEqual(byte_to_abits(255), '++++++++')
+        self.assertEqual(byte_to_abits(255), '11111111')
 
     def test_ascii_A(self):
         # A = 0x41 = 01000001
-        self.assertEqual(byte_to_abits(0x41), '-+-----+')
+        self.assertEqual(byte_to_abits(0x41), '01000001')
 
     def test_ascii_a(self):
         # a = 0x61 = 01100001
-        self.assertEqual(byte_to_abits(0x61), '-++----+')
+        self.assertEqual(byte_to_abits(0x61), '01100001')
 
 
 class TestAbitsToByteRoundtrip(unittest.TestCase):
@@ -53,11 +53,11 @@ class TestAbitsToByteRoundtrip(unittest.TestCase):
 
     def test_invalid_length(self):
         with self.assertRaises(ValueError):
-            abits_to_byte('+-+')
+            abits_to_byte('101')
 
     def test_invalid_char(self):
         with self.assertRaises(ValueError):
-            abits_to_byte('+-+x-+-+')
+            abits_to_byte('101x0101')
 
 
 class TestCharToAnum(unittest.TestCase):
@@ -65,19 +65,19 @@ class TestCharToAnum(unittest.TestCase):
 
     def test_ascii_char(self):
         anum = char_to_anum('A')
-        self.assertTrue(anum.startswith('('))
-        self.assertTrue(anum.endswith(')'))
-        self.assertEqual(len(anum), 10)  # '(' + 8 abits + ')'
+        self.assertTrue(anum.startswith('['))
+        self.assertTrue(anum.endswith(']'))
+        self.assertEqual(len(anum), 10)  # '[' + 8 abits + ']'
 
     def test_cyrillic_char(self):
         anum = char_to_anum('М')
         # Кириллица — 2 байта UTF-8 → 16 абитов
-        self.assertEqual(len(anum), 18)  # '(' + 16 abits + ')'
+        self.assertEqual(len(anum), 18)  # '[' + 16 abits + ']'
 
     def test_infinity_symbol(self):
         anum = char_to_anum('∞')
         # ∞ (U+221E) — 3 байта UTF-8 → 24 абита
-        self.assertEqual(len(anum), 26)  # '(' + 24 abits + ')'
+        self.assertEqual(len(anum), 26)  # '[' + 24 abits + ']'
 
 
 class TestTextToAnumRoundtrip(unittest.TestCase):
@@ -120,27 +120,27 @@ class TestExtractCharAnums(unittest.TestCase):
     """Тесты извлечения отдельных ачисел из строки."""
 
     def test_single(self):
-        chars = extract_char_anums('(+-+-+-+-)')
-        self.assertEqual(chars, ['+-+-+-+-'])
+        chars = extract_char_anums('[10101010]')
+        self.assertEqual(chars, ['10101010'])
 
     def test_multiple(self):
-        chars = extract_char_anums('(++++++++)(--------)')
+        chars = extract_char_anums('[11111111][00000000]')
         self.assertEqual(len(chars), 2)
 
     def test_invalid_unmatched(self):
         with self.assertRaises(ValueError):
-            extract_char_anums('(++')
+            extract_char_anums('[11')
 
     def test_invalid_extra_close(self):
         with self.assertRaises(ValueError):
-            extract_char_anums('++))')
+            extract_char_anums('11]]')
 
     def test_abit_outside_context(self):
         with self.assertRaises(ValueError):
-            extract_char_anums('+(++)')
+            extract_char_anums('1[11]')
 
     def test_whitespace_ignored(self):
-        chars = extract_char_anums('(++) (--)')
+        chars = extract_char_anums('[11] [00]')
         self.assertEqual(len(chars), 2)
 
 
@@ -213,16 +213,20 @@ class TestAsciiToUnicode(unittest.TestCase):
 
 
 class TestAbitConversion(unittest.TestCase):
-    """Тесты конвертации абитов между anum_docs и aprover."""
+    """Тесты конвертации абитов между anum_docs и aprover.
+
+    После унификации нотаций символы абитов совпадают,
+    поэтому конвертация является тождественной.
+    """
 
     def test_to_aprover(self):
-        self.assertEqual(abits_to_aprover('(+-)'), '[10]')
+        self.assertEqual(abits_to_aprover('[10]'), '[10]')
 
     def test_to_anum(self):
-        self.assertEqual(aprover_to_abits('[10]'), '(+-)')
+        self.assertEqual(aprover_to_abits('[10]'), '[10]')
 
     def test_roundtrip_to_aprover(self):
-        original = '(())(+-)(--)'
+        original = '[[][10][00]'
         converted = abits_to_aprover(original)
         back = aprover_to_abits(converted)
         self.assertEqual(back, original)
