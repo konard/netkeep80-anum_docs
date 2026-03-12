@@ -1,0 +1,137 @@
+# -*- coding: utf-8 -*-
+"""
+Конвертер UTF-8 текста в четверичные ачисла (абитовую нотацию).
+
+Каждый символ UTF-8 текста кодируется в последовательность абитов:
+  - Байт кодируется 8 абитами: бит 1 → '+', бит 0 → '-'
+  - Символ оборачивается в контекст: '(' символ_абиты ')'
+  - Строка — левоассоциативная цепочка закодированных символов
+
+Соответствие МТС:
+  - decode(c₁...cₙ) = (((∞ ⟼ c₁) ⟼ c₂) ⟼ ... ⟼ cₙ)
+  - Где ∞ = () (акорень)
+
+Использование:
+  python3 converters/text_to_anum.py "hello"
+  python3 converters/text_to_anum.py --file input.txt
+  python3 converters/text_to_anum.py --verbose "A"
+"""
+
+import sys
+import argparse
+
+
+def byte_to_abits(byte_val: int) -> str:
+    """Конвертация одного байта в 8 абитов.
+
+    Args:
+        byte_val: Значение байта (0–255).
+
+    Returns:
+        Строка из 8 символов '+' и '-'.
+    """
+    binary = format(byte_val, '08b')
+    return ''.join('+' if bit == '1' else '-' for bit in binary)
+
+
+def char_to_anum(char: str) -> str:
+    """Конвертация одного символа в ачисло.
+
+    Символ кодируется через UTF-8 байты, каждый байт — 8 абитов.
+    Результат оборачивается в контекст '(' ... ')'.
+
+    Args:
+        char: Один символ UTF-8.
+
+    Returns:
+        Ачисло символа в абитовой нотации.
+    """
+    utf8_bytes = char.encode('utf-8')
+    abits = ''.join(byte_to_abits(b) for b in utf8_bytes)
+    return f'({abits})'
+
+
+def text_to_anum(text: str) -> str:
+    """Конвертация UTF-8 текста в четверичное ачисло.
+
+    Каждый символ кодируется отдельно, результат — конкатенация
+    ачисел символов (левоассоциативная цепочка).
+
+    Args:
+        text: UTF-8 строка.
+
+    Returns:
+        Четверичное ачисло (строка из символов '(', ')', '+', '-').
+    """
+    return ''.join(char_to_anum(c) for c in text)
+
+
+def text_to_anum_verbose(text: str) -> list:
+    """Подробная конвертация с информацией о каждом символе.
+
+    Args:
+        text: UTF-8 строка.
+
+    Returns:
+        Список словарей с деталями кодирования каждого символа.
+    """
+    result = []
+    for char in text:
+        utf8_bytes = char.encode('utf-8')
+        entry = {
+            'char': char,
+            'codepoint': f'U+{ord(char):04X}',
+            'utf8_bytes': [f'0x{b:02X}' for b in utf8_bytes],
+            'utf8_binary': [format(b, '08b') for b in utf8_bytes],
+            'anum': char_to_anum(char),
+        }
+        result.append(entry)
+    return result
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Конвертер UTF-8 текста в четверичные ачисла МТС'
+    )
+    parser.add_argument(
+        'text', nargs='?', default=None,
+        help='Текст для конвертации'
+    )
+    parser.add_argument(
+        '--file', '-f', type=str, default=None,
+        help='Файл с текстом для конвертации'
+    )
+    parser.add_argument(
+        '--verbose', '-v', action='store_true',
+        help='Подробный вывод с деталями кодирования'
+    )
+
+    args = parser.parse_args()
+
+    if args.file:
+        with open(args.file, 'r', encoding='utf-8') as f:
+            text = f.read()
+    elif args.text is not None:
+        text = args.text
+    else:
+        parser.print_help()
+        sys.exit(1)
+
+    if args.verbose:
+        details = text_to_anum_verbose(text)
+        print(f'Текст: "{text}"')
+        print(f'Длина: {len(text)} символов')
+        print()
+        for entry in details:
+            print(f'  {entry["char"]}  '
+                  f'({entry["codepoint"]})  '
+                  f'UTF-8: {" ".join(entry["utf8_bytes"])}  '
+                  f'→  {entry["anum"]}')
+        print()
+        print(f'Результат: {text_to_anum(text)}')
+    else:
+        print(text_to_anum(text))
+
+
+if __name__ == '__main__':
+    main()
