@@ -38,7 +38,7 @@ ROOT/                           # Keep minimal - only README.md, LICENSE, .gitig
 ├── core/                       # Core system components
 │   └── axioms/                 # MTC axiom definitions and validation
 ├── parsers/                    # All anum parsing components
-├── converters/                 # Format conversion utilities
+├── converters/                 # Конвертеры между форматами нотаций
 ├── tools/                      # Calculators and utilities
 ├── examples/                   # Demonstration code
 ├── tests/                      # Test files and .anum test cases
@@ -228,6 +228,12 @@ anum_docs/                              # Корневая директория 
 │   │   └── validate_axioms.py          # Валидатор аксиом MTC
 │   └── notation_system.py              # Система нотации абитов
 │
+├── converters/                         # Конвертеры между форматами нотаций
+│   ├── __init__.py                     # Описание модуля конвертеров
+│   ├── text_to_anum.py                 # UTF-8 текст → четверичное ачисло
+│   ├── anum_to_text.py                 # Четверичное ачисло → UTF-8 текст
+│   └── ascii_unicode.py                # ASCII (aprover) ↔ Unicode (anum_docs)
+│
 ├── parsers/                            # Парсеры ачисел и формул MTC
 │   ├── anum_prover.py                  # Основной движок доказательств
 │   ├── mtc_formula_prover.py           # Движок доказательств формул MTC
@@ -263,6 +269,7 @@ anum_docs/                              # Корневая директория 
 │
 ├── tests/                              # Тесты
 │   ├── mtc_formulas.mtc                # Тестовые формулы MTC
+│   ├── test_converters.py              # Тесты конвертеров (43 теста)
 │   └── test.bat                        # Скрипт запуска тестов
 │
 ├── pics/                               # Изображения
@@ -295,6 +302,12 @@ anum_docs/                              # Корневая директория 
 - Аксиомы, система нотации, базовые структуры данных
 - Валидация корректности теоретических основ
 
+#### `/converters/` - Конвертеры форматов
+- Конвертация между тремя нотациями МТС (формальная, строковая, четверичная)
+- `text_to_anum.py` — UTF-8 текст в четверичные ачисла (абитовую нотацию)
+- `anum_to_text.py` — четверичные ачисла обратно в UTF-8 текст
+- `ascii_unicode.py` — ASCII (aprover: M, F, ->, INF, [], 10) ↔ Unicode (anum_docs: ♂, ♀, ⟼, ∞, (), +-)
+
 #### `/parsers/` - Парсеры и движки
 - Основной движок доказательств и парсеры ачисел
 - Поддержка Unicode (♂♀→∞) и ASCII (MF->INF) нотаций
@@ -317,8 +330,12 @@ anum_docs/                              # Корневая директория 
 2. **`docs/theory/Метатеория связей.md`** — чистовик МТС (финальная версия теории)
 3. **`parsers/anum_prover.py`** — основной движок вычислений MTC
 4. **`parsers/mtc_formula_prover.py`** — движок для формул MTC в полной нотации
-5. **`tests/mtc_formulas.mtc`** — тестовые формулы MTC
-6. **`docs/plan.md`** — план наведения порядка в репозитории
+5. **`converters/text_to_anum.py`** — конвертер текста в ачисла
+6. **`converters/anum_to_text.py`** — конвертер ачисел в текст
+7. **`converters/ascii_unicode.py`** — конвертер ASCII ↔ Unicode нотаций
+8. **`tests/mtc_formulas.mtc`** — тестовые формулы MTC
+9. **`tests/test_converters.py`** — тесты конвертеров (43 теста)
+10. **`docs/plan.md`** — план разработки
 
 ### 📊 Статус компонентов:
 - ✅ **Core**: Базовая функциональность реализована
@@ -326,7 +343,8 @@ anum_docs/                              # Корневая директория 
 - ✅ **MTC Formula Prover**: Новый движок для полной нотации MTC (83.3% тестов)
 - ✅ **Tests**: Комплексное тестирование настроено
 - ✅ **Documentation**: Полная теоретическая база
-- 🔄 **Future**: Планируется добавление `/converters/`, `/tools/`, `/examples/`
+- ✅ **Converters**: Конвертеры форматов реализованы (text↔anum, ASCII↔Unicode, 43 теста)
+- 🔄 **Future**: Планируется добавление `/tools/`, `/examples/`
 
 ## ⚠️ **CRITICAL: PYTHON EXECUTION REQUIREMENTS** ⚠️
 
@@ -364,12 +382,12 @@ This project **REQUIRES** using the [py](file://d:\Projects\anum_protocol\anum_d
 6. **Документация**: Обновляй документацию при изменениях
 
 ### Приоритеты разработки:
-1. **Core** - базовые компоненты (абиты, связи, аксиомы)
-2. **Parsers** - парсинг всех типов ачисел
-3. **MTC Formula Prover** - обработка формул в полной нотации MTC
-4. **Converters** - конвертация между форматами
-5. **Tools** - пользовательские инструменты
-6. **Examples** - демонстрации и обучающие материалы
+1. ✅ **Core** - базовые компоненты (абиты, связи, аксиомы)
+2. ✅ **Parsers** - парсинг всех типов ачисел
+3. ✅ **MTC Formula Prover** - обработка формул в полной нотации MTC
+4. ✅ **Converters** - конвертация между форматами
+5. 🔄 **Tools** - пользовательские инструменты
+6. 🔄 **Examples** - демонстрации и обучающие материалы
 
 ### Командная строка:
 - Используй `py` вместо `python`
