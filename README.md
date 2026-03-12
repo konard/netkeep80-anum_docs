@@ -13,7 +13,7 @@
 | Домен | Уровень | Символы | Назначение |
 |-------|---------|---------|------------|
 | **Формы связей** | Теоретический | `⟼`, `∞`, `♂`, `♀`, `¬` | Аксиомы, теоремы, формальные конструкции |
-| **Сериализация** | Практический | `(`, `)`, `+`, `-` | Представление данных в виде последовательностей |
+| **Сериализация** | Практический | `[`, `]`, `1`, `0` | Представление данных в виде последовательностей |
 
 ### Абиты
 
@@ -21,12 +21,12 @@
 
 | Абит | Форма | Описание |
 |------|-------|----------|
-| `(` | `♂∞` | Начало смысла — самозамкнутое начало акорня |
-| `)` | `∞♀` | Конец смысла — самозамкнутый конец акорня |
-| `+` | `♂∞ ⟼ ∞♀` | Единица смысла — связь от начала к концу |
-| `-` | `∞♀ ⟼ ♂∞` | Нуль смысла — инверсия единицы |
+| `[` | `♂∞` | Начало смысла — самозамкнутое начало акорня |
+| `]` | `∞♀` | Конец смысла — самозамкнутый конец акорня |
+| `1` | `♂∞ ⟼ ∞♀` | Единица смысла — связь от начала к концу |
+| `0` | `∞♀ ⟼ ♂∞` | Нуль смысла — инверсия единицы |
 
-> **Важно:** `∞` (акорень) **не является абитом**. Это мета-конструкт, выражаемый через комбинацию абитов: `() ≡ ∞`.
+> **Важно:** `∞` (акорень) **не является абитом**. Это мета-конструкт, выражаемый через комбинацию абитов: `[] ≡ ∞`.
 
 ### Ачисла
 
@@ -46,9 +46,9 @@
 | А5. Самозамыкание начала | `♂v : ♂v ⟼ v` | Начало замкнуто на связь |
 | А6. Самозамыкание конца | `r♀ : r ⟼ r♀` | Конец замкнут на связь |
 | А7. Инверсия | `¬(a ⟼ b) = b ⟼ a` | Обращение направления |
-| А8. Единица смысла | `+ : ♂∞ ⟼ ∞♀` | Направленная связь |
-| А9. Нуль смысла | `- : ¬+` | Инверсия единицы |
-| А10. Абиты | `( : ♂∞`, `) : ∞♀`, `+ : +`, `- : -` | Четверичная система |
+| А8. Единица смысла | `1 : ♂∞ ⟼ ∞♀` | Направленная связь |
+| А9. Нуль смысла | `0 : ¬1` | Инверсия единицы |
+| А10. Абиты | `[ : ♂∞`, `] : ∞♀`, `1 : 1`, `0 : 0` | Четверичная система |
 | А11. Левоассоциативность | `abc = (a ⟼ b) ⟼ c` | Порядок группировки |
 
 Подробное описание аксиом и теорем: [`docs/theory/Метатеория связей.md`](docs/theory/Метатеория%20связей.md)
@@ -132,7 +132,7 @@ python3 converters/ascii_unicode.py
 |---------|------------|----------|
 | **Формальная** | `.mtl` | Язык запросов по форме связей (основной язык теории) |
 | **Строковая** | `.astr` | UTF-8 представление как левоассоциативная цепочка |
-| **Четверичная** | `.anum` | Алфавит из 4 абитов: `(`, `)`, `+`, `-` |
+| **Четверичная** | `.anum` | Алфавит из 4 абитов: `[`, `]`, `1`, `0` |
 
 ### Соответствие нотаций anum_docs и aprover
 
@@ -141,10 +141,12 @@ python3 converters/ascii_unicode.py
 | `⟼` | `->` | Конструктор связи |
 | `¬⟼` | `!->` | Отрицание стрелки |
 | `¬` | `!` | Инверсия |
-| `(` | `[` | Абит начала смысла |
-| `)` | `]` | Абит конца смысла |
-| `+` | `1` | Абит единицы смысла |
-| `-` | `0` | Абит нуля смысла |
+| `[` | `[` | Абит начала смысла |
+| `]` | `]` | Абит конца смысла |
+| `1` | `1` | Абит единицы смысла |
+| `0` | `0` | Абит нуля смысла |
+
+> **Примечание:** Символы абитов в anum_docs и aprover теперь унифицированы.
 
 Подробнее: [netkeep80/aprover](https://github.com/netkeep80/aprover)
 
@@ -185,7 +187,7 @@ This repository contains documentation, tools, and the implementation of the **a
 | Domain | Level | Symbols | Purpose |
 |--------|-------|---------|---------|
 | **Link forms** | Theoretical | `⟼`, `∞`, `♂`, `♀`, `¬` | Axioms, theorems, formal constructions |
-| **Serialization** | Practical | `(`, `)`, `+`, `-` | Data representation as sequences |
+| **Serialization** | Practical | `[`, `]`, `1`, `0` | Data representation as sequences |
 
 ### Abits
 
@@ -193,12 +195,12 @@ This repository contains documentation, tools, and the implementation of the **a
 
 | Abit | Form | Description |
 |------|------|-------------|
-| `(` | `♂∞` | Start of meaning — self-closed start of aroot |
-| `)` | `∞♀` | End of meaning — self-closed end of aroot |
-| `+` | `♂∞ ⟼ ∞♀` | Unit of meaning — link from start to end |
-| `-` | `∞♀ ⟼ ♂∞` | Zero of meaning — inversion of unit |
+| `[` | `♂∞` | Start of meaning — self-closed start of aroot |
+| `]` | `∞♀` | End of meaning — self-closed end of aroot |
+| `1` | `♂∞ ⟼ ∞♀` | Unit of meaning — link from start to end |
+| `0` | `∞♀ ⟼ ♂∞` | Zero of meaning — inversion of unit |
 
-> **Important:** `∞` (aroot) **is not an abit**. It is a meta-theoretical construct expressed through a combination of abits: `() ≡ ∞`.
+> **Important:** `∞` (aroot) **is not an abit**. It is a meta-theoretical construct expressed through a combination of abits: `[] ≡ ∞`.
 
 ### Anumbers
 
@@ -218,9 +220,9 @@ MTC is based on 12 axioms (A0–A11):
 | A5. Start self-closure | `♂v : ♂v ⟼ v` | Start closed on link |
 | A6. End self-closure | `r♀ : r ⟼ r♀` | End closed on link |
 | A7. Inversion | `¬(a ⟼ b) = b ⟼ a` | Direction reversal |
-| A8. Unit of meaning | `+ : ♂∞ ⟼ ∞♀` | Directed link |
-| A9. Zero of meaning | `- : ¬+` | Inversion of unit |
-| A10. Abits | `( : ♂∞`, `) : ∞♀`, `+ : +`, `- : -` | Quaternary system |
+| A8. Unit of meaning | `1 : ♂∞ ⟼ ∞♀` | Directed link |
+| A9. Zero of meaning | `0 : ¬1` | Inversion of unit |
+| A10. Abits | `[ : ♂∞`, `] : ∞♀`, `1 : 1`, `0 : 0` | Quaternary system |
 | A11. Left-associativity | `abc = (a ⟼ b) ⟼ c` | Grouping order |
 
 Full axiom descriptions and theorems: [`docs/theory/Метатеория связей.md`](docs/theory/Метатеория%20связей.md)
@@ -304,7 +306,7 @@ python3 converters/ascii_unicode.py
 |----------|-----------|-------------|
 | **Formal** | `.mtl` | Link form query language (main theory language) |
 | **String** | `.astr` | UTF-8 representation as left-associative chain |
-| **Quaternary** | `.anum` | Alphabet of 4 abits: `(`, `)`, `+`, `-` |
+| **Quaternary** | `.anum` | Alphabet of 4 abits: `[`, `]`, `1`, `0` |
 
 ### Notation Correspondence: anum_docs vs aprover
 
@@ -313,10 +315,12 @@ python3 converters/ascii_unicode.py
 | `⟼` | `->` | Link constructor |
 | `¬⟼` | `!->` | Arrow negation |
 | `¬` | `!` | Inversion |
-| `(` | `[` | Start-of-meaning abit |
-| `)` | `]` | End-of-meaning abit |
-| `+` | `1` | Unit-of-meaning abit |
-| `-` | `0` | Zero-of-meaning abit |
+| `[` | `[` | Start-of-meaning abit |
+| `]` | `]` | End-of-meaning abit |
+| `1` | `1` | Unit-of-meaning abit |
+| `0` | `0` | Zero-of-meaning abit |
+
+> **Note:** Abit symbols in anum_docs and aprover are now unified.
 
 More details: [netkeep80/aprover](https://github.com/netkeep80/aprover)
 
