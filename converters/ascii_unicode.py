@@ -9,8 +9,8 @@
   ⟼                    |  ->               |  Конструктор связи
   ¬⟼                   |  !->              |  Отрицание стрелки
   ¬                    |  !                |  Инверсия
-  ♂                    |  M                |  Начальность (самозамыкание начала)
-  ♀                    |  F                |  Конечность (самозамыкание конца)
+  ♂                    |  M                |  Начальность (самозамыкание начала, постфиксный)
+  ♀                    |  F                |  Конечность (самозамыкание конца, префиксный)
   ∞                    |  INF              |  Акорень
   =                    |  =                |  Тождественность
   ≠                    |  !=               |  Отрицание тождества
@@ -23,8 +23,8 @@
 Примечание: Символы абитов в anum_docs и aprover теперь унифицированы.
 
 Использование:
-  python3 converters/ascii_unicode.py --to-ascii "♂∞♀ = (♂∞)♀"
-  python3 converters/ascii_unicode.py --to-unicode "M INF F = (M INF) F"
+  python3 converters/ascii_unicode.py --to-ascii "♀∞♂ = (♀∞)♂"
+  python3 converters/ascii_unicode.py --to-unicode "F INF M = (F INF) M"
 """
 
 import sys
