@@ -37,28 +37,28 @@ class MTCAxiomValidator(object):
         result1 = self.log_test(
             "Абит '[' — начало связи",
             True,
-            "[ ≡ ♂∞ → ∞ (начало связи, ссылка)"
+            "[ = ♂∞ → ∞ (начало связи, ссылка)"
         )
 
         # Абит ']' - конец связи
         result2 = self.log_test(
             "Абит ']' — конец связи",
             True,
-            "] ≡ ∞ → ∞♀ (конец связи, значение)"
+            "] = ∞ → ∞♀ (конец связи, значение)"
         )
 
         # Абит '1' - наличие связи
         result3 = self.log_test(
             "Абит '1' — наличие связи",
             True,
-            "1 ≡ ♂∞ → ∞♀ ≡ → (наличие связи, истина)"
+            "1 = ♂∞ → ∞♀ = → (наличие связи, истина)"
         )
 
         # Абит '0' - отсутствие связи
         result4 = self.log_test(
             "Абит '0' — отсутствие связи",
             True,
-            "0 ≡ ∞♀ → ♂∞ ≡ ↛ (отсутствие связи, ложь)"
+            "0 = ∞♀ → ♂∞ = ↛ (отсутствие связи, ложь)"
         )
 
         # Инверсии абитов
@@ -72,7 +72,7 @@ class MTCAxiomValidator(object):
         result6 = self.log_test(
             "∞ НЕ является абитом",
             True,
-            "∞ — НЕ абит, выражается через комбинацию абитов: [] ≡ ∞"
+            "∞ — НЕ абит, выражается через комбинацию абитов: [] = ∞"
         )
 
         # Валидация чистой четверичной системы
@@ -113,7 +113,7 @@ class MTCAxiomValidator(object):
         result3 = self.log_test(
             "Правильное выражение ∞",
             True,
-            "[] ≡ ∞ (акорень выражается через комбинацию абитов)"
+            "[] = ∞ (акорень выражается через комбинацию абитов)"
         )
         
         # Примеры валидных четверичных ачисел
@@ -218,7 +218,7 @@ class MTCAxiomValidator(object):
         return result1 and result2 and result3 and result4 and result5
 
     def test_axiom_1_existence(self):
-        """Аксиома 1: rv ≡ r⟼v - Существование"""
+        """Аксиома А3: rv : (r ⟼ v) - Связь"""
         print("\n=== АКСИОМА 1: СУЩЕСТВОВАНИЕ ===")
         
         # Тест 1.1: Базовое существование
@@ -232,7 +232,7 @@ class MTCAxiomValidator(object):
         result2 = self.log_test(
             "1.2 Левоассоциативность", 
             True, 
-            "abc ≡ (a->b)->c, НЕ a->(b->c)"
+            "abc = (a->b)->c, НЕ a->(b->c)"
         )
         
         # Тест 1.3: Первичность оператора ->
@@ -245,14 +245,14 @@ class MTCAxiomValidator(object):
         return result1 and result2 and result3
     
     def test_axiom_2_recursive_ref(self):
-        """Аксиома 2: ♂v ≡ ♂v⟼v - Рекурсивная ссылка"""
+        """Аксиома А5: ♂x : (♂x ⟼ x) - Самозамыкание начала"""
         print("\n=== АКСИОМА 2: РЕКУРСИВНАЯ ССЫЛКА ===")
         
         # Тест 2.1: Базовая рекурсия
         result1 = self.log_test(
             "2.1 Базовая рекурсия ссылки", 
             True, 
-            "Mx ≡ Mx->x (самоссылающаяся структура)"
+            "Mx = Mx->x (самоссылающаяся структура)"
         )
         
         # Тест 2.2: Стабильность рекурсии
@@ -266,20 +266,20 @@ class MTCAxiomValidator(object):
         result3 = self.log_test(
             "2.3 Правоассоциативность M", 
             True, 
-            "MMx ≡ M(Mx), НЕ (MM)x"
+            "MMx = M(Mx), НЕ (MM)x"
         )
         
         return result1 and result2 and result3
     
     def test_axiom_3_recursive_val(self):
-        """Аксиома 3: r♀ ≡ r⟼r♀ - Рекурсивное значение"""
+        """Аксиома А6: x♀ : (x ⟼ x♀) - Самозамыкание конца"""
         print("\n=== АКСИОМА 3: РЕКУРСИВНОЕ ЗНАЧЕНИЕ ===")
         
         # Тест 3.1: Базовая рекурсия значения
         result1 = self.log_test(
             "3.1 Базовая рекурсия значения", 
             True, 
-            "xF ≡ x->xF (самозначащая структура)"
+            "xF = x->xF (самозначащая структура)"
         )
         
         # Тест 3.2: Дуальность с M
@@ -299,7 +299,7 @@ class MTCAxiomValidator(object):
         return result1 and result2 and result3
     
     def test_axiom_4_identity(self):
-        """Аксиома 4: (ab ≡ cd) ↔ (a ≡ c) ∧ (b ≡ d) - Идентичность"""
+        """Аксиома А2: (ab = cd) ↔ (a = c) ∧ (b = d) - Конгруэнция"""
         print("\n=== АКСИОМА 4: ИДЕНТИЧНОСТЬ ===")
         
         # Тест 4.1: Структурная детерминированность
@@ -313,7 +313,7 @@ class MTCAxiomValidator(object):
         result2 = self.log_test(
             "4.2 Идентичность рекурсивных операторов", 
             True, 
-            "(Mv ≡ Mw) → (v ≡ w), (rF ≡ sF) → (r ≡ s)"
+            "(Mv = Mw) → (v = w), (rF = sF) → (r = s)"
         )
         
         # Тест 4.3: Исключение скрытых свойств
@@ -347,13 +347,13 @@ class MTCAxiomValidator(object):
         result3 = self.log_test(
             "5.3 Идемпотентность смысла",
             True,
-            "INF ≡ INF->INF->INF->... стабильно (∞ⁿ = ∞)"
+            "INF = INF->INF->INF->... стабильно (∞ⁿ = ∞)"
         )
 
         return result1 and result2 and result3
     
     def test_axiom_6_loop(self):
-        """Аксиома 6: aa ≡ a⟼a при a≠∞ - Петля"""
+        """Аксиома А8: aa : (a ⟼ a) - Петля"""
         print("\n=== АКСИОМА 6: ПЕТЛЯ ===")
         
         # Тест 6.1: Конечные петли
@@ -374,27 +374,27 @@ class MTCAxiomValidator(object):
         result3 = self.log_test(
             "6.3 Условие ограничения", 
             True, 
-            "При a≡INF аксиома петли не применяется"
+            "При a=INF аксиома петли не применяется"
         )
         
         return result1 and result2 and result3
     
     def test_axiom_7_reflection(self):
-        """Аксиома 7: -ab ≡ ba - Отражение"""
+        """Аксиома А7: -(a ⟼ b) : (b ⟼ a) - Инверсия"""
         print("\n=== АКСИОМА 7: ОТРАЖЕНИЕ ===")
         
         # Тест 7.1: Базовое отражение
         result1 = self.log_test(
             "7.1 Базовое отражение", 
             True, 
-            "-ab ≡ ba (инверсия порядка)"
+            "-ab = ba (инверсия порядка)"
         )
         
         # Тест 7.2: Специальные случаи
         result2 = self.log_test(
             "7.2 Специальные случаи", 
             True, 
-            "-aa≡aa, -Mx≡xF, -INF≡INF"
+            "-aa=aa, -Mx=xF, -INF=INF"
         )
         
         # Тест 7.3: Симметрия системы
@@ -407,14 +407,14 @@ class MTCAxiomValidator(object):
         return result1 and result2 and result3
     
     def test_axiom_8_composition(self):
-        """Аксиома 8: abc ≡ (a⟼b)⟼c ≢ a⟼(b⟼c) - Композиция"""
+        """Аксиома А9: a ⟼ b ⟼ c = (a ⟼ b) ⟼ c ≠ a ⟼ (b ⟼ c) - Прямоассоциативность"""
         print("\n=== АКСИОМА 8: КОМПОЗИЦИЯ ===")
         
         # Тест 8.1: Строгая левоассоциативность
         result1 = self.log_test(
             "8.1 Строгая левоассоциативность", 
             True, 
-            "abc ≡ (a->b)->c, ЗАПРЕТ a->(b->c)"
+            "abc = (a->b)->c, ЗАПРЕТ a->(b->c)"
         )
         
         # Тест 8.2: Запрет транзитивности
@@ -434,7 +434,7 @@ class MTCAxiomValidator(object):
         return result1 and result2 and result3
     
     def test_axiom_9_degree(self):
-        """Аксиома 9: a^n ≡ a⟼a⟼...⟼a (n раз) - Степень"""
+        """Аксиома А12: a^n = a⟼a⟼...⟼a (n раз) - Степень петли"""
         print("\n=== АКСИОМА 9: СТЕПЕНЬ ПЕТЛИ ===")
         
         # Тест 9.1: Определение степени
@@ -448,18 +448,66 @@ class MTCAxiomValidator(object):
         result2 = self.log_test(
             "9.2 Базовые случаи", 
             True, 
-            "a^1≡a, a^2≡a->a, a^0≡несвязь"
+            "a^1=a, a^2=a->a, a^0=несвязь"
         )
         
         # Тест 9.3: Специальный случай INF
         result3 = self.log_test(
             "9.3 Специальный случай INF", 
             True, 
-            "INF^n ≡ INF для любого n≥1"
+            "INF^n = INF для любого n≥1"
         )
         
         return result1 and result2 and result3
     
+    def test_connection_disconnection_clarification(self):
+        """Тестирование уточнения аксиомы связи и несвязи (issue #24)"""
+        print("\n=== УТОЧНЕНИЕ АКСИОМЫ СВЯЗИ И НЕСВЯЗИ ===\n")
+
+        # Единица смысла = связь (от начала к концу)
+        result1 = self.log_test(
+            "Единица смысла (связь)",
+            True,
+            "1 : (♂∞ ⟼ ∞♀) — связь или единица смысла (от начала к концу)"
+        )
+
+        # Нуль смысла = несвязь (от конца к началу)
+        result2 = self.log_test(
+            "Нуль смысла (несвязь)",
+            True,
+            "0 : (∞♀ ⟼ ♂∞) — несвязь или нуль смысла (от конца к началу)"
+        )
+
+        # Совпадение форм: 𝟙 и абит 1
+        result3 = self.log_test(
+            "Совпадение форм: 𝟙 и абит 1",
+            True,
+            "𝟙 = 1 — одна и та же форма ♂∞ ⟼ ∞♀ в разных доменах"
+        )
+
+        # Совпадение форм: -𝟙 и абит 0
+        result4 = self.log_test(
+            "Совпадение форм: -𝟙 и абит 0",
+            True,
+            "-𝟙 = 0 — одна и та же форма ∞♀ ⟼ ♂∞ в разных доменах"
+        )
+
+        # Символ ↛ = -𝟙
+        result5 = self.log_test(
+            "Несвязь ↛ = -𝟙",
+            True,
+            "↛ = -𝟙 = 0 — отсутствие связи (инверсия единицы смысла)"
+        )
+
+        # Используется = а не ≡ для аксиомы равенства
+        result6 = self.log_test(
+            "Аксиома равенства использует = а не ≡",
+            True,
+            "Во всех аксиомах используется знак = (равенство), а не ≡ (тождество)"
+        )
+
+        return result1 and result2 and result3 and result4 and result5 and result6
+
     def test_self_closure_consequences(self):
         """Тестирование следствий аксиом самозамыкания (issue #23)"""
         print("\n=== СЛЕДСТВИЯ АКСИОМ САМОЗАМЫКАНИЯ ===\n")
@@ -561,6 +609,9 @@ class MTCAxiomValidator(object):
         axiom_results.append(self.test_axiom_8_composition())
         axiom_results.append(self.test_axiom_9_degree())
         
+        # Тестируем уточнение связи и несвязи (issue #24)
+        axiom_results.append(self.test_connection_disconnection_clarification())
+
         # Тестируем следствия аксиом самозамыкания (issue #23)
         axiom_results.append(self.test_self_closure_consequences())
 
