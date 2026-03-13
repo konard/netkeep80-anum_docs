@@ -38,7 +38,7 @@
 
 | Аксиома | Формула | Описание |
 |---------|---------|----------|
-| А0. Определение | `(s : F) ⟼ (s = F)` | Знак как запрос по форме |
+| А0. Определение | `(s : F) ⟼ (s = F)` | Определение есть связь от знака к форме |
 | А1. Тождественность | `x = x` | Структурная неразличимость |
 | А2. Конгруэнция | `{(a = c), (b = d)} ⟼ ((a⟼b) = (c⟼d))` | Структурная прозрачность |
 | А3. Связь | `rv : r ⟼ v` | Базовый конструктор |
@@ -212,7 +212,7 @@ MTC is based on 12 axioms (A0–A11):
 
 | Axiom | Formula | Description |
 |-------|---------|-------------|
-| A0. Definition | `(s : F) ⟼ (s = F)` | Sign as a form query |
+| A0. Definition | `(s : F) ⟼ (s = F)` | Definition is a link from sign to form |
 | A1. Identity | `x = x` | Structural indistinguishability |
 | A2. Congruence | `{(a = c), (b = d)} ⟼ ((a⟼b) = (c⟼d))` | Structural transparency |
 | A3. Link | `rv : r ⟼ v` | Basic constructor |
