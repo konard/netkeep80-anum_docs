@@ -343,3 +343,9 @@ The project uses GitHub Actions for continuous integration:
 ## License
 
 The project is released under the [Unlicense](LICENSE) (public domain).
+
+## Авторы и соавторыБлагодарности / Thanks
+
+- [Вертушкин Роман Павлович](https://github.com/netkeep80)
+- [Дьяченко Константин Константиновчи](https://github.com/konard)
+- [Шакиров Тимур Эдуардович](https://github.com/TimaxLacs)
