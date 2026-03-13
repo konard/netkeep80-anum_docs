@@ -134,7 +134,7 @@ class ConnectionForm(AnumExpression):
 
 # Enhanced classes for complex formulas
 class ComplexClosure(AnumExpression):
-    """Complex closure expression like ♀∞♂"""
+    """Complex closure expression like ♂∞♀"""
     def __init__(self, parts):
         self.parts = parts
     def __str__(self):

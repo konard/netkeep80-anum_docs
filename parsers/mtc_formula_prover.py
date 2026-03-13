@@ -141,7 +141,7 @@ class ConnectionForm(AnumExpression):
         return hash(('ConnectionForm', self.form_type))
 
 class NegationExpression(AnumExpression):
-    """Negation expression like -x♂"""
+    """Negation expression like -♂x"""
     def __init__(self, expression):
         self.expression = expression
     def __str__(self):
@@ -167,7 +167,7 @@ class PowerLoopExpression(AnumExpression):
 
 # Enhanced classes for complex formulas
 class ComplexClosure(AnumExpression):
-    """Complex closure expression like ♀∞♂"""
+    """Complex closure expression like ♂∞♀"""
     def __init__(self, parts):
         self.parts = parts
     def __str__(self):
