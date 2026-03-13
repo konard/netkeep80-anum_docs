@@ -3,7 +3,7 @@
 Unified Anum Prover - Complete MTC Implementation (Formula Notation Only)
 
 UNIFIED PROVER: Best features from all previous versions
-- Complex closure expressions: ♀∞♂, (♀∞)♂
+- Complex closure expressions: ♂∞♀, (♂∞)♀
 - Recursive patterns and equivalence chains
 - Complete MTC axiom support (100% test success rate)
 - Unicode MTC formula notation ONLY (ASCII compatibility removed)
@@ -11,9 +11,9 @@ UNIFIED PROVER: Best features from all previous versions
 - Full MTC axiom implementation
 
 NEW CAPABILITIES:
-1. Merger of recursions theorem: ♀♂ = ∞
-2. Complex closure decomposition: ♀∞♂ = (♀∞)♂
-3. Closure composition: ♀r = ♀r → r
+1. Merger of recursions theorem: ♂♀ = ∞
+2. Complex closure decomposition: ♂∞♀ = (♂∞)♀
+3. Closure composition: r♀ = r♀ → r
 4. Advanced pattern matching and validation
 5. Full .anum file processing support
 6. Complete MTC axiom system
@@ -134,7 +134,7 @@ class ConnectionForm(AnumExpression):
 
 # Enhanced classes for complex formulas
 class ComplexClosure(AnumExpression):
-    """Complex closure expression like ♀∞♂"""
+    """Complex closure expression like ♂∞♀"""
     def __init__(self, parts):
         self.parts = parts
     def __str__(self):
@@ -148,8 +148,8 @@ class EnhancedAnumLexer(object):
     """Enhanced lexer for complex MTC formulas - FORMULA NOTATION ONLY
 
     Operator positions:
-    - ♀ is PREFIX (comes before operand): ♀r means endhood applied to r
-    - ♂ is POSTFIX (comes after operand): v♂ means beginninghood applied to v
+    - ♂ is PREFIX (comes before operand): ♂v means beginninghood applied to v
+    - ♀ is POSTFIX (comes after operand): r♀ means endhood applied to r
     """
     def __init__(self, text):
         self.text = text
@@ -174,12 +174,12 @@ class EnhancedAnumLexer(object):
         return None
 
     def read_complex_closure(self):
-        """Read complex closure patterns like ♀∞♂
+        """Read complex closure patterns like ♂∞♀
 
         New operator positions:
-        - ♀ is prefix (read before operand)
-        - ♂ is postfix (read after operand)
-        Pattern: leading ♀ symbols + ∞ + trailing ♂ symbols
+        - ♂ is prefix (read before operand)
+        - ♀ is postfix (read after operand)
+        Pattern: leading ♂ symbols + ∞ + trailing ♀ symbols
         """
         result = []
         while self.current_char and self.current_char in ['♂', '♀', '∞']:
@@ -287,10 +287,10 @@ class EnhancedAnumParser(object):
             self.error("Expected {0}, got {1}".format(token_type, self.current_token.type))
 
     def parse_complex_closure(self, closure_text):
-        """Parse complex closure like ♀∞♂
+        """Parse complex closure like ♂∞♀
 
-        ♀ maps to VAL (endhood/конечность) - now prefix
-        ♂ maps to REF (beginninghood/начальность) - now postfix
+        ♂ maps to REF (beginninghood/начальность) - now prefix
+        ♀ maps to VAL (endhood/конечность) - now postfix
         """
         parts = []
 
@@ -424,27 +424,27 @@ class EnhancedAnumProver(object):
     def _check_equivalence(self, expr1, expr2):
         """Enhanced equivalence checking for complex formulas"""
 
-        # CRITICAL RULE: Merger of Recursions Theorem ♀♂ = ∞
+        # CRITICAL RULE: Merger of Recursions Theorem ♂♀ = ∞
         if self._check_merger_of_recursions(expr1, expr2):
             return True
 
-        # Rule 1: Complex closure decomposition ♀∞♂ = (♀∞)♂
+        # Rule 1: Complex closure decomposition ♂∞♀ = (♂∞)♀
         if self._check_closure_decomposition_rule(expr1, expr2):
             return True
 
-        # Rule 2: Closure composition ♀r = ♀r → r
+        # Rule 2: Closure composition r♀ = r♀ → r
         if self._check_closure_composition_rule(expr1, expr2):
             return True
 
-        # Rule 3: MTC closure expansion ♀∞♂ = ♀∞ → ♀∞♂
+        # Rule 3: MTC closure expansion ♂∞♀ = ∞♀ → ♂∞♀
         if self._check_mtc_closure_expansion(expr1, expr2):
             return True
 
-        # Rule 4: Complex nested closure ♀∞♂ = (♀∞ → ∞) → ♀∞♂
+        # Rule 4: Complex nested closure ♂∞♀ = (∞♀ → ∞) → ♂∞♀
         if self._check_nested_closure_rule(expr1, expr2):
             return True
 
-        # Rule 5: Meta-theoretical self-closure ∞♂ = ∞ → ∞♂
+        # Rule 5: Meta-theoretical self-closure ♂∞ = ∞ → ♂∞
         if self._check_meta_self_closure(expr1, expr2):
             return True
 
@@ -459,119 +459,119 @@ class EnhancedAnumProver(object):
         return False
 
     def _check_merger_of_recursions(self, expr1, expr2):
-        """Check Merger of Recursions Theorem: ♀♂ = ∞
-        CRITICAL: Only ♀♂ (VAL+REF) equals ∞, NOT ♀∞♂ (VAL+INF+REF)
+        """Check Merger of Recursions Theorem: ♂♀ = ∞
+        CRITICAL: Only ♂♀ (REF+VAL) equals ∞, NOT ♂∞♀ (REF+INF+VAL)
         """
-        # Unicode pattern: ♀♂ = ∞ (EXACTLY 2 parts: VAL + REF)
+        # Unicode pattern: ♂♀ = ∞ (EXACTLY 2 parts: REF + VAL)
         if (isinstance(expr1, ComplexClosure) and len(expr1.parts) == 2 and
-            isinstance(expr1.parts[0], ConnectionForm) and expr1.parts[0].form_type == 'VAL' and
-            isinstance(expr1.parts[1], ConnectionForm) and expr1.parts[1].form_type == 'REF' and
+            isinstance(expr1.parts[0], ConnectionForm) and expr1.parts[0].form_type == 'REF' and
+            isinstance(expr1.parts[1], ConnectionForm) and expr1.parts[1].form_type == 'VAL' and
             isinstance(expr2, AssociativeRoot)):
             return True
         if (isinstance(expr2, ComplexClosure) and len(expr2.parts) == 2 and
-            isinstance(expr2.parts[0], ConnectionForm) and expr2.parts[0].form_type == 'VAL' and
-            isinstance(expr2.parts[1], ConnectionForm) and expr2.parts[1].form_type == 'REF' and
+            isinstance(expr2.parts[0], ConnectionForm) and expr2.parts[0].form_type == 'REF' and
+            isinstance(expr2.parts[1], ConnectionForm) and expr2.parts[1].form_type == 'VAL' and
             isinstance(expr1, AssociativeRoot)):
             return True
 
         return False
 
     def _check_closure_decomposition_rule(self, expr1, expr2):
-        """Check ♀∞♂ = (♀∞)♂ decomposition - specific pattern matching"""
+        """Check ♂∞♀ = (♂∞)♀ decomposition - specific pattern matching"""
 
-        # Pattern 1: ♀∞♂ = (♀∞)♂ where both are ComplexClosures
+        # Pattern 1: ♂∞♀ = (♂∞)♀ where both are ComplexClosures
         if (isinstance(expr1, ComplexClosure) and len(expr1.parts) == 3 and
             isinstance(expr2, ComplexClosure) and len(expr2.parts) == 2):
-            # Check if it's the ♀∞♂ = (♀∞)♂ pattern
-            if (str(expr1) == '♀∞♂' and str(expr2) == '(♀∞)♂'):
+            # Check if it's the ♂∞♀ = (♂∞)♀ pattern
+            if (str(expr1) == '♂∞♀' and str(expr2) == '(♂∞)♀'):
                 return True
         if (isinstance(expr2, ComplexClosure) and len(expr2.parts) == 3 and
             isinstance(expr1, ComplexClosure) and len(expr1.parts) == 2):
-            # Check if it's the (♀∞)♂ = ♀∞♂ pattern
-            if (str(expr2) == '♀∞♂' and str(expr1) == '(♀∞)♂'):
+            # Check if it's the (♂∞)♀ = ♂∞♀ pattern
+            if (str(expr2) == '♂∞♀' and str(expr1) == '(♂∞)♀'):
                 return True
 
-        # Pattern 2: ♀∞♂ = (♀∞)♂ where right side is parsed as Connection
+        # Pattern 2: ♂∞♀ = (♂∞)♀ where right side is parsed as Connection
         if (isinstance(expr1, ComplexClosure) and len(expr1.parts) == 3 and
             isinstance(expr2, Connection)):
-            # Check if expr1 is ♀∞♂ and expr2 represents grouped (♀∞)♂
-            if str(expr1) == '♀∞♂':
-                # The connection should represent (♀∞)♂ structure
+            # Check if expr1 is ♂∞♀ and expr2 represents grouped (♂∞)♀
+            if str(expr1) == '♂∞♀':
+                # The connection should represent (♂∞)♀ structure
                 return True
         if (isinstance(expr2, ComplexClosure) and len(expr2.parts) == 3 and
             isinstance(expr1, Connection)):
             # Reverse direction
-            if str(expr2) == '♀∞♂':
+            if str(expr2) == '♂∞♀':
                 return True
 
         return False
 
     def _check_closure_composition_rule(self, expr1, expr2):
-        """Check ♀r = ♀r → r composition - specific pattern matching"""
-        # Pattern: ♀r = ♀r → r - recursive value expansion
+        """Check r♀ = r♀ → r composition - specific pattern matching"""
+        # Pattern: r♀ = r♀ → r - recursive value expansion
         if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
-            # Check if expr1 is a recursive value pattern like ♀r (starts with VAL)
+            # Check if expr1 is a recursive value pattern like r♀ (ends with VAL)
             if (len(expr1.parts) == 2 and
-                isinstance(expr1.parts[0], ConnectionForm) and
-                expr1.parts[0].form_type == 'VAL'):
-                # Check if expr2 is the expanded form ♀r → r
-                if (isinstance(expr2.reference, type(expr1.parts[1])) and
+                isinstance(expr1.parts[1], ConnectionForm) and
+                expr1.parts[1].form_type == 'VAL'):
+                # Check if expr2 is the expanded form r♀ → r
+                if (isinstance(expr2.reference, type(expr1.parts[0])) and
                     isinstance(expr2.value, ComplexClosure)):
                     return True
         if isinstance(expr2, ComplexClosure) and isinstance(expr1, Connection):
             # Reverse direction
             if (len(expr2.parts) == 2 and
-                isinstance(expr2.parts[0], ConnectionForm) and
-                expr2.parts[0].form_type == 'VAL'):
-                if (isinstance(expr1.reference, type(expr2.parts[1])) and
+                isinstance(expr2.parts[1], ConnectionForm) and
+                expr2.parts[1].form_type == 'VAL'):
+                if (isinstance(expr1.reference, type(expr2.parts[0])) and
                     isinstance(expr1.value, ComplexClosure)):
                     return True
 
         return False
 
     def _check_mtc_closure_expansion(self, expr1, expr2):
-        """Check ♀∞♂ = ♀∞ → ♀∞♂ expansion - specific pattern matching"""
-        # Pattern: ♀∞♂ = ♀∞ → ♀∞♂ - recursive closure expansion
+        """Check ♂∞♀ = ∞♀ → ♂∞♀ expansion - specific pattern matching"""
+        # Pattern: ♂∞♀ = ∞♀ → ♂∞♀ - recursive closure expansion
         if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
-            # Check if expr1 is ♀∞♂ pattern and expr2 is ♀∞ → ♀∞♂
-            if (len(expr1.parts) == 3 and str(expr1) == '♀∞♂' and
+            # Check if expr1 is ♂∞♀ pattern and expr2 is ∞♀ → ♂∞♀
+            if (len(expr1.parts) == 3 and str(expr1) == '♂∞♀' and
                 isinstance(expr2.value, ComplexClosure) and
-                str(expr2.value) == '♀∞♂'):
+                str(expr2.value) == '♂∞♀'):
                 return True
         if isinstance(expr2, ComplexClosure) and isinstance(expr1, Connection):
             # Reverse direction
-            if (len(expr2.parts) == 3 and str(expr2) == '♀∞♂' and
+            if (len(expr2.parts) == 3 and str(expr2) == '♂∞♀' and
                 isinstance(expr1.value, ComplexClosure) and
-                str(expr1.value) == '♀∞♂'):
+                str(expr1.value) == '♂∞♀'):
                 return True
 
         return False
 
     def _check_nested_closure_rule(self, expr1, expr2):
-        """Check ♀∞♂ = (♀∞ → ∞) → ♀∞♂ nested pattern - specific matching"""
-        # Pattern: ♀∞♂ = (♀∞ → ∞) → ♀∞♂ - complex nested closure
+        """Check ♂∞♀ = (∞♀ → ∞) → ♂∞♀ nested pattern - specific matching"""
+        # Pattern: ♂∞♀ = (∞♀ → ∞) → ♂∞♀ - complex nested closure
         if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
-            # Check if expr1 is ♀∞♂ and expr2 has nested structure
-            if (len(expr1.parts) == 3 and str(expr1) == '♀∞♂' and
+            # Check if expr1 is ♂∞♀ and expr2 has nested structure
+            if (len(expr1.parts) == 3 and str(expr1) == '♂∞♀' and
                 isinstance(expr2.reference, Connection) and
                 isinstance(expr2.value, ComplexClosure) and
-                str(expr2.value) == '♀∞♂'):
-                # Check if reference is (♀∞ → ∞) pattern
+                str(expr2.value) == '♂∞♀'):
+                # Check if reference is (∞♀ → ∞) pattern
                 if isinstance(expr2.reference.value, AssociativeRoot):
                     return True
         if isinstance(expr2, ComplexClosure) and isinstance(expr1, Connection):
             # Reverse direction
-            if (len(expr2.parts) == 3 and str(expr2) == '♀∞♂' and
+            if (len(expr2.parts) == 3 and str(expr2) == '♂∞♀' and
                 isinstance(expr1.reference, Connection) and
                 isinstance(expr1.value, ComplexClosure) and
-                str(expr1.value) == '♀∞♂'):
+                str(expr1.value) == '♂∞♀'):
                 if isinstance(expr1.reference.value, AssociativeRoot):
                     return True
 
         return False
 
     def _check_meta_self_closure(self, expr1, expr2):
-        """Check ∞♂ = ∞ → ∞♂ meta-theoretical self-closure"""
+        """Check ♂∞ = ∞ → ♂∞ meta-theoretical self-closure"""
         # Pattern: Complex closure equals connection to infinity
         if (isinstance(expr1, ComplexClosure) and len(expr1.parts) == 2 and
             isinstance(expr2, Connection) and isinstance(expr2.value, AssociativeRoot)):
@@ -687,7 +687,7 @@ class EnhancedAnumProver(object):
 def main():
     if len(sys.argv) < 2:
         print("=== Enhanced MTC Prover for Complex Formulas ===")
-        print("Supports: ♀∞♂ patterns, recursive closures, equivalence chains")
+        print("Supports: ♂∞♀ patterns, recursive closures, equivalence chains")
         print("FORMULA NOTATION ONLY - ASCII compatibility removed")
         print()
 
@@ -700,8 +700,8 @@ def main():
             "- = -",
             "( = (",
             ") = )",
-            "♀♂ = ∞",
-            "♀∞♂ = (♀∞)♂",
+            "♂♀ = ∞",
+            "♂∞♀ = (♂∞)♀",
             "∞ = ∞→∞",
             "∞ = ∞→∞→∞"
         ]
