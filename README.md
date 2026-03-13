@@ -26,7 +26,7 @@
 | `1` | `♂∞ ⟼ ∞♀` | Единица смысла — связь от начала к концу |
 | `0` | `∞♀ ⟼ ♂∞` | Нуль смысла — инверсия единицы |
 
-> **Важно:** `∞` (акорень) **не является абитом**. Это мета-конструкт, выражаемый через комбинацию абитов: `[] ≡ ∞`.
+> **Важно:** `∞` (акорень) **не является абитом**. Это мета-конструкт, выражаемый через комбинацию абитов: `[] = ∞`.
 
 ### Ачисла
 
@@ -46,8 +46,8 @@
 | А5. Самозамыкание начала | `♂v : ♂v ⟼ v` | Безначальность — начало замкнуто на связь |
 | А6. Самозамыкание конца | `r♀ : r ⟼ r♀` | Бесконечность — конец замкнут на связь |
 | А7. Инверсия | `¬(a ⟼ b) = b ⟼ a` | Обращение направления |
-| А8. Единица смысла | `1 : ♂∞ ⟼ ∞♀` | Направленная связь |
-| А9. Нуль смысла | `0 : ¬1` | Инверсия единицы |
+| А8. Единица смысла (связь) | `(⟼) : ♂∞ ⟼ ∞♀` | Связь или единица смысла (от начала к концу) |
+| А9. Нуль смысла (несвязь) | `(↛) : ∞♀ ⟼ ♂∞` | Несвязь или нуль смысла (от конца к началу) |
 | А10. Абиты | `[ : ♂∞`, `] : ∞♀`, `1 : 1`, `0 : 0` | Четверичная система |
 | А11. Левоассоциативность | `abc = (a ⟼ b) ⟼ c` | Порядок группировки |
 
@@ -200,7 +200,7 @@ This repository contains documentation, tools, and the implementation of the **a
 | `1` | `♂∞ ⟼ ∞♀` | Unit of meaning — link from start to end |
 | `0` | `∞♀ ⟼ ♂∞` | Zero of meaning — inversion of unit |
 
-> **Important:** `∞` (aroot) **is not an abit**. It is a meta-theoretical construct expressed through a combination of abits: `[] ≡ ∞`.
+> **Important:** `∞` (aroot) **is not an abit**. It is a meta-theoretical construct expressed through a combination of abits: `[] = ∞`.
 
 ### Anumbers
 
@@ -220,8 +220,8 @@ MTC is based on 12 axioms (A0–A11):
 | A5. Start self-closure | `♂v : ♂v ⟼ v` | Beginninglessness — start closed on link |
 | A6. End self-closure | `r♀ : r ⟼ r♀` | Endlessness — end closed on link |
 | A7. Inversion | `¬(a ⟼ b) = b ⟼ a` | Direction reversal |
-| A8. Unit of meaning | `1 : ♂∞ ⟼ ∞♀` | Directed link |
-| A9. Zero of meaning | `0 : ¬1` | Inversion of unit |
+| A8. Unit of meaning (link) | `(⟼) : ♂∞ ⟼ ∞♀` | Link or unit of meaning (from start to end) |
+| A9. Zero of meaning (non-link) | `(↛) : ∞♀ ⟼ ♂∞` | Non-link or zero of meaning (from end to start) |
 | A10. Abits | `[ : ♂∞`, `] : ∞♀`, `1 : 1`, `0 : 0` | Quaternary system |
 | A11. Left-associativity | `abc = (a ⟼ b) ⟼ c` | Grouping order |
 
