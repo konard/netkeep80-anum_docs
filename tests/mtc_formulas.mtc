@@ -42,8 +42,8 @@ ab^3 == ab(ab)(ab)
 v♂♂ == v♂ → v♂♂
 v♂♂♂ == v♂♂ → v♂♂♂
 
-♀♀r == ♀r → ♀♀r
-♀♀♀r == ♀♀r → ♀♀♀r
+♀♀r == ♀♀r → ♀r
+♀♀♀r == ♀♀♀r → ♀♀r
 
 -∞♂ == ♀∞
 -♀∞ == ∞♂
@@ -72,6 +72,7 @@ aaaa == ((a → a) → a) → a
 
 ♀∞♂ == (♀∞)♂
 ♀∞♂ == ♀∞ → ♀∞♂
+♀∞♂ == ♀∞♂ → ∞♂
 
 a^20 == aaaaaaaaaaaaaaaaaaaa
 a^20 != aaaaaaaaaaaaaaaaaaa

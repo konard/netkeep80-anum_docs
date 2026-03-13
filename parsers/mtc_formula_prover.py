@@ -587,11 +587,11 @@ class MtcProver(object):
         if self._check_closure_composition_rule(expr1, expr2):
             return True
 
-        # Rule 3: MTC closure expansion ♀∞♂ = ♀∞ → ♀∞♂
+        # Rule 3: MTC closure expansion ♀∞♂ = ♀∞♂ → ∞♂
         if self._check_mtc_closure_expansion(expr1, expr2):
             return True
 
-        # Rule 4: Complex nested closure ♀∞♂ = (♀∞ → ∞) → ♀∞♂
+        # Rule 4: Complex nested closure ♀∞♂ = ♀∞♂ → (∞ → ∞♂)
         if self._check_nested_closure_rule(expr1, expr2):
             return True
 
@@ -875,22 +875,22 @@ class MtcProver(object):
     
     def _check_closure_composition_rule(self, expr1, expr2):
         """Check ♀r = ♀r → r composition - specific pattern matching"""
-        # Pattern: ♀♀r = ♀r → ♀♀r
+        # Pattern: ♀♀r = ♀♀r → ♀r
         if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
             # Check if expr1 starts with ♀ (value form, now prefix)
             if (len(expr1.parts) >= 1 and
                 isinstance(expr1.parts[0], ConnectionForm) and
                 expr1.parts[0].form_type == 'VAL'):
-                # Check if expr2 is the expanded form: reference → value
-                # where reference is expr1 with one less leading ♀
-                # and value is expr1 (the full form)
+                # Check if expr2 is the expanded form: ♀x → x
+                # where reference is expr1 (the full form)
+                # and value is expr1 with first ♀ removed
                 if (isinstance(expr2.reference, ComplexClosure) and
                     isinstance(expr2.value, ComplexClosure) and
-                    # Check if reference is expr1 with one less leading ♀
-                    len(expr2.reference.parts) == len(expr1.parts) - 1 and
-                    expr2.reference.parts == expr1.parts[1:] and
-                    # Check if value is the same as expr1
-                    expr2.value.parts == expr1.parts):
+                    # Check if reference is the same as expr1
+                    expr2.reference.parts == expr1.parts and
+                    # Check if value is expr1 with first ♀ removed
+                    len(expr2.value.parts) == len(expr1.parts) - 1 and
+                    expr2.value.parts == expr1.parts[1:]):
                     return True
         if isinstance(expr2, ComplexClosure) and isinstance(expr1, Connection):
             # Reverse direction
@@ -899,14 +899,14 @@ class MtcProver(object):
                 expr2.parts[0].form_type == 'VAL'):
                 if (isinstance(expr1.reference, ComplexClosure) and
                     isinstance(expr1.value, ComplexClosure) and
-                    # Check if reference is expr2 with one less leading ♀
-                    len(expr1.reference.parts) == len(expr2.parts) - 1 and
-                    expr1.reference.parts == expr2.parts[1:] and
-                    # Check if value is the same as expr2
-                    expr1.value.parts == expr2.parts):
+                    # Check if reference is the same as expr2
+                    expr1.reference.parts == expr2.parts and
+                    # Check if value is expr2 with first ♀ removed
+                    len(expr1.value.parts) == len(expr2.parts) - 1 and
+                    expr1.value.parts == expr2.parts[1:]):
                     return True
 
-        # Pattern: ♀♀r = ♀r → ♀♀r - recursive value expansion (multi-♀ prefix case)
+        # Pattern: ♀♀r = ♀♀r → ♀r - recursive value expansion (multi-♀ case)
         if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
             # Check if expr1 starts with ♀♀ (value form, prefix) and has multiple ♀
             if (len(expr1.parts) >= 2 and
@@ -915,14 +915,14 @@ class MtcProver(object):
                 isinstance(expr1.parts[1], ConnectionForm) and
                 expr1.parts[1].form_type == 'VAL'):
                 # This is a pattern like ♀♀r where we have multiple leading ♀
-                # The right side should be ♀r → ♀♀r
+                # The right side should be ♀♀r → ♀r
                 if (isinstance(expr2.reference, ComplexClosure) and
                     isinstance(expr2.value, ComplexClosure)):
-                    # Check if reference is expr1 with one less leading ♀
-                    if (len(expr2.reference.parts) == len(expr1.parts) - 1 and
-                        expr2.reference.parts == expr1.parts[1:] and
-                        # Check if value is the same as expr1
-                        expr2.value.parts == expr1.parts):
+                    # Check if reference is the same as expr1
+                    if (expr2.reference.parts == expr1.parts and
+                        # Check if value is expr1 with first ♀ removed
+                        len(expr2.value.parts) == len(expr1.parts) - 1 and
+                        expr2.value.parts == expr1.parts[1:]):
                         return True
         if isinstance(expr2, ComplexClosure) and isinstance(expr1, Connection):
             # Reverse direction
@@ -933,14 +933,14 @@ class MtcProver(object):
                 expr2.parts[1].form_type == 'VAL'):
                 if (isinstance(expr1.reference, ComplexClosure) and
                     isinstance(expr1.value, ComplexClosure)):
-                    # Check if reference is expr2 with one less leading ♀
-                    if (len(expr1.reference.parts) == len(expr2.parts) - 1 and
-                        expr1.reference.parts == expr2.parts[1:] and
-                        # Check if value is the same as expr2
-                        expr1.value.parts == expr2.parts):
+                    # Check if reference is the same as expr2
+                    if (expr1.reference.parts == expr2.parts and
+                        # Check if value is expr2 with first ♀ removed
+                        len(expr1.value.parts) == len(expr2.parts) - 1 and
+                        expr1.value.parts == expr2.parts[1:]):
                         return True
 
-        # Pattern: ♀♀♀r = ♀♀r → ♀♀♀r - complex value closure pattern
+        # Pattern: ♀♀♀r = ♀♀♀r → ♀♀r - complex value closure pattern
         if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
             # Check if expr1 starts with ♀♀ (two value forms prefix)
             if (len(expr1.parts) >= 2 and
@@ -948,14 +948,14 @@ class MtcProver(object):
                 expr1.parts[0].form_type == 'VAL' and
                 isinstance(expr1.parts[1], ConnectionForm) and
                 expr1.parts[1].form_type == 'VAL'):
-                # The right side should be ♀r → ♀♀r
+                # The right side should be ♀♀r → ♀r
                 if (isinstance(expr2.reference, ComplexClosure) and
                     isinstance(expr2.value, ComplexClosure)):
-                    # Check if reference is expr1 with one less leading ♀
-                    if (len(expr2.reference.parts) == len(expr1.parts) - 1 and
-                        expr2.reference.parts == expr1.parts[1:] and
-                        # Check if value is the same as expr1
-                        expr2.value.parts == expr1.parts):
+                    # Check if reference is the same as expr1
+                    if (expr2.reference.parts == expr1.parts and
+                        # Check if value is expr1 with first ♀ removed
+                        len(expr2.value.parts) == len(expr1.parts) - 1 and
+                        expr2.value.parts == expr1.parts[1:]):
                         return True
         if isinstance(expr2, ComplexClosure) and isinstance(expr1, Connection):
             # Reverse direction
@@ -966,14 +966,14 @@ class MtcProver(object):
                 expr2.parts[1].form_type == 'VAL'):
                 if (isinstance(expr1.reference, ComplexClosure) and
                     isinstance(expr1.value, ComplexClosure)):
-                    # Check if reference is expr2 with one less leading ♀
-                    if (len(expr1.reference.parts) == len(expr2.parts) - 1 and
-                        expr1.reference.parts == expr2.parts[1:] and
-                        # Check if value is the same as expr2
-                        expr1.value.parts == expr2.parts):
+                    # Check if reference is the same as expr2
+                    if (expr1.reference.parts == expr2.parts and
+                        # Check if value is expr2 with first ♀ removed
+                        len(expr1.value.parts) == len(expr2.parts) - 1 and
+                        expr1.value.parts == expr2.parts[1:]):
                         return True
 
-        # Pattern: ♀♀♀r = ♀♀r → ♀♀♀r - even more complex value closure pattern
+        # Pattern: ♀♀♀r = ♀♀♀r → ♀♀r - even more complex value closure pattern
         if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
             # Check if expr1 starts with ♀♀♀ (three value forms prefix)
             if (len(expr1.parts) >= 3 and
@@ -983,14 +983,14 @@ class MtcProver(object):
                 expr1.parts[1].form_type == 'VAL' and
                 isinstance(expr1.parts[2], ConnectionForm) and
                 expr1.parts[2].form_type == 'VAL'):
-                # The right side should be ♀♀r → ♀♀♀r
+                # The right side should be ♀♀♀r → ♀♀r
                 if (isinstance(expr2.reference, ComplexClosure) and
                     isinstance(expr2.value, ComplexClosure)):
-                    # Check if reference is expr1 with one less leading ♀
-                    if (len(expr2.reference.parts) == len(expr1.parts) - 1 and
-                        expr2.reference.parts == expr1.parts[1:] and
-                        # Check if value is the same as expr1
-                        expr2.value.parts == expr1.parts):
+                    # Check if reference is the same as expr1
+                    if (expr2.reference.parts == expr1.parts and
+                        # Check if value is expr1 with first ♀ removed
+                        len(expr2.value.parts) == len(expr1.parts) - 1 and
+                        expr2.value.parts == expr1.parts[1:]):
                         return True
         if isinstance(expr2, ComplexClosure) and isinstance(expr1, Connection):
             # Reverse direction
@@ -1003,11 +1003,11 @@ class MtcProver(object):
                 expr2.parts[2].form_type == 'VAL'):
                 if (isinstance(expr1.reference, ComplexClosure) and
                     isinstance(expr1.value, ComplexClosure)):
-                    # Check if reference is expr2 with one less leading ♀
-                    if (len(expr1.reference.parts) == len(expr2.parts) - 1 and
-                        expr1.reference.parts == expr2.parts[1:] and
-                        # Check if value is the same as expr2
-                        expr1.value.parts == expr2.parts):
+                    # Check if reference is the same as expr2
+                    if (expr1.reference.parts == expr2.parts and
+                        # Check if value is expr2 with first ♀ removed
+                        len(expr1.value.parts) == len(expr2.parts) - 1 and
+                        expr1.value.parts == expr2.parts[1:]):
                         return True
 
         # Pattern: ♀r = ♀r → r - recursive value expansion (symbol case, ♀ is now prefix)
@@ -1247,57 +1247,57 @@ class MtcProver(object):
         return False
     
     def _check_mtc_closure_expansion(self, expr1, expr2):
-        """Check ♀∞♂ = ♀∞ → ♀∞♂ expansion - specific pattern matching"""
-        # Pattern: ♀∞♂ = ♀∞ → ♀∞♂ - recursive closure expansion
+        """Check ♀∞♂ = ♀∞♂ → ∞♂ expansion - specific pattern matching"""
+        # Pattern: ♀∞♂ = ♀∞♂ → ∞♂ - recursive closure expansion
         if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
-            # Check if expr1 is ♀∞♂ pattern and expr2 is ♀∞ → ♀∞♂
+            # Check if expr1 is ♀∞♂ pattern and expr2 is ♀∞♂ → ∞♂
             if (len(expr1.parts) == 3 and str(expr1) == '♀∞♂' and
-                isinstance(expr2.value, ComplexClosure) and
-                str(expr2.value) == '♀∞♂'):
+                isinstance(expr2.reference, ComplexClosure) and
+                str(expr2.reference) == '♀∞♂'):
                 return True
         if isinstance(expr2, ComplexClosure) and isinstance(expr1, Connection):
             # Reverse direction
             if (len(expr2.parts) == 3 and str(expr2) == '♀∞♂' and
-                isinstance(expr1.value, ComplexClosure) and
-                str(expr1.value) == '♀∞♂'):
+                isinstance(expr1.reference, ComplexClosure) and
+                str(expr1.reference) == '♀∞♂'):
                 return True
 
         return False
     
     def _check_nested_closure_rule(self, expr1, expr2):
-        """Check ♀∞♂ = (♀∞ → ∞) → ♀∞♂ nested pattern - specific matching"""
-        # Pattern: ♀∞♂ = (♀∞ → ∞) → ♀∞♂ - complex nested closure
+        """Check ♀∞♂ = ♀∞♂ → (∞ → ∞♂) nested pattern - specific matching"""
+        # Pattern: ♀∞♂ = ♀∞♂ → (∞ → ∞♂) - complex nested closure
         if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
             # Check if expr1 is ♀∞♂ and expr2 has nested structure
             if (len(expr1.parts) == 3 and str(expr1) == '♀∞♂' and
-                isinstance(expr2.reference, Connection) and
-                isinstance(expr2.value, ComplexClosure) and
-                str(expr2.value) == '♀∞♂'):
-                # Check if reference is (♀∞ → ∞) pattern
-                if isinstance(expr2.reference.value, AssociativeRoot):
+                isinstance(expr2.reference, ComplexClosure) and
+                isinstance(expr2.value, Connection) and
+                str(expr2.reference) == '♀∞♂'):
+                # Check if value is (∞ → ∞♂) pattern
+                if isinstance(expr2.value.reference, AssociativeRoot):
                     return True
         if isinstance(expr2, ComplexClosure) and isinstance(expr1, Connection):
             # Reverse direction
             if (len(expr2.parts) == 3 and str(expr2) == '♀∞♂' and
-                isinstance(expr1.reference, Connection) and
-                isinstance(expr1.value, ComplexClosure) and
-                str(expr1.value) == '♀∞♂'):
-                if isinstance(expr1.reference.value, AssociativeRoot):
+                isinstance(expr1.reference, ComplexClosure) and
+                isinstance(expr1.value, Connection) and
+                str(expr1.reference) == '♀∞♂'):
+                if isinstance(expr1.value.reference, AssociativeRoot):
                     return True
 
         return False
     
     def _check_meta_self_closure(self, expr1, expr2):
         """Check ∞♂ = ∞ → ∞♂ meta-theoretical self-closure"""
-        # Pattern: Complex closure equals connection to infinity
+        # Pattern: Complex closure equals connection from infinity
         if (isinstance(expr1, ComplexClosure) and len(expr1.parts) == 2 and
-            isinstance(expr2, Connection) and isinstance(expr2.value, AssociativeRoot)):
+            isinstance(expr2, Connection) and isinstance(expr2.reference, AssociativeRoot)):
             return True
-            
+
         if (isinstance(expr2, ComplexClosure) and len(expr2.parts) == 2 and
-            isinstance(expr1, Connection) and isinstance(expr1.value, AssociativeRoot)):
+            isinstance(expr1, Connection) and isinstance(expr1.reference, AssociativeRoot)):
             return True
-        
+
         return False
     
     def _check_extended_self_closure(self, expr1, expr2):
