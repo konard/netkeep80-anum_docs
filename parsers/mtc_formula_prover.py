@@ -6,11 +6,11 @@ This prover supports the full MTC formula notation and can process multiline .mt
 It implements all MTC axioms and handles complex closure expressions.
 
 Features:
-- Full Unicode MTC formula notation support (♂, ♀, →, ∞, ≡, ≢)
+- Full Unicode MTC formula notation support (♂, ♀, →, ∞, =, ≠)
 - Multiline formula file processing (.mtc files)
 - Complex closure pattern matching (♂∞♀, (♂∞)♀, etc.)
-- Extended self-closure axioms (∞ ≡ ∞→∞→∞...)
-- Merger of recursions theorem (♂♀ ≡ ∞)
+- Extended self-closure axioms (∞ = ∞→∞→∞...)
+- Merger of recursions theorem (♂♀ = ∞)
 - Complete equivalence checking with caching
 
 Usage:
@@ -296,10 +296,10 @@ class MtcLexer(object):
                 return AnumToken('POWER_LOOP', u'^', self.position)
             
             # Unicode operators - CRITICAL FIX
-            if self.current_char == u'≡':
+            if self.current_char == u'=':
                 self.advance()
                 return AnumToken('EQUALS', u'==', self.position)
-            if self.current_char == u'≢':
+            if self.current_char == u'≠':
                 self.advance()
                 return AnumToken('NOT_EQUALS', u'!=', self.position)
             if self.current_char == u'→':
@@ -427,7 +427,7 @@ class MtcParser(object):
             self.eat('ASSOCIATIVE_ROOT')
             return AssociativeRoot()
         elif token.type == 'ABIT_START':
-            # Check if this is the () ≡ ∞ pattern
+            # Check if this is the () = ∞ pattern
             self.eat('ABIT_START')
             if self.current_token.type == 'ABIT_END':
                 self.eat('ABIT_END')
@@ -484,7 +484,7 @@ class MtcParser(object):
     def parse_sequence(self):
         expr = self.parse_power_loop()
         
-        # Handle () ≡ ∞ pattern
+        # Handle () = ∞ pattern
         if (isinstance(expr, AbitStart) and 
             self.current_token.type == 'ABIT_END'):
             self.eat('ABIT_END')
@@ -501,7 +501,7 @@ class MtcParser(object):
                 
             right = self.parse_power_loop()
             
-            # Handle () ≡ ∞ pattern for the right side too
+            # Handle () = ∞ pattern for the right side too
             if (isinstance(right, AbitStart) and 
                 self.current_token.type == 'ABIT_END'):
                 self.eat('ABIT_END')
@@ -563,7 +563,7 @@ class MtcProver(object):
     def _check_equivalence(self, expr1, expr2):
         """Enhanced equivalence checking for complex formulas"""
         
-        # CRITICAL RULE: Merger of Recursions Theorem ♂♀ ≡ ∞
+        # CRITICAL RULE: Merger of Recursions Theorem ♂♀ = ∞
         if self._check_merger_of_recursions(expr1, expr2):
             return True
         
@@ -575,27 +575,27 @@ class MtcProver(object):
         if self._check_power_loop_rules(expr1, expr2):
             return True
         
-        # Rule 1: Complex closure decomposition ♂∞♀ ≡ (♂∞)♀
+        # Rule 1: Complex closure decomposition ♂∞♀ = (♂∞)♀
         if self._check_closure_decomposition_rule(expr1, expr2):
             return True
         
-        # Rule 2: Closure composition r♀ ≡ r → r♀
+        # Rule 2: Closure composition r♀ = r → r♀
         if self._check_closure_composition_rule(expr1, expr2):
             return True
         
-        # Rule 3: MTC closure expansion ♂∞♀ ≡ ♂∞ → ♂∞♀  
+        # Rule 3: MTC closure expansion ♂∞♀ = ♂∞ → ♂∞♀  
         if self._check_mtc_closure_expansion(expr1, expr2):
             return True
         
-        # Rule 4: Complex nested closure ♂∞♀ ≡ (♂∞ → ∞) → ♂∞♀
+        # Rule 4: Complex nested closure ♂∞♀ = (♂∞ → ∞) → ♂∞♀
         if self._check_nested_closure_rule(expr1, expr2):
             return True
         
-        # Rule 5: Meta-theoretical self-closure ♂∞ ≡ ♂∞ → ∞
+        # Rule 5: Meta-theoretical self-closure ♂∞ = ♂∞ → ∞
         if self._check_meta_self_closure(expr1, expr2):
             return True
         
-        # Rule 6: Extended self-closure: ∞ ≡ ∞→∞→∞→... (any chain)
+        # Rule 6: Extended self-closure: ∞ = ∞→∞→∞→... (any chain)
         if self._check_extended_self_closure(expr1, expr2):
             return True
         
@@ -607,7 +607,7 @@ class MtcProver(object):
     
     def _check_power_loop_rules(self, expr1, expr2):
         """Check power loop rules like a^2 == a → a"""
-        # Rule: a^n ≡ a → a → ... → a (n times)
+        # Rule: a^n = a → a → ... → a (n times)
         if isinstance(expr1, PowerLoopExpression):
             # expr1 is a^n, expand it to Connection chain
             expanded_form = self._expand_power_loop(expr1)
@@ -649,7 +649,7 @@ class MtcProver(object):
             return True
             
         # Handle the case where a^n should be equivalent to repeated character patterns
-        # According to the first axiom: rv ≡ r → v, which makes the arrow optional
+        # According to the first axiom: rv = r → v, which makes the arrow optional
         # So a^4 should be equivalent to aaaa
         if isinstance(expr1, PowerLoopExpression) and isinstance(expr2, Symbol):
             if self._is_repeated_char_pattern(expr2.name, expr1.base) and len(expr2.name) == expr1.exponent:
@@ -695,10 +695,10 @@ class MtcProver(object):
             return 0
     
     def _check_merger_of_recursions(self, expr1, expr2):
-        """Check Merger of Recursions Theorem: ♂♀ ≡ ∞
+        """Check Merger of Recursions Theorem: ♂♀ = ∞
         CRITICAL: Only ♂♀ (REF+VAL) equals ∞, NOT ♂∞♀ (REF+INF+VAL)
         """
-        # Unicode pattern: ♂♀ ≡ ∞ (EXACTLY 2 parts: REF + VAL)
+        # Unicode pattern: ♂♀ = ∞ (EXACTLY 2 parts: REF + VAL)
         if (isinstance(expr1, ComplexClosure) and len(expr1.parts) == 2 and
             isinstance(expr1.parts[0], ConnectionForm) and expr1.parts[0].form_type == 'REF' and
             isinstance(expr1.parts[1], ConnectionForm) and expr1.parts[1].form_type == 'VAL' and
@@ -840,21 +840,21 @@ class MtcProver(object):
         return False
     
     def _check_closure_decomposition_rule(self, expr1, expr2):
-        """Check ♂∞♀ ≡ (♂∞)♀ decomposition - specific pattern matching"""
+        """Check ♂∞♀ = (♂∞)♀ decomposition - specific pattern matching"""
         
-        # Pattern 1: ♂∞♀ ≡ (♂∞)♀ where both are ComplexClosures
+        # Pattern 1: ♂∞♀ = (♂∞)♀ where both are ComplexClosures
         if (isinstance(expr1, ComplexClosure) and len(expr1.parts) == 3 and
             isinstance(expr2, ComplexClosure) and len(expr2.parts) == 2):
-            # Check if it's the ♂∞♀ ≡ (♂∞)♀ pattern
+            # Check if it's the ♂∞♀ = (♂∞)♀ pattern
             if (str(expr1) == '♂∞♀' and str(expr2) == '(♂∞)♀'):
                 return True
         if (isinstance(expr2, ComplexClosure) and len(expr2.parts) == 3 and
             isinstance(expr1, ComplexClosure) and len(expr1.parts) == 2):
-            # Check if it's the (♂∞)♀ ≡ ♂∞♀ pattern
+            # Check if it's the (♂∞)♀ = ♂∞♀ pattern
             if (str(expr2) == '♂∞♀' and str(expr1) == '(♂∞)♀'):
                 return True
         
-        # Pattern 2: ♂∞♀ ≡ (♂∞)♀ where right side is parsed as Connection
+        # Pattern 2: ♂∞♀ = (♂∞)♀ where right side is parsed as Connection
         if (isinstance(expr1, ComplexClosure) and len(expr1.parts) == 3 and
             isinstance(expr2, Connection)):
             # Check if expr1 is ♂∞♀ and expr2 represents grouped (♂∞)♀
@@ -870,8 +870,8 @@ class MtcProver(object):
         return False
     
     def _check_closure_composition_rule(self, expr1, expr2):
-        """Check r♀ ≡ r → r♀ composition - specific pattern matching"""
-        # Pattern: r♀♀ ≡ r♀ → r
+        """Check r♀ = r → r♀ composition - specific pattern matching"""
+        # Pattern: r♀♀ = r♀ → r
         if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
             # Check if expr1 ends with ♀ (value form)
             if (len(expr1.parts) >= 1 and 
@@ -902,7 +902,7 @@ class MtcProver(object):
                     expr1.value.parts == expr2.parts):
                     return True
         
-        # Pattern: r♀♀ ≡ r♀ → r♀♀ - recursive value expansion (multi-♀ case)
+        # Pattern: r♀♀ = r♀ → r♀♀ - recursive value expansion (multi-♀ case)
         if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
             # Check if expr1 ends with ♀ (value form) and has multiple ♀
             if (len(expr1.parts) >= 2 and 
@@ -936,7 +936,7 @@ class MtcProver(object):
                         expr1.value.parts == expr2.parts):
                         return True
         
-        # Pattern: r♀♀♀ ≡ r♀♀ → r♀♀♀ - complex value closure pattern
+        # Pattern: r♀♀♀ = r♀♀ → r♀♀♀ - complex value closure pattern
         if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
             # Check if expr1 ends with ♀♀♀ (two value forms)
             if (len(expr1.parts) >= 2 and 
@@ -969,7 +969,7 @@ class MtcProver(object):
                         expr1.value.parts == expr2.parts):
                         return True
                         
-        # Pattern: r♀♀♀ ≡ r♀♀ → r♀♀♀ - even more complex value closure pattern
+        # Pattern: r♀♀♀ = r♀♀ → r♀♀♀ - even more complex value closure pattern
         if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
             # Check if expr1 ends with ♀♀♀ (three value forms)
             if (len(expr1.parts) >= 3 and 
@@ -1006,7 +1006,7 @@ class MtcProver(object):
                         expr1.value.parts == expr2.parts):
                         return True
         
-        # Pattern: r♀ ≡ r → r♀ - recursive value expansion (symbol case)
+        # Pattern: r♀ = r → r♀ - recursive value expansion (symbol case)
         if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
             # Check if expr1 is a recursive value pattern like r♀
             if (len(expr1.parts) == 2 and 
@@ -1039,7 +1039,7 @@ class MtcProver(object):
                     expr1.value.parts[0] == expr2.parts[0]):
                     return True
         
-        # Pattern: ♂v ≡ ♂v → v - basic recursive reference pattern
+        # Pattern: ♂v = ♂v → v - basic recursive reference pattern
         if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
             # Check if expr1 starts with ♂ and has a symbol
             if (len(expr1.parts) == 2 and 
@@ -1072,7 +1072,7 @@ class MtcProver(object):
                     expr1.value == expr2.parts[1]):
                     return True
                     
-        # Pattern: ♂♂v ≡ ♂♂v → ♂v - recursive reference pattern
+        # Pattern: ♂♂v = ♂♂v → ♂v - recursive reference pattern
         if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
             # Check if expr1 starts with ♂♂ and has a symbol
             if (len(expr1.parts) == 3 and 
@@ -1121,7 +1121,7 @@ class MtcProver(object):
                     expr1.value.parts[1] == expr2.parts[2]):
                     return True
                     
-        # Pattern: ♂♂♂v ≡ ♂♂♂v → ♂♂v - complex recursive reference pattern
+        # Pattern: ♂♂♂v = ♂♂♂v → ♂♂v - complex recursive reference pattern
         if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
             # Check if expr1 starts with ♂♂♂ and has a symbol
             if (len(expr1.parts) == 4 and 
@@ -1182,7 +1182,7 @@ class MtcProver(object):
                     expr1.value.parts[2] == expr2.parts[3]):
                     return True
                     
-        # Pattern: ∞♀ ≡ ∞ → ∞♀ - basic value closure pattern
+        # Pattern: ∞♀ = ∞ → ∞♀ - basic value closure pattern
         if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
             # Check if expr1 is ∞♀ pattern
             if (len(expr1.parts) == 2 and 
@@ -1214,8 +1214,8 @@ class MtcProver(object):
         return False
     
     def _check_mtc_closure_expansion(self, expr1, expr2):
-        """Check ♂∞♀ ≡ ♂∞ → ♂∞♀ expansion - specific pattern matching"""
-        # Pattern: ♂∞♀ ≡ ♂∞ → ♂∞♀ - recursive closure expansion
+        """Check ♂∞♀ = ♂∞ → ♂∞♀ expansion - specific pattern matching"""
+        # Pattern: ♂∞♀ = ♂∞ → ♂∞♀ - recursive closure expansion
         if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
             # Check if expr1 is ♂∞♀ pattern and expr2 is ♂∞ → ♂∞♀
             if (len(expr1.parts) == 3 and str(expr1) == '♂∞♀' and
@@ -1232,8 +1232,8 @@ class MtcProver(object):
         return False
     
     def _check_nested_closure_rule(self, expr1, expr2):
-        """Check ♂∞♀ ≡ (♂∞ → ∞) → ♂∞♀ nested pattern - specific matching"""
-        # Pattern: ♂∞♀ ≡ (♂∞ → ∞) → ♂∞♀ - complex nested closure
+        """Check ♂∞♀ = (♂∞ → ∞) → ♂∞♀ nested pattern - specific matching"""
+        # Pattern: ♂∞♀ = (♂∞ → ∞) → ♂∞♀ - complex nested closure
         if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
             # Check if expr1 is ♂∞♀ and expr2 has nested structure
             if (len(expr1.parts) == 3 and str(expr1) == '♂∞♀' and
@@ -1255,7 +1255,7 @@ class MtcProver(object):
         return False
     
     def _check_meta_self_closure(self, expr1, expr2):
-        """Check ♂∞ ≡ ♂∞ → ∞ meta-theoretical self-closure"""
+        """Check ♂∞ = ♂∞ → ∞ meta-theoretical self-closure"""
         # Pattern: Complex closure equals connection to infinity
         if (isinstance(expr1, ComplexClosure) and len(expr1.parts) == 2 and
             isinstance(expr2, Connection) and isinstance(expr2.value, AssociativeRoot)):
@@ -1268,7 +1268,7 @@ class MtcProver(object):
         return False
     
     def _check_extended_self_closure(self, expr1, expr2):
-        """Check extended self-closure: ∞ ≡ ∞→∞→∞→... (any chain)"""
+        """Check extended self-closure: ∞ = ∞→∞→∞→... (any chain)"""
         
         # Case 1: One is ∞ and the other is a chain of ∞→∞→∞...
         if isinstance(expr1, AssociativeRoot) and isinstance(expr2, Connection):
@@ -1307,7 +1307,7 @@ class MtcProver(object):
     
     def _check_basic_axioms(self, expr1, expr2):
         """Basic axioms from original prover"""
-        # Basic existence axiom: rv ≡ r → v
+        # Basic existence axiom: rv = r → v
         if (isinstance(expr1, Symbol) and isinstance(expr2, Connection) and
             isinstance(expr1.name, str) and len(expr1.name) == 2):
             # expr1 is a two-character symbol like "rv"
@@ -1323,7 +1323,7 @@ class MtcProver(object):
             if expr1.reference == r_char and expr1.value == v_char:
                 return True
         
-        # Symbol expansion axiom: aaa ≡ (a → a) → a, aaaa ≡ ((a → a) → a) → a
+        # Symbol expansion axiom: aaa = (a → a) → a, aaaa = ((a → a) → a) → a
         if (isinstance(expr1, Symbol) and isinstance(expr2, Connection) and
             isinstance(expr1.name, str) and len(expr1.name) >= 3):
             # Check if expr1 is a repeated character pattern like "aaa"
@@ -1382,7 +1382,7 @@ class MtcProver(object):
                         isinstance(expr1.value, Symbol) and
                         expr1.value.name == first_char):
                         return True
-        # () ≡ ∞
+        # () = ∞
         if (isinstance(expr1, Connection) and 
             isinstance(expr1.reference, AbitStart) and isinstance(expr1.value, AbitEnd) and
             isinstance(expr2, AssociativeRoot)):
@@ -1511,11 +1511,11 @@ def main():
         prover = MtcProver()
         
         test_formulas = [
-            "() ≡ ∞",
-            "♂♀ ≡ ∞",
-            "♂∞♀ ≡ (♂∞)♀",
-            "∞ ≡ ∞→∞",
-            "∞ ≡ ∞→∞→∞"
+            "() = ∞",
+            "♂♀ = ∞",
+            "♂∞♀ = (♂∞)♀",
+            "∞ = ∞→∞",
+            "∞ = ∞→∞→∞"
         ]
         
         print("Running basic tests:")
