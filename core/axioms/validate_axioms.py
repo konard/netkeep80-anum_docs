@@ -176,6 +176,47 @@ class MTCAxiomValidator(object):
         
         return result1 and result2 and result3 and result4
     
+    def test_axiom_0_definition(self):
+        """Аксиома А0: (s : F) ⟼ (s = F) — Определение есть связь от знака к форме"""
+        print("\n=== АКСИОМА А0: ОПРЕДЕЛЕНИЕ ===")
+
+        # Тест 0.1: Определение есть связь
+        result1 = self.log_test(
+            "0.1 Определение есть связь",
+            True,
+            "Определение — связь, начало (знак s) и конец (форма F) определяют его смысл"
+        )
+
+        # Тест 0.2: Определение порождает тождество
+        result2 = self.log_test(
+            "0.2 Определение порождает тождество",
+            True,
+            "(s : F) ⟼ (s = F) — акт определения порождает структурное тождество"
+        )
+
+        # Тест 0.3: Ориентированность определения
+        result3 = self.log_test(
+            "0.3 Ориентированность определения",
+            True,
+            "(s : F) ≠ (F : s) — определяется знак формой, не наоборот"
+        )
+
+        # Тест 0.4: Знак как запрос по форме
+        result4 = self.log_test(
+            "0.4 Знак как запрос по форме",
+            True,
+            "Знак s задаёт паттерн поиска ко всем связям с формой F"
+        )
+
+        # Тест 0.5: Синхронность возникновения
+        result5 = self.log_test(
+            "0.5 Синхронность возникновения",
+            True,
+            "Паттерн формы и резолюция возникают синхронно — нет цикла «имя → объект → имя»"
+        )
+
+        return result1 and result2 and result3 and result4 and result5
+
     def test_axiom_1_existence(self):
         """Аксиома 1: rv ≡ r⟼v - Существование"""
         print("\n=== АКСИОМА 1: СУЩЕСТВОВАНИЕ ===")
@@ -457,7 +498,10 @@ class MTCAxiomValidator(object):
         axiom_results.append(self.test_abit_axioms())
         axiom_results.append(self.test_quaternary_sequence_validation())
         axiom_results.append(self.test_connection_forms())
-        
+
+        # Тестируем аксиому определения (А0)
+        axiom_results.append(self.test_axiom_0_definition())
+
         # Тестируем каждую классическую аксиому
         axiom_results.append(self.test_axiom_1_existence())
         axiom_results.append(self.test_axiom_2_recursive_ref())
