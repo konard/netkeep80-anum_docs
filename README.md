@@ -21,10 +21,10 @@
 
 | Абит | Форма | Описание |
 |------|-------|----------|
-| `[` | `♂∞` | Начало смысла — самозамкнутое начало акорня |
-| `]` | `∞♀` | Конец смысла — самозамкнутый конец акорня |
-| `1` | `♂∞ ⟼ ∞♀` | Единица смысла — связь от начала к концу |
-| `0` | `∞♀ ⟼ ♂∞` | Нуль смысла — инверсия единицы |
+| `[` | `♀∞` | Начало смысла — самозамкнутое начало акорня |
+| `]` | `∞♂` | Конец смысла — самозамкнутый конец акорня |
+| `1` | `♀∞ ⟼ ∞♂` | Единица смысла — связь от начала к концу |
+| `0` | `∞♂ ⟼ ♀∞` | Нуль смысла — инверсия единицы |
 
 > **Важно:** `∞` (акорень) **не является абитом**. Это мета-конструкт, выражаемый через комбинацию абитов: `[] = ∞`.
 
@@ -43,12 +43,12 @@
 | А2. Конгруэнция | `{(a = c), (b = d)} ⟼ ((a⟼b) = (c⟼d))` | Структурная прозрачность |
 | А3. Связь | `rv : r ⟼ v` | Базовый конструктор |
 | А4. Смысл | `∞ : ∞ ⟼ ∞` | ∞ есть смысл, смысл есть связь смыслов |
-| А5. Самозамыкание начала | `♂v : ♂v ⟼ v` | Безначальность — начало замкнуто на связь |
-| А6. Самозамыкание конца | `r♀ : r ⟼ r♀` | Бесконечность — конец замкнут на связь |
+| А5. Начальность | `v♂ : v ⟼ v♂` | Самозамыкание начала — начало связи определяется через безначальность |
+| А6. Конечность | `♀r : ♀r ⟼ r` | Самозамыкание конца — конец связи определяется через бесконечность |
 | А7. Инверсия | `¬(a ⟼ b) = b ⟼ a` | Обращение направления |
-| А8. Единица смысла (связь) | `(⟼) : ♂∞ ⟼ ∞♀` | Связь или единица смысла (от начала к концу) |
-| А9. Нуль смысла (несвязь) | `(↛) : ∞♀ ⟼ ♂∞` | Несвязь или нуль смысла (от конца к началу) |
-| А10. Абиты | `[ : ♂∞`, `] : ∞♀`, `1 : 1`, `0 : 0` | Четверичная система |
+| А8. Единица смысла (связь) | `(⟼) : ♀∞ ⟼ ∞♂` | Связь или единица смысла (от начала к концу) |
+| А9. Нуль смысла (несвязь) | `(↛) : ∞♂ ⟼ ♀∞` | Несвязь или нуль смысла (от конца к началу) |
+| А10. Абиты | `[ : ♀∞`, `] : ∞♂`, `1 : 1`, `0 : 0` | Четверичная система |
 | А11. Левоассоциативность | `abc = (a ⟼ b) ⟼ c` | Порядок группировки |
 
 Подробное описание аксиом и теорем: [`docs/theory/Метатеория связей.md`](docs/theory/Метатеория%20связей.md)
@@ -195,10 +195,10 @@ This repository contains documentation, tools, and the implementation of the **a
 
 | Abit | Form | Description |
 |------|------|-------------|
-| `[` | `♂∞` | Start of meaning — self-closed start of aroot |
-| `]` | `∞♀` | End of meaning — self-closed end of aroot |
-| `1` | `♂∞ ⟼ ∞♀` | Unit of meaning — link from start to end |
-| `0` | `∞♀ ⟼ ♂∞` | Zero of meaning — inversion of unit |
+| `[` | `♀∞` | Start of meaning — self-closed start of aroot |
+| `]` | `∞♂` | End of meaning — self-closed end of aroot |
+| `1` | `♀∞ ⟼ ∞♂` | Unit of meaning — link from start to end |
+| `0` | `∞♂ ⟼ ♀∞` | Zero of meaning — inversion of unit |
 
 > **Important:** `∞` (aroot) **is not an abit**. It is a meta-theoretical construct expressed through a combination of abits: `[] = ∞`.
 
@@ -217,12 +217,12 @@ MTC is based on 12 axioms (A0–A11):
 | A2. Congruence | `{(a = c), (b = d)} ⟼ ((a⟼b) = (c⟼d))` | Structural transparency |
 | A3. Link | `rv : r ⟼ v` | Basic constructor |
 | A4. Meaning | `∞ : ∞ ⟼ ∞` | ∞ is meaning, meaning is a link of meanings |
-| A5. Start self-closure | `♂v : ♂v ⟼ v` | Beginninglessness — start closed on link |
-| A6. End self-closure | `r♀ : r ⟼ r♀` | Endlessness — end closed on link |
+| A5. Beginninghood | `v♂ : v ⟼ v♂` | Start self-closure — beginning of link defined through beginninglessness |
+| A6. Endhood | `♀r : ♀r ⟼ r` | End self-closure — end of link defined through endlessness |
 | A7. Inversion | `¬(a ⟼ b) = b ⟼ a` | Direction reversal |
-| A8. Unit of meaning (link) | `(⟼) : ♂∞ ⟼ ∞♀` | Link or unit of meaning (from start to end) |
-| A9. Zero of meaning (non-link) | `(↛) : ∞♀ ⟼ ♂∞` | Non-link or zero of meaning (from end to start) |
-| A10. Abits | `[ : ♂∞`, `] : ∞♀`, `1 : 1`, `0 : 0` | Quaternary system |
+| A8. Unit of meaning (link) | `(⟼) : ♀∞ ⟼ ∞♂` | Link or unit of meaning (from start to end) |
+| A9. Zero of meaning (non-link) | `(↛) : ∞♂ ⟼ ♀∞` | Non-link or zero of meaning (from end to start) |
+| A10. Abits | `[ : ♀∞`, `] : ∞♂`, `1 : 1`, `0 : 0` | Quaternary system |
 | A11. Left-associativity | `abc = (a ⟼ b) ⟼ c` | Grouping order |
 
 Full axiom descriptions and theorems: [`docs/theory/Метатеория связей.md`](docs/theory/Метатеория%20связей.md)

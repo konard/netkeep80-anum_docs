@@ -165,10 +165,10 @@ class TestUnicodeToAscii(unittest.TestCase):
         self.assertEqual(unicode_to_ascii('a ¬⟼ b'), 'a !-> b')
 
     def test_symbols(self):
-        result = unicode_to_ascii('♂∞♀')
-        self.assertIn('M', result)
-        self.assertIn('INF', result)
+        result = unicode_to_ascii('♀∞♂')
         self.assertIn('F', result)
+        self.assertIn('INF', result)
+        self.assertIn('M', result)
 
     def test_negation(self):
         self.assertEqual(unicode_to_ascii('¬x'), '!x')
@@ -181,12 +181,12 @@ class TestUnicodeToAscii(unittest.TestCase):
         self.assertEqual(result, 'INF : INF -> INF')
 
     def test_selfclosure(self):
-        result = unicode_to_ascii('♂v : ♂v ⟼ v')
-        self.assertEqual(result, 'M v : M v -> v')
+        result = unicode_to_ascii('v♂ : v ⟼ v♂')
+        self.assertEqual(result, 'v M : v -> v M')
 
     def test_spaces_between_identifiers(self):
-        result = unicode_to_ascii('♂♀')
-        self.assertEqual(result, 'M F')
+        result = unicode_to_ascii('♀♂')
+        self.assertEqual(result, 'F M')
 
 
 class TestAsciiToUnicode(unittest.TestCase):
