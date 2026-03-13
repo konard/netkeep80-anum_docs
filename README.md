@@ -43,8 +43,8 @@
 | А2. Конгруэнция | `{(a = c), (b = d)} ⟼ ((a⟼b) = (c⟼d))` | Структурная прозрачность |
 | А3. Связь | `rv : r ⟼ v` | Базовый конструктор |
 | А4. Смысл | `∞ : ∞ ⟼ ∞` | ∞ есть смысл, смысл есть связь смыслов |
-| А5. Самозамыкание начала | `♂v : ♂v ⟼ v` | Начало замкнуто на связь |
-| А6. Самозамыкание конца | `r♀ : r ⟼ r♀` | Конец замкнут на связь |
+| А5. Самозамыкание начала | `♂v : ♂v ⟼ v` | Безначальность — начало замкнуто на связь |
+| А6. Самозамыкание конца | `r♀ : r ⟼ r♀` | Бесконечность — конец замкнут на связь |
 | А7. Инверсия | `¬(a ⟼ b) = b ⟼ a` | Обращение направления |
 | А8. Единица смысла | `1 : ♂∞ ⟼ ∞♀` | Направленная связь |
 | А9. Нуль смысла | `0 : ¬1` | Инверсия единицы |
@@ -217,8 +217,8 @@ MTC is based on 12 axioms (A0–A11):
 | A2. Congruence | `{(a = c), (b = d)} ⟼ ((a⟼b) = (c⟼d))` | Structural transparency |
 | A3. Link | `rv : r ⟼ v` | Basic constructor |
 | A4. Meaning | `∞ : ∞ ⟼ ∞` | ∞ is meaning, meaning is a link of meanings |
-| A5. Start self-closure | `♂v : ♂v ⟼ v` | Start closed on link |
-| A6. End self-closure | `r♀ : r ⟼ r♀` | End closed on link |
+| A5. Start self-closure | `♂v : ♂v ⟼ v` | Beginninglessness — start closed on link |
+| A6. End self-closure | `r♀ : r ⟼ r♀` | Endlessness — end closed on link |
 | A7. Inversion | `¬(a ⟼ b) = b ⟼ a` | Direction reversal |
 | A8. Unit of meaning | `1 : ♂∞ ⟼ ∞♀` | Directed link |
 | A9. Zero of meaning | `0 : ¬1` | Inversion of unit |

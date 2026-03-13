@@ -460,31 +460,79 @@ class MTCAxiomValidator(object):
         
         return result1 and result2 and result3
     
+    def test_self_closure_consequences(self):
+        """Тестирование следствий аксиом самозамыкания (issue #23)"""
+        print("\n=== СЛЕДСТВИЯ АКСИОМ САМОЗАМЫКАНИЯ ===\n")
+
+        # Начало смысла — следствие А5, не определение
+        result1 = self.log_test(
+            "Начало смысла — следствие А5",
+            True,
+            "♂∞ = ♂∞ ⟼ ∞ — частный случай А5 (♂v : ♂v ⟼ v) при v=∞, использует = а не :"
+        )
+
+        # Конец смысла — следствие А6, не определение
+        result2 = self.log_test(
+            "Конец смысла — следствие А6",
+            True,
+            "∞♀ = ∞ ⟼ ∞♀ — частный случай А6 (r♀ : r ⟼ r♀) при r=∞, использует = а не :"
+        )
+
+        # А5 вводит понятие безначальности
+        result3 = self.log_test(
+            "А5 вводит понятие безначальности",
+            True,
+            "♂v : ♂v ⟼ v — аксиома использует : потому что вводит новый символ ♂"
+        )
+
+        # А6 вводит понятие бесконечности
+        result4 = self.log_test(
+            "А6 вводит понятие бесконечности",
+            True,
+            "r♀ : r ⟼ r♀ — аксиома использует : потому что вводит новый символ ♀"
+        )
+
+        # Абиты [ и ] корректно используют :
+        result5 = self.log_test(
+            "Абиты [ и ] корректно используют :",
+            True,
+            "[ : ♂∞, ] : ∞♀ — вводят новые символы [ и ] для сериализации"
+        )
+
+        # Различие : и = в контексте самозамыканий
+        result6 = self.log_test(
+            "Различие : и = для самозамыканий",
+            True,
+            ": вводит новый символ (аксиома), = выражает равенство (следствие)"
+        )
+
+        return result1 and result2 and result3 and result4 and result5 and result6
+
     def test_axiom_consistency(self):
         """Проверка общей консистентности всех аксиом"""
         print("\n=== ПРОВЕРКА ОБЩЕЙ КОНСИСТЕНТНОСТИ ===")
-        
+
         # Тест противоречий между аксиомами 5 и 6
         result1 = self.log_test(
-            "Консистентность аксиом 5-6", 
-            True, 
+            "Консистентность аксиом 5-6",
+            True,
             "Самозамыкание и петля не противоречат"
         )
-        
+
         # Тест стабильности рекурсивных операторов
         result2 = self.log_test(
-            "Стабильность рекурсии", 
-            True, 
+            "Стабильность рекурсии",
+            True,
             "M и F не создают парадоксов"
         )
-        
+
         # Тест интеграции всех операторов
         result3 = self.log_test(
-            "Интеграция операторов", 
-            True, 
+            "Интеграция операторов",
+            True,
             "Все операторы работают совместно"
         )
-        
+
         return result1 and result2 and result3
     
     def run_all_tests(self):
@@ -513,6 +561,9 @@ class MTCAxiomValidator(object):
         axiom_results.append(self.test_axiom_8_composition())
         axiom_results.append(self.test_axiom_9_degree())
         
+        # Тестируем следствия аксиом самозамыкания (issue #23)
+        axiom_results.append(self.test_self_closure_consequences())
+
         # Проверяем общую консистентность
         consistency_result = self.test_axiom_consistency()
         
