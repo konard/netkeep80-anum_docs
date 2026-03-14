@@ -181,8 +181,8 @@ class TestUnicodeToAscii(unittest.TestCase):
         self.assertEqual(result, 'INF : INF -> INF')
 
     def test_selfclosure(self):
-        result = unicode_to_ascii('♂v : v ⟼ ♂v')
-        self.assertEqual(result, 'M v : v -> M v')
+        result = unicode_to_ascii('♂v : ♂v ⟼ v')
+        self.assertEqual(result, 'M v : M v -> v')
 
     def test_spaces_between_identifiers(self):
         result = unicode_to_ascii('♂♀')
