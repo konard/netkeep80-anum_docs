@@ -43,8 +43,8 @@
 | А2. Конгруэнция | `{(a = c), (b = d)} ⟼ ((a⟼b) = (c⟼d))` | Структурная прозрачность |
 | А3. Связь | `rv : r ⟼ v` | Базовый конструктор |
 | А4. Смысл | `∞ : ∞ ⟼ ∞` | ∞ есть смысл, смысл есть связь смыслов |
-| А5. Начальность | `♂v : ♂v ⟼ v` | Самозамыкание начала — начало связи определяется через безначальность |
-| А6. Конечность | `r♀ : r ⟼ r♀` | Самозамыкание конца — конец связи определяется через бесконечность |
+| А5. Конечность | `♂v : ♂v ⟼ v` | Самозамыкание начала — если нет начала, то остаётся только конец |
+| А6. Начальность | `r♀ : r ⟼ r♀` | Самозамыкание конца — если нет конца, то остаётся только начало |
 | А7. Инверсия | `¬(a ⟼ b) = b ⟼ a` | Обращение направления |
 | А8. Единица смысла (связь) | `(⟼) : ∞♀ ⟼ ♂∞` | Связь или единица смысла (от начала к концу) |
 | А9. Нуль смысла (несвязь) | `(↛) : ♂∞ ⟼ ∞♀` | Несвязь или нуль смысла (от конца к началу) |
@@ -217,8 +217,8 @@ MTC is based on 12 axioms (A0–A11):
 | A2. Congruence | `{(a = c), (b = d)} ⟼ ((a⟼b) = (c⟼d))` | Structural transparency |
 | A3. Link | `rv : r ⟼ v` | Basic constructor |
 | A4. Meaning | `∞ : ∞ ⟼ ∞` | ∞ is meaning, meaning is a link of meanings |
-| A5. Beginninghood | `♂v : ♂v ⟼ v` | Start self-closure — beginning of link defined through beginninglessness |
-| A6. Endhood | `r♀ : r ⟼ r♀` | End self-closure — end of link defined through endlessness |
+| A5. Endhood | `♂v : ♂v ⟼ v` | Start self-closure — if there is no beginning, only the end remains |
+| A6. Beginninghood | `r♀ : r ⟼ r♀` | End self-closure — if there is no end, only the beginning remains |
 | A7. Inversion | `¬(a ⟼ b) = b ⟼ a` | Direction reversal |
 | A8. Unit of meaning (link) | `(⟼) : ∞♀ ⟼ ♂∞` | Link or unit of meaning (from start to end) |
 | A9. Zero of meaning (non-link) | `(↛) : ♂∞ ⟼ ∞♀` | Non-link or zero of meaning (from end to start) |
