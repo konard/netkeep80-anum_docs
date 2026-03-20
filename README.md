@@ -213,7 +213,7 @@ An **anumber** (associative number) is a finite sequence of abits serving as a u
 
 ### Axiom System
 
-MTC is based on 12 axioms (A0–A11):
+MTC is based on 17 axioms (A0–A16), the core of which (A4–A7) forms a self-closed system of logical equations:
 
 | Axiom | Formula | Description |
 |-------|---------|-------------|
@@ -221,14 +221,19 @@ MTC is based on 12 axioms (A0–A11):
 | A1. Identity | `x = x` | Structural indistinguishability |
 | A2. Congruence | `{(a = c), (b = d)} ⟼ ((a⟼b) = (c⟼d))` | Structural transparency |
 | A3. Link | `rv : r ⟼ v` | Basic constructor |
-| A4. Meaning | `∞ : ∞ ⟼ ∞` | ∞ is meaning, meaning is a link of meanings |
-| A5. Endhood | `♂v : ♂v ⟼ v` | Start self-closure — if there is no beginning, only the end remains |
-| A6. Beginninghood | `r♀ : r ⟼ r♀` | End self-closure — if there is no end, only the beginning remains |
-| A7. Inversion | `¬(a ⟼ b) = b ⟼ a` | Direction reversal |
-| A8. Unit of meaning (link) | `(⟼) : ∞♀ ⟼ ♂∞` | Link or unit of meaning (from start to end) |
-| A9. Zero of meaning (non-link) | `(↛) : ♂∞ ⟼ ∞♀` | Non-link or zero of meaning (from end to start) |
-| A10. Abits | `[ : ∞♀`, `] : ♂∞`, `1 : 1`, `0 : 0` | Quaternary system |
-| A11. Left-associativity | `abc = (a ⟼ b) ⟼ c` | Grouping order |
+| A4. Meaning | `∞ : ∞ ⟼ ∞` | Meaning is a complete self-closure of a link |
+| A5. Start of meaning | `∞♀ : [⟼]♀` | Start of meaning is defined by the start of the link |
+| A6. End of meaning | `♂∞ : ♂[⟼]` | End of meaning is defined by the end of the link |
+| A7. Link (unit of meaning) | `⟼ : ∞♀ ⟼ ♂∞` | Link is defined by start of meaning connected to end of meaning |
+| A8. Unit of meaning | `1 : [⟼]` | Abit of unit of meaning is defined by the link |
+| A9. Non-link | `↛ : ¬[⟼]` | Non-link is defined by the inversion of the link |
+| A10. Zero of meaning | `0 : [↛]` | Abit of zero of meaning is defined by the non-link |
+| A11. Start of link | `[⟼]♀ : [⟼] ⟼ [⟼]♀` | Start of link |
+| A12. End of link | `♂[⟼] : ♂[⟼] ⟼ [⟼]` | End of link |
+| A13. Inversion of link | `¬[⟼] : ♂[⟼] ⟼ [⟼]♀` | Inversion of link |
+| A14. Inversion | `¬(a ⟼ b) = b ⟼ a` | Direction reversal |
+| A15. Abits | `[ : ∞♀`, `] : ♂∞` | Serialization abits |
+| A16. Left-associativity | `abc = (a ⟼ b) ⟼ c` | Grouping order |
 
 Full axiom descriptions and theorems: [`docs/theory/Метатеория связей.md`](docs/theory/Метатеория%20связей.md)
 

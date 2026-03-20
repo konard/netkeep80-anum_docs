@@ -40,7 +40,7 @@ if os.name == 'nt':
     try:
         sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
         sys.stderr = codecs.getwriter('utf-8')(sys.stderr.detach())
-    except:
+    except Exception:
         pass
 
 # Base classes for MTC expressions
@@ -299,10 +299,7 @@ class MtcLexer(object):
                 self.advance()
                 return AnumToken('POWER_LOOP', u'^', self.position)
             
-            # Unicode operators - CRITICAL FIX
-            if self.current_char == u'=':
-                self.advance()
-                return AnumToken('EQUALS', u'==', self.position)
+            # Unicode operators
             if self.current_char == u'≠':
                 self.advance()
                 return AnumToken('NOT_EQUALS', u'!=', self.position)
@@ -1440,7 +1437,7 @@ class MtcProver(object):
         # Abit identity
         if isinstance(expr1, (AbitStart, AbitEnd, AbitConnect, AbitDisconnect)) and \
            isinstance(expr2, (AbitStart, AbitEnd, AbitConnect, AbitDisconnect)):
-            return type(expr1) == type(expr2)
+            return type(expr1) is type(expr2)
         
         return False
     
