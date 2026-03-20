@@ -870,142 +870,59 @@ class MtcProver(object):
 
         return False
     
+    def _check_val_closure_composition(self, closure, conn):
+        """Check r♀...♀ = r♀...♀ → r♀...♀ (with one less ♀) pattern.
+        Works for any number of trailing VAL forms."""
+        if (len(closure.parts) >= 1 and
+            isinstance(closure.parts[-1], ConnectionForm) and
+            closure.parts[-1].form_type == 'VAL'):
+            if (isinstance(conn.reference, ComplexClosure) and
+                isinstance(conn.value, ComplexClosure) and
+                conn.reference.parts == closure.parts and
+                len(conn.value.parts) == len(closure.parts) - 1 and
+                conn.value.parts == closure.parts[:-1]):
+                return True
+        return False
+
+    def _check_ref_closure_composition(self, closure, conn):
+        """Check ♂...♂v = ♂...(one less)v → ♂...♂v pattern.
+        Works for any number of leading REF forms + trailing Symbol."""
+        if len(closure.parts) < 2:
+            return False
+        # Check all leading parts are REF forms and last is Symbol
+        ref_count = 0
+        for part in closure.parts[:-1]:
+            if isinstance(part, ConnectionForm) and part.form_type == 'REF':
+                ref_count += 1
+            else:
+                break
+        if ref_count == 0 or ref_count != len(closure.parts) - 1:
+            return False
+        if not isinstance(closure.parts[-1], Symbol):
+            return False
+        sym = closure.parts[-1]
+        # For ♂v (single REF): expect v → ♂v (reference=Symbol, value=closure)
+        if ref_count == 1:
+            return (isinstance(conn.reference, Symbol) and
+                    isinstance(conn.value, ComplexClosure) and
+                    conn.reference == sym and
+                    conn.value.parts == closure.parts)
+        # For ♂♂...♂v (N REFs): expect ♂...(N-1)v → ♂...♂v
+        expected_ref_parts = closure.parts[1:]  # one less REF + same Symbol
+        return (isinstance(conn.reference, ComplexClosure) and
+                isinstance(conn.value, ComplexClosure) and
+                conn.reference.parts == list(expected_ref_parts) and
+                conn.value.parts == list(closure.parts))
+
     def _check_closure_composition_rule(self, expr1, expr2):
         """Check r♀ = r♀ → r composition - specific pattern matching"""
-        # Pattern: r♀♀ = r♀♀ → r♀
+        # General pattern: r♀...♀ = r♀...♀ → r♀...(one less ♀)
         if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
-            # Check if expr1 ends with ♀ (value form, now postfix)
-            if (len(expr1.parts) >= 1 and
-                isinstance(expr1.parts[-1], ConnectionForm) and
-                expr1.parts[-1].form_type == 'VAL'):
-                # Check if expr2 is the expanded form: x♀ → x
-                # where reference is expr1 (the full form)
-                # and value is expr1 with last ♀ removed
-                if (isinstance(expr2.reference, ComplexClosure) and
-                    isinstance(expr2.value, ComplexClosure) and
-                    # Check if reference is the same as expr1
-                    expr2.reference.parts == expr1.parts and
-                    # Check if value is expr1 with last ♀ removed
-                    len(expr2.value.parts) == len(expr1.parts) - 1 and
-                    expr2.value.parts == expr1.parts[:-1]):
-                    return True
+            if self._check_val_closure_composition(expr1, expr2):
+                return True
         if isinstance(expr2, ComplexClosure) and isinstance(expr1, Connection):
-            # Reverse direction
-            if (len(expr2.parts) >= 1 and
-                isinstance(expr2.parts[-1], ConnectionForm) and
-                expr2.parts[-1].form_type == 'VAL'):
-                if (isinstance(expr1.reference, ComplexClosure) and
-                    isinstance(expr1.value, ComplexClosure) and
-                    # Check if reference is the same as expr2
-                    expr1.reference.parts == expr2.parts and
-                    # Check if value is expr2 with last ♀ removed
-                    len(expr1.value.parts) == len(expr2.parts) - 1 and
-                    expr1.value.parts == expr2.parts[:-1]):
-                    return True
-
-        # Pattern: r♀♀ = r♀♀ → r♀ - recursive value expansion (multi-♀ case)
-        if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
-            # Check if expr1 ends with ♀♀ (value form, postfix) and has multiple ♀
-            if (len(expr1.parts) >= 2 and
-                isinstance(expr1.parts[-1], ConnectionForm) and
-                expr1.parts[-1].form_type == 'VAL' and
-                isinstance(expr1.parts[-2], ConnectionForm) and
-                expr1.parts[-2].form_type == 'VAL'):
-                # This is a pattern like r♀♀ where we have multiple trailing ♀
-                # The right side should be r♀♀ → r♀
-                if (isinstance(expr2.reference, ComplexClosure) and
-                    isinstance(expr2.value, ComplexClosure)):
-                    # Check if reference is the same as expr1
-                    if (expr2.reference.parts == expr1.parts and
-                        # Check if value is expr1 with last ♀ removed
-                        len(expr2.value.parts) == len(expr1.parts) - 1 and
-                        expr2.value.parts == expr1.parts[:-1]):
-                        return True
-        if isinstance(expr2, ComplexClosure) and isinstance(expr1, Connection):
-            # Reverse direction
-            if (len(expr2.parts) >= 2 and
-                isinstance(expr2.parts[-1], ConnectionForm) and
-                expr2.parts[-1].form_type == 'VAL' and
-                isinstance(expr2.parts[-2], ConnectionForm) and
-                expr2.parts[-2].form_type == 'VAL'):
-                if (isinstance(expr1.reference, ComplexClosure) and
-                    isinstance(expr1.value, ComplexClosure)):
-                    # Check if reference is the same as expr2
-                    if (expr1.reference.parts == expr2.parts and
-                        # Check if value is expr2 with last ♀ removed
-                        len(expr1.value.parts) == len(expr2.parts) - 1 and
-                        expr1.value.parts == expr2.parts[:-1]):
-                        return True
-
-        # Pattern: r♀♀♀ = r♀♀♀ → r♀♀ - complex value closure pattern
-        if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
-            # Check if expr1 ends with ♀♀ (two value forms postfix)
-            if (len(expr1.parts) >= 2 and
-                isinstance(expr1.parts[-1], ConnectionForm) and
-                expr1.parts[-1].form_type == 'VAL' and
-                isinstance(expr1.parts[-2], ConnectionForm) and
-                expr1.parts[-2].form_type == 'VAL'):
-                # The right side should be r♀♀ → r♀
-                if (isinstance(expr2.reference, ComplexClosure) and
-                    isinstance(expr2.value, ComplexClosure)):
-                    # Check if reference is the same as expr1
-                    if (expr2.reference.parts == expr1.parts and
-                        # Check if value is expr1 with last ♀ removed
-                        len(expr2.value.parts) == len(expr1.parts) - 1 and
-                        expr2.value.parts == expr1.parts[:-1]):
-                        return True
-        if isinstance(expr2, ComplexClosure) and isinstance(expr1, Connection):
-            # Reverse direction
-            if (len(expr2.parts) >= 2 and
-                isinstance(expr2.parts[-1], ConnectionForm) and
-                expr2.parts[-1].form_type == 'VAL' and
-                isinstance(expr2.parts[-2], ConnectionForm) and
-                expr2.parts[-2].form_type == 'VAL'):
-                if (isinstance(expr1.reference, ComplexClosure) and
-                    isinstance(expr1.value, ComplexClosure)):
-                    # Check if reference is the same as expr2
-                    if (expr1.reference.parts == expr2.parts and
-                        # Check if value is expr2 with last ♀ removed
-                        len(expr1.value.parts) == len(expr2.parts) - 1 and
-                        expr1.value.parts == expr2.parts[:-1]):
-                        return True
-
-        # Pattern: r♀♀♀ = r♀♀♀ → r♀♀ - even more complex value closure pattern
-        if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
-            # Check if expr1 ends with ♀♀♀ (three value forms postfix)
-            if (len(expr1.parts) >= 3 and
-                isinstance(expr1.parts[-1], ConnectionForm) and
-                expr1.parts[-1].form_type == 'VAL' and
-                isinstance(expr1.parts[-2], ConnectionForm) and
-                expr1.parts[-2].form_type == 'VAL' and
-                isinstance(expr1.parts[-3], ConnectionForm) and
-                expr1.parts[-3].form_type == 'VAL'):
-                # The right side should be r♀♀♀ → r♀♀
-                if (isinstance(expr2.reference, ComplexClosure) and
-                    isinstance(expr2.value, ComplexClosure)):
-                    # Check if reference is the same as expr1
-                    if (expr2.reference.parts == expr1.parts and
-                        # Check if value is expr1 with last ♀ removed
-                        len(expr2.value.parts) == len(expr1.parts) - 1 and
-                        expr2.value.parts == expr1.parts[:-1]):
-                        return True
-        if isinstance(expr2, ComplexClosure) and isinstance(expr1, Connection):
-            # Reverse direction
-            if (len(expr2.parts) >= 3 and
-                isinstance(expr2.parts[-1], ConnectionForm) and
-                expr2.parts[-1].form_type == 'VAL' and
-                isinstance(expr2.parts[-2], ConnectionForm) and
-                expr2.parts[-2].form_type == 'VAL' and
-                isinstance(expr2.parts[-3], ConnectionForm) and
-                expr2.parts[-3].form_type == 'VAL'):
-                if (isinstance(expr1.reference, ComplexClosure) and
-                    isinstance(expr1.value, ComplexClosure)):
-                    # Check if reference is the same as expr2
-                    if (expr1.reference.parts == expr2.parts and
-                        # Check if value is expr2 with last ♀ removed
-                        len(expr1.value.parts) == len(expr2.parts) - 1 and
-                        expr1.value.parts == expr2.parts[:-1]):
-                        return True
+            if self._check_val_closure_composition(expr2, expr1):
+                return True
 
         # Pattern: r♀ = r♀ → r - recursive value expansion (symbol case, ♀ is now postfix)
         if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
@@ -1040,148 +957,13 @@ class MtcProver(object):
                     expr1.value == expr2.parts[0]):
                     return True
 
-        # Pattern: ♂v = v → ♂v - basic recursive reference pattern (♂ is now prefix)
+        # Pattern: ♂...♂v = ♂...(one less ♂)v → ♂...♂v - generalized REF closure
         if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
-            # Check if expr1 starts with ♂ and has a symbol
-            if (len(expr1.parts) == 2 and
-                isinstance(expr1.parts[0], ConnectionForm) and
-                expr1.parts[0].form_type == 'REF' and
-                isinstance(expr1.parts[1], Symbol)):
-                # Check if expr2 is the expanded form v → ♂v
-                if (isinstance(expr2.reference, Symbol) and
-                    isinstance(expr2.value, ComplexClosure) and
-                    len(expr2.value.parts) == 2 and
-                    isinstance(expr2.value.parts[0], ConnectionForm) and
-                    expr2.value.parts[0].form_type == 'REF' and
-                    isinstance(expr2.value.parts[1], Symbol) and
-                    expr2.reference == expr1.parts[1] and
-                    expr2.value.parts[1] == expr1.parts[1]):
-                    return True
+            if self._check_ref_closure_composition(expr1, expr2):
+                return True
         if isinstance(expr2, ComplexClosure) and isinstance(expr1, Connection):
-            # Reverse direction
-            if (len(expr2.parts) == 2 and
-                isinstance(expr2.parts[0], ConnectionForm) and
-                expr2.parts[0].form_type == 'REF' and
-                isinstance(expr2.parts[1], Symbol)):
-                if (isinstance(expr1.reference, Symbol) and
-                    isinstance(expr1.value, ComplexClosure) and
-                    len(expr1.value.parts) == 2 and
-                    isinstance(expr1.value.parts[0], ConnectionForm) and
-                    expr1.value.parts[0].form_type == 'REF' and
-                    isinstance(expr1.value.parts[1], Symbol) and
-                    expr1.reference == expr2.parts[1] and
-                    expr1.value.parts[1] == expr2.parts[1]):
-                    return True
-
-        # Pattern: ♂♂v = ♂v → ♂♂v - recursive reference pattern (♂ is now prefix)
-        if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
-            # Check if expr1 starts with ♂♂ and has a symbol
-            if (len(expr1.parts) == 3 and
-                isinstance(expr1.parts[0], ConnectionForm) and
-                expr1.parts[0].form_type == 'REF' and
-                isinstance(expr1.parts[1], ConnectionForm) and
-                expr1.parts[1].form_type == 'REF' and
-                isinstance(expr1.parts[2], Symbol)):
-                # Check if expr2 is the expanded form ♂v → ♂♂v
-                if (isinstance(expr2.reference, ComplexClosure) and
-                    isinstance(expr2.value, ComplexClosure) and
-                    len(expr2.reference.parts) == 2 and
-                    isinstance(expr2.reference.parts[0], ConnectionForm) and
-                    expr2.reference.parts[0].form_type == 'REF' and
-                    isinstance(expr2.reference.parts[1], Symbol) and
-                    expr2.reference.parts[1] == expr1.parts[2] and
-                    len(expr2.value.parts) == 3 and
-                    isinstance(expr2.value.parts[0], ConnectionForm) and
-                    expr2.value.parts[0].form_type == 'REF' and
-                    isinstance(expr2.value.parts[1], ConnectionForm) and
-                    expr2.value.parts[1].form_type == 'REF' and
-                    isinstance(expr2.value.parts[2], Symbol) and
-                    expr2.value.parts[2] == expr1.parts[2]):
-                    return True
-        if isinstance(expr2, ComplexClosure) and isinstance(expr1, Connection):
-            # Reverse direction
-            if (len(expr2.parts) == 3 and
-                isinstance(expr2.parts[0], ConnectionForm) and
-                expr2.parts[0].form_type == 'REF' and
-                isinstance(expr2.parts[1], ConnectionForm) and
-                expr2.parts[1].form_type == 'REF' and
-                isinstance(expr2.parts[2], Symbol)):
-                if (isinstance(expr1.reference, ComplexClosure) and
-                    isinstance(expr1.value, ComplexClosure) and
-                    len(expr1.reference.parts) == 2 and
-                    isinstance(expr1.reference.parts[0], ConnectionForm) and
-                    expr1.reference.parts[0].form_type == 'REF' and
-                    isinstance(expr1.reference.parts[1], Symbol) and
-                    expr1.reference.parts[1] == expr2.parts[2] and
-                    len(expr1.value.parts) == 3 and
-                    isinstance(expr1.value.parts[0], ConnectionForm) and
-                    expr1.value.parts[0].form_type == 'REF' and
-                    isinstance(expr1.value.parts[1], ConnectionForm) and
-                    expr1.value.parts[1].form_type == 'REF' and
-                    isinstance(expr1.value.parts[2], Symbol) and
-                    expr1.value.parts[2] == expr2.parts[2]):
-                    return True
-
-        # Pattern: ♂♂♂v = ♂♂v → ♂♂♂v - complex recursive reference pattern (♂ is now prefix)
-        if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
-            # Check if expr1 starts with ♂♂♂ and has a symbol
-            if (len(expr1.parts) == 4 and
-                isinstance(expr1.parts[0], ConnectionForm) and
-                expr1.parts[0].form_type == 'REF' and
-                isinstance(expr1.parts[1], ConnectionForm) and
-                expr1.parts[1].form_type == 'REF' and
-                isinstance(expr1.parts[2], ConnectionForm) and
-                expr1.parts[2].form_type == 'REF' and
-                isinstance(expr1.parts[3], Symbol)):
-                # Check if expr2 is the expanded form ♂♂v → ♂♂♂v
-                if (isinstance(expr2.reference, ComplexClosure) and
-                    isinstance(expr2.value, ComplexClosure) and
-                    len(expr2.reference.parts) == 3 and
-                    isinstance(expr2.reference.parts[0], ConnectionForm) and
-                    expr2.reference.parts[0].form_type == 'REF' and
-                    isinstance(expr2.reference.parts[1], ConnectionForm) and
-                    expr2.reference.parts[1].form_type == 'REF' and
-                    isinstance(expr2.reference.parts[2], Symbol) and
-                    expr2.reference.parts[2] == expr1.parts[3] and
-                    len(expr2.value.parts) == 4 and
-                    isinstance(expr2.value.parts[0], ConnectionForm) and
-                    expr2.value.parts[0].form_type == 'REF' and
-                    isinstance(expr2.value.parts[1], ConnectionForm) and
-                    expr2.value.parts[1].form_type == 'REF' and
-                    isinstance(expr2.value.parts[2], ConnectionForm) and
-                    expr2.value.parts[2].form_type == 'REF' and
-                    isinstance(expr2.value.parts[3], Symbol) and
-                    expr2.value.parts[3] == expr1.parts[3]):
-                    return True
-        if isinstance(expr2, ComplexClosure) and isinstance(expr1, Connection):
-            # Reverse direction
-            if (len(expr2.parts) == 4 and
-                isinstance(expr2.parts[0], ConnectionForm) and
-                expr2.parts[0].form_type == 'REF' and
-                isinstance(expr2.parts[1], ConnectionForm) and
-                expr2.parts[1].form_type == 'REF' and
-                isinstance(expr2.parts[2], ConnectionForm) and
-                expr2.parts[2].form_type == 'REF' and
-                isinstance(expr2.parts[3], Symbol)):
-                if (isinstance(expr1.reference, ComplexClosure) and
-                    isinstance(expr1.value, ComplexClosure) and
-                    len(expr1.reference.parts) == 3 and
-                    isinstance(expr1.reference.parts[0], ConnectionForm) and
-                    expr1.reference.parts[0].form_type == 'REF' and
-                    isinstance(expr1.reference.parts[1], ConnectionForm) and
-                    expr1.reference.parts[1].form_type == 'REF' and
-                    isinstance(expr1.reference.parts[2], Symbol) and
-                    expr1.reference.parts[2] == expr2.parts[3] and
-                    len(expr1.value.parts) == 4 and
-                    isinstance(expr1.value.parts[0], ConnectionForm) and
-                    expr1.value.parts[0].form_type == 'REF' and
-                    isinstance(expr1.value.parts[1], ConnectionForm) and
-                    expr1.value.parts[1].form_type == 'REF' and
-                    isinstance(expr1.value.parts[2], ConnectionForm) and
-                    expr1.value.parts[2].form_type == 'REF' and
-                    isinstance(expr1.value.parts[3], Symbol) and
-                    expr1.value.parts[3] == expr2.parts[3]):
-                    return True
+            if self._check_ref_closure_composition(expr2, expr1):
+                return True
 
         # Pattern: ♂∞ = ∞ → ♂∞ - basic reference closure pattern (♂ is now prefix)
         if isinstance(expr1, ComplexClosure) and isinstance(expr2, Connection):
