@@ -87,7 +87,7 @@ class AbitNotation:
             if char.isspace():
                 continue  # Пропускаем пробелы
             
-            if char == '∞' or char == 'INF':
+            if char == '∞':
                 invalid_chars.append(f"'{char}' (∞ НЕ является абитом!)")
             elif not self.is_abit_symbol(char):
                 invalid_chars.append(f"'{char}' (не является абитом)")
@@ -222,7 +222,6 @@ class ExtendedAnumLexer:
     
     def read_word(self):
         """Чтение слова (для word-based абитов)"""
-        start_pos = self.position
         result = ''
         
         while (self.current_char and 

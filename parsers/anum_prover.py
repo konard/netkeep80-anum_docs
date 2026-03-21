@@ -34,7 +34,7 @@ if os.name == 'nt':
     try:
         sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
         sys.stderr = codecs.getwriter('utf-8')(sys.stderr.detach())
-    except:
+    except Exception:
         pass
 
 # Base classes (standalone version)
@@ -222,10 +222,7 @@ class EnhancedAnumLexer(object):
                     self.advance()
                     return AnumToken('NOT_EQUALS', '!=', self.position)
 
-            # Unicode operators - CRITICAL FIX
-            if self.current_char == '=':
-                self.advance()
-                return AnumToken('EQUALS', '==', self.position)
+            # Unicode operators
             if self.current_char == '≠':
                 self.advance()
                 return AnumToken('NOT_EQUALS', '!=', self.position)
@@ -572,9 +569,9 @@ class EnhancedAnumProver(object):
 
     def _check_meta_self_closure(self, expr1, expr2):
         """Check ♂∞ = ∞ → ♂∞ meta-theoretical self-closure"""
-        # Pattern: Complex closure equals connection to infinity
+        # Pattern: Complex closure equals connection from infinity
         if (isinstance(expr1, ComplexClosure) and len(expr1.parts) == 2 and
-            isinstance(expr2, Connection) and isinstance(expr2.value, AssociativeRoot)):
+            isinstance(expr2, Connection) and isinstance(expr2.reference, AssociativeRoot)):
             return True
 
         if (isinstance(expr2, ComplexClosure) and len(expr2.parts) == 2 and
@@ -623,7 +620,7 @@ class EnhancedAnumProver(object):
         # Abit identity
         if isinstance(expr1, (AbitStart, AbitEnd, AbitConnect, AbitDisconnect)) and \
            isinstance(expr2, (AbitStart, AbitEnd, AbitConnect, AbitDisconnect)):
-            return type(expr1) == type(expr2)
+            return type(expr1) is type(expr2)
 
         return False
 

@@ -136,7 +136,7 @@ class MTCAxiomValidator(object):
         
         if invalid_symbols:
             if '∞' in invalid_symbols:
-                return False, f"∞ НЕ является абитом и не может быть в четверичной последовательности"
+                return False, "∞ НЕ является абитом и не может быть в четверичной последовательности"
             else:
                 return False, f"Невалидные символы: {invalid_symbols}"
         

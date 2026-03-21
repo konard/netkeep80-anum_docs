@@ -7,10 +7,20 @@ Complex Anum Parser for MTC - парсер сложных ачисел для М
 """
 
 import re
-from extended_anum_parser import (
-    AbitNotation, UTF8ByteProcessor, 
-    ExtendedAnumToken, ExtendedAnumLexer
-)
+import sys
+import os
+
+# Support both direct execution and module import
+try:
+    from parsers.extended_anum_parser import (
+        AbitNotation, UTF8ByteProcessor,
+        ExtendedAnumToken, ExtendedAnumLexer
+    )
+except ImportError:
+    from extended_anum_parser import (
+        AbitNotation, UTF8ByteProcessor,
+        ExtendedAnumToken, ExtendedAnumLexer
+    )
 
 class ComplexAnumExpression:
     """Базовый класс для сложных выражений ачисел"""

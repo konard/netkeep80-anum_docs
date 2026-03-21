@@ -58,8 +58,7 @@ jobs:
 
       - name: Run Ruff linter
         run: |
-          ruff check parsers/ converters/ core/ tests/ --ignore E501,F401 --exit-zero
-        continue-on-error: true
+          ruff check parsers/ converters/ core/ tests/ --ignore E501,F401
 
   check-file-limits:
     runs-on: ubuntu-latest
@@ -69,7 +68,7 @@ jobs:
       - name: Check Python file line limits (1500 max)
         run: |
           EXIT_CODE=0
-          find . -name "*.py" -type f | while read -r file; do
+          for file in $(find . -name "*.py" -type f); do
             line_count=$(wc -l < "$file")
             if [ "$line_count" -gt 1500 ]; then
               echo "::error file=$file::File has $line_count lines (limit: 1500)"
@@ -103,7 +102,6 @@ jobs:
       - name: Run converter tests
         run: |
           python -m pytest tests/test_converters.py -v --tb=short
-        continue-on-error: true
 
   validate-docs:
     runs-on: ubuntu-latest
