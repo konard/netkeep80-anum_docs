@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Regression checks for the issue #42 MTS foundation rewrite."""
+"""Regression checks for the current MTS documentation and formula fixture."""
 
 import re
 from pathlib import Path
@@ -17,6 +17,20 @@ REQUIRED_DOCS = [
     ROOT / "docs/specs/Ачисла и сериализация.md",
     ROOT / "docs/specs/Формальная нотация МТС.md",
     ROOT / "docs/research/Открытые вопросы новой аксиоматики МТС.md",
+    ROOT / "tests/mtc_formulas.mtc",
+]
+
+REMOVED_ACTIVE_FILES = [
+    ROOT / "docs/theory/Анализ природы скобок в МТС.md",
+    ROOT / "docs/theory/Анализ формулы связи ♂∞♀.md",
+    ROOT / "docs/theory/Ответ на вопрос о связи и ролях в МТС.md",
+    ROOT / "docs/theory/Переосмысление операторов начала и конца связи.md",
+    ROOT / "docs/research/Вопросы и ответы.md",
+    ROOT / "docs/research/Отличия между знаками равенства.md",
+    ROOT / "docs/research/Проработка аксиом самозамыканий начала и конца.md",
+]
+
+REMOVED_TEST_FIXTURES = [
     ROOT / "tests/issue42_mtc_formulas.mtc",
     ROOT / "tests/legacy_mtc_formulas.mtc",
 ]
@@ -59,6 +73,26 @@ ACTIVE_DOCS = [
     "docs/research/Открытые вопросы новой аксиоматики МТС.md",
 ]
 
+REQUIRED_FORMULAS = [
+    "∞ : {} = {} ⟼ {}",
+    "∞ = ∞ ⟼ ∞",
+    "♂{} : ♂{} = ♂{} ⟼ {}",
+    "♂∞ = ♂∞ ⟼ ∞",
+    "{}♀ : {}♀ = {} ⟼ {}♀",
+    "∞♀ = ∞ ⟼ ∞♀",
+    "{[} : ∞♀",
+    "{]} : ♂∞",
+    "{⟼} : {[} ⟼ {]}",
+]
+
+FORBIDDEN_FIXTURE_PREFIXES = (
+    "AXIOM ",
+    "EXEC ",
+    "RULE ",
+    "NEGATIVE ",
+    "STATUS ",
+)
+
 BRACE_NEGATIONS = [
     "{} ≠ пустое множество",
     "{} ≠ пустой результат поиска",
@@ -70,13 +104,6 @@ REPEATED_BRACE_RULE = (
     "Внутри одного исполнения шаблона все одинаковые вхождения `{}` "
     "относятся к одной и той же связи-кандидату."
 )
-
-STALE_ACTIVE_THEORY_MARKERS = [
-    "Сводная таблица аксиом А0-А16",
-    "Аксиома единицы смысла: 1 : [⟼]",
-    "Начало связи: [⟼]♀",
-    "Конец связи: ♂[⟼]",
-]
 
 REQUIRED_SYMBOLS = [
     "∞",
@@ -100,38 +127,71 @@ REQUIRED_SYMBOLS = [
     ",",
 ]
 
-ISSUE42_FIXTURE_LINES = {
-    "AXIOM root: ∞ : {} = {} ⟼ {}",
-    "EXEC root: ∞ : ∞ ⟼ ∞",
-    "AXIOM self-start: ♂{} : ♂{} = ♂{} ⟼ {}",
-    "EXEC self-start: ♂X : ♂X ⟼ X",
-    "AXIOM self-end: {}♀ : {}♀ = {} ⟼ {}♀",
-    "EXEC self-end: X♀ : X ⟼ X♀",
-    "AXIOM abit-start: {[} : ∞♀",
-    "AXIOM abit-end: {]} : ♂∞",
-    "AXIOM arrow-meaning: {⟼} : {[} ⟼ {]}",
-    "RULE repeated-empty-braces: one-candidate-per-template-execution",
-    "RULE template-execution: candidate -> form-constraint -> found-meaning -> introduced-sign",
-    "RULE candidate-reference-distinction: {} is not {s}",
-    "NEGATIVE empty-braces: {} не пустое множество",
-    "NEGATIVE empty-braces: {} не пустой результат поиска",
-    "NEGATIVE empty-braces: {} не несвязь",
-    "NEGATIVE empty-braces: {} не 0",
-    "NEGATIVE brackets: [] не формульная группировка",
-    "NEGATIVE brackets: старая скобочная запись связи не базовое ядро",
-    "STATUS parser: parsers/mtc_formula_prover.py is legacy and does not execute this fixture",
-}
+SYSTEM_STATUS_ROWS = [
+    "`∞`",
+    "`{}`",
+    "`{s}`",
+    "`{`",
+    "`}`",
+    "`:`",
+    "`=`",
+    "`⟼`",
+    "`♂`",
+    "`♀`",
+    "`[`",
+    "`]`",
+    "`1`, `0`",
+    "`¬`",
+    "`↛`",
+]
+
+STALE_ACTIVE_MARKERS = [
+    "Сводная таблица аксиом А0-А16",
+    "МТС основана на 17 аксиомах",
+    "MTC is based on 17 axioms",
+    "Аксиома единицы смысла: 1 : [⟼]",
+    "Начало связи: [⟼]♀",
+    "Конец связи: ♂[⟼]",
+    "tests/issue42_mtc_formulas.mtc",
+    "tests/legacy_mtc_formulas.mtc",
+    "legacy parser does not execute this fixture",
+    "legacy-прувер",
+    "AXIOM root:",
+    "EXEC root:",
+    "RULE repeated-empty-braces:",
+    "NEGATIVE empty-braces:",
+    "STATUS parser:",
+]
 
 
 def read_doc(relative_path: str) -> str:
     return (ROOT / relative_path).read_text(encoding="utf-8")
 
 
+def formula_lines() -> list[str]:
+    return [
+        line.strip()
+        for line in read_doc("tests/mtc_formulas.mtc").splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+
+
 def markdown_links(text: str) -> list[str]:
     return re.findall(r"\[[^\]]+\]\(([^)#]+)(?:#[^)]+)?\)", text)
 
 
-def test_issue42_foundation_documents_exist():
+def assert_balanced(line: str, opening: str, closing: str) -> None:
+    depth = 0
+    for char in line:
+        if char == opening:
+            depth += 1
+        elif char == closing:
+            depth -= 1
+        assert depth >= 0, line
+    assert depth == 0, line
+
+
+def test_current_foundation_documents_exist():
     missing = [str(path.relative_to(ROOT)) for path in REQUIRED_DOCS if not path.exists()]
 
     assert missing == []
@@ -143,40 +203,49 @@ def test_active_document_surface_is_small_and_explicit():
     assert {path.name for path in (ROOT / "docs/research").glob("*.md")} == ACTIVE_RESEARCH_FILES
 
 
-def test_issue42_renamed_old_formula_fixture_to_legacy():
-    assert not (ROOT / "tests/mtc_formulas.mtc").exists()
-    assert (ROOT / "tests/legacy_mtc_formulas.mtc").exists()
+def test_removed_historical_files_are_not_active_or_rearchived():
+    missing_from_active = [path for path in REMOVED_ACTIVE_FILES if path.exists()]
+    assert missing_from_active == []
 
-    legacy = read_doc("tests/legacy_mtc_formulas.mtc")
-    assert "a^20 == aaaaaaaaaaaaaaaaaaaa" in legacy
+    rearchived = [ROOT / "archive" / path.name for path in REMOVED_ACTIVE_FILES]
+    assert [path for path in rearchived if path.exists()] == []
 
 
-def test_issue42_formula_fixture_matches_new_working_core():
-    lines = {
-        line.strip()
-        for line in read_doc("tests/issue42_mtc_formulas.mtc").splitlines()
-        if line.strip() and not line.startswith("#")
-    }
+def test_only_current_formula_fixture_is_present():
+    assert (ROOT / "tests/mtc_formulas.mtc").exists()
+    assert [path for path in REMOVED_TEST_FIXTURES if path.exists()] == []
 
-    missing = sorted(ISSUE42_FIXTURE_LINES - lines)
-    assert missing == []
+
+def test_mtc_formula_fixture_uses_pure_formulas():
+    lines = formula_lines()
+
+    assert lines == REQUIRED_FORMULAS
+
+    for line in lines:
+        assert not line.startswith(FORBIDDEN_FIXTURE_PREFIXES), line
+        assert_balanced(line, "{", "}")
+        assert_balanced(line, "(", ")")
 
 
 def test_active_theory_uses_template_root_axiom():
     theory = read_doc("docs/theory/Метатеория связей.md")
 
     assert "∞ : {} = {} ⟼ {}" in theory
-    assert "МТС основана на 17 аксиомах" not in theory
+    assert "∞ = ∞ ⟼ ∞" in read_doc("tests/mtc_formulas.mtc")
 
 
-def test_readme_marks_issue42_rewrite_as_current_status():
+def test_readme_is_current_entrypoint():
     readme = read_doc("README.md")
 
-    assert "issue #42" in readme
-    assert "tests/issue42_mtc_formulas.mtc" in readme
-    assert "tests/legacy_mtc_formulas.mtc" in readme
-    assert "МТС основана на 17 аксиомах" not in readme
-    assert "MTC is based on 17 axioms" not in readme
+    for required in [
+        "Что сейчас является МТС",
+        "Где система аксиом",
+        "Где формальная нотация",
+        "Где тест формул",
+        "Как проверить согласованность",
+        "tests/mtc_formulas.mtc",
+    ]:
+        assert required in readme
 
 
 def test_readme_links_point_to_existing_local_files():
@@ -214,13 +283,16 @@ def test_axiom_template_is_normative():
     assert "Каждая аксиома вводит ровно один смысловой механизм." in template
     assert "Арность / валентность" in template
     assert "Критерий готовности аксиомы" in template
-    assert "tests/issue42_mtc_formulas.mtc" in template
+    assert "tests/mtc_formulas.mtc" in template
 
 
-def test_axiom_system_has_dependency_table_and_all_core_cards():
+def test_axiom_system_has_symbol_statuses_and_core_cards():
     system = read_doc("docs/theory/Система аксиом МТС.md")
 
     assert "символ → слой → аксиома → зависит от → следствия → тесты" in system
+    for row_marker in SYSTEM_STATUS_ROWS:
+        assert row_marker in system, row_marker
+
     for heading in [
         "## А1. Акорень",
         "## А2. Самозамкнутое начало",
@@ -232,34 +304,7 @@ def test_axiom_system_has_dependency_table_and_all_core_cards():
         assert heading in system
 
     assert "Что не входит в рабочее ядро" in system
-    assert "tests/issue42_mtc_formulas.mtc" in system
-
-
-def test_historical_bracket_analysis_is_not_active_theory():
-    active_path = ROOT / "docs/theory/Анализ природы скобок в МТС.md"
-    archive_path = ROOT / "archive/Анализ природы скобок в МТС.md"
-
-    assert not active_path.exists()
-    assert archive_path.exists()
-    assert "Статус: исторический" in archive_path.read_text(encoding="utf-8")
-
-
-def test_legacy_notes_are_not_active_theory_or_research():
-    moved_files = [
-        "Анализ формулы связи ♂∞♀.md",
-        "Переосмысление операторов начала и конца связи.md",
-        "Ответ на вопрос о связи и ролях в МТС.md",
-        "Вопросы и ответы.md",
-        "Отличия между знаками равенства.md",
-        "Проработка аксиом самозамыканий начала и конца.md",
-    ]
-
-    for name in moved_files:
-        assert not (ROOT / "docs/theory" / name).exists()
-        assert not (ROOT / "docs/research" / name).exists()
-        archived = ROOT / "archive" / name
-        assert archived.exists()
-        assert "Статус: исторический" in archived.read_text(encoding="utf-8")
+    assert "tests/mtc_formulas.mtc" in system
 
 
 def test_active_foundation_docs_keep_brace_search_boundaries():
@@ -282,15 +327,11 @@ def test_formal_notation_separates_candidate_and_reference():
     assert "{s} не является поиском без фильтра" in spec
 
 
-def test_active_docs_do_not_promote_old_bracketed_arrow_core():
+def test_active_docs_do_not_promote_old_or_temporary_surfaces():
     for relative_path in ACTIVE_DOCS:
         text = read_doc(relative_path)
+        markers = [marker for marker in STALE_ACTIVE_MARKERS if marker in text]
+
+        assert markers == [], relative_path
         assert "[⟼]" not in text, relative_path
-
-
-def test_active_theory_has_no_stale_core_markers():
-    for path in (ROOT / "docs/theory").glob("*.md"):
-        text = path.read_text(encoding="utf-8")
-        stale_markers = [marker for marker in STALE_ACTIVE_THEORY_MARKERS if marker in text]
-
-        assert stale_markers == [], str(path.relative_to(ROOT))
+        assert "archive/" not in text, relative_path
