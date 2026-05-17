@@ -1,364 +1,157 @@
-# Метатеория связей (МТС) — Документация и инструменты
+# Метатеория связей (МТС) — документация и инструменты
 
-## Описание
+## Текущий статус
 
-**Метатеория связей (МТС)** — это формальная система, в которой всё есть связь. Система является онтологически замкнутой: не существует внешних сущностей, которые не могут быть выражены через связи. МТС устраняет традиционный дуализм между «объектами» и «отношениями», сводя их к единой категории — направленным связям.
+Репозиторий находится в переработке оснований по issue #42. Актуальная задача — отделить новую рамку МТС от исторических формулировок, где смешивались формальная нотация, ачисла, асети, скобки и старые аксиомы.
 
-Данный репозиторий содержит документацию, инструменты и реализацию протокола **ачисел** (ассоциативных чисел) на основе МТС.
+Старая система А0–А16 сохранена как важный исторический этап, но больше не должна читаться как окончательная версия МТС. Текущая рабочая линия:
 
-## Основные концепции
+```text
+Ачисла описывают структуры связей.
+Формальная нотация МТС описывает смыслы и шаблоны смыслов.
+Система аксиом МТС описывает виды форм смыслов.
+```
 
-### Два домена МТС
+Код парсеров и конвертеров пока отражает прежнюю стабилизированную практическую нотацию. Его нельзя радикально переписывать до стабилизации новой формальной нотации.
 
-| Домен | Уровень | Символы | Назначение |
-|-------|---------|---------|------------|
-| **Формы связей** | Теоретический | `⟼`, `∞`, `♂`, `♀`, `¬` | Аксиомы, теоремы, формальные конструкции |
-| **Сериализация** | Практический | `[`, `]`, `1`, `0` | Представление данных в виде последовательностей |
+## Основная рамка
 
-### Абиты
+Базовый постулат МТС остаётся прежним:
 
-**Абиты** (ассоциативные биты) — четыре базовые связи вокруг акорня `∞`, формирующие четверичную систему сериализации:
+```text
+всё есть связь
+```
 
-| Абит | Форма | Описание |
-|------|-------|----------|
-| `[` | `∞♀` | Начало смысла — самозамкнутое начало акорня |
-| `]` | `♂∞` | Конец смысла — самозамкнутый конец акорня |
-| `1` | `∞♀ ⟼ ♂∞` | Единица смысла — связь от начала к концу |
-| `0` | `♂∞ ⟼ ∞♀` | Нуль смысла — инверсия единицы |
+После issue #42 уровни различаются строже:
 
-> **Важно:** `∞` (акорень) **не является абитом**. Это мета-конструкт, выражаемый через комбинацию абитов: `[] = ∞`.
+```text
+связь в натуре
+→ смысл связи
+→ знак смысла
+→ формальная запись смысла
+→ шаблон поиска формы
+→ возможная сериализация в ачисло
+```
 
-### Ачисла
+Главное уточнение: знак не обязан ссылаться на одну конкретную связь. Знак задаёт шаблон формы, по которому смысл распознаётся среди связей.
 
-**Ачисло** (ассоциативное число) — конечная последовательность абитов, являющаяся уникальным идентификатором связи. Используется для кодирования данных, сериализации структур МТС и преобразования UTF-8 текста в связи.
+## Рабочее ядро
 
-### Система аксиом
+Новая форма аксиомы акорня:
 
-МТС основана на 17 аксиомах (А0–А16), ядро которых (А4–А7) образует самозамкнутую систему логических уравнений:
+```text
+∞ : {} = {} ⟼ {}
+```
 
-| Аксиома | Формула | Описание |
-|---------|---------|----------|
-| А0. Определение | `(s : F) ⟼ (s = F)` | Определение есть связь от знака к форме |
-| А1. Тождественность | `x = x` | Структурная неразличимость |
-| А2. Конгруэнция | `{(a = c), (b = d)} ⟼ ((a⟼b) = (c⟼d))` | Структурная прозрачность |
-| А3. Связь | `rv : r ⟼ v` | Базовый конструктор |
-| А4. Смысл | `∞ : ∞ ⟼ ∞` | Смысл есть полное самозамыкание связи |
-| А5. Начало смысла | `∞♀ : [⟼]♀` | Начало смысла определяется началом связи |
-| А6. Конец смысла | `♂∞ : ♂[⟼]` | Конец смысла определяется концом связи |
-| А7. Связь (единица смысла) | `⟼ : ∞♀ ⟼ ♂∞` | Связь определяется началом смысла связанным с концом смысла |
-| А8. Единица смысла | `1 : [⟼]` | Абит единицы смысла определяется связью |
-| А9. Несвязь | `↛ : ¬[⟼]` | Несвязь определяется инверсией связи |
-| А10. Нуль смысла | `0 : [↛]` | Абит нуля смысла определяется несвязью |
-| А11. Начало связи | `[⟼]♀ : [⟼] ⟼ [⟼]♀` | Начало связи |
-| А12. Конец связи | `♂[⟼] : ♂[⟼] ⟼ [⟼]` | Конец связи |
-| А13. Инверсия связи | `¬[⟼] : ♂[⟼] ⟼ [⟼]♀` | Инверсия связи |
-| А14. Инверсия | `¬(a ⟼ b) = b ⟼ a` | Обращение направления |
-| А15. Абиты | `[ : ∞♀`, `] : ♂∞` | Абиты сериализации |
-| А16. Левоассоциативность | `abc = (a ⟼ b) ⟼ c` | Порядок группировки |
+`{}` — шаблонный поиск без фильтра, связь-кандидат текущего шаблонного контекста. Это не пустое множество, не пустой результат поиска, не несвязь и не абитовый ноль.
 
-Подробное описание аксиом и теорем: [`docs/theory/Метатеория связей.md`](docs/theory/Метатеория%20связей.md)
+После исполнения шаблона аксиома даёт привычную развёртку:
+
+```text
+∞ : ∞ ⟼ ∞
+```
+
+Минимальное рабочее ядро сейчас фиксируется так:
+
+```text
+∞ : {} = {} ⟼ {}
+♂{} : ♂{} = ♂{} ⟼ {}
+{}♀ : {}♀ = {} ⟼ {}♀
+{[} : ∞♀
+{]} : ♂∞
+{⟼} : {[} ⟼ {]}
+```
+
+Эти формулы задают направление переработки. Они ещё требуют нормализации: нужно отдельно решить пустой результат поиска, независимые шаблонные поиска, статус знаков `{` и `}`, инверсию, `0`, `1` и исполнение шаблонов.
+
+## Слои нотации
+
+| Слой | Назначение | Основные знаки |
+|------|------------|----------------|
+| Формальная нотация смыслов | Описывает смыслы и шаблоны поиска | `{}`, `{s}`, `:`, `=`, `⟼`, `♂`, `♀`, `¬` |
+| Ачисла | Сериализуют структуры связей | `[`, `]`, `1`, `0` |
+| Асеть | Остенсивная модель связей | узлы и направленные связи |
+| Метаязык | Объясняет систему | русский текст, схемы, внешние обозначения |
+
+Квадратные скобки закреплены за ачислами и слоем сериализации. Запись `[⟼]` может встречаться как историческая или абитово-остенсивная запись, но она не является базовым синтаксисом нового ядра.
+
+## Карта актуальной документации
+
+- [Основания МТС](docs/theory/Основания%20МТС.md) — новая рамка после issue #42.
+- [Метатеория связей](docs/theory/Метатеория%20связей.md) — текущая рабочая версия теории.
+- [Новая система аксиом МТС](docs/theory/Новая%20система%20аксиом%20МТС.md) — минимальное ядро и открытые вопросы.
+- [Шаблон аксиом МТС](docs/theory/Шаблон%20аксиом%20МТС.md) — новый формат описания аксиомы.
+- [Слои нотации МТС](docs/specs/Слои%20нотации%20МТС.md) — разделение формальной нотации, ачисел и асети.
+- [Шаблонный поиск МТС](docs/specs/Шаблонный%20поиск%20МТС.md) — семантика `{}`.
+- [Ачисла и сериализация](docs/specs/Ачисла%20и%20сериализация.md) — статус `[`, `]`, `1`, `0`.
+- [Формальная нотация МТС](docs/specs/Формальная%20нотация%20МТС.md) — обновлённая спецификация смысловой нотации.
+
+Исторические материалы остаются в [archive/](archive/) и исследовательских разделах. Их нужно читать как черновики, если в начале файла не указано обратное.
+
+## Инструменты
+
+В репозитории остаются практические инструменты для старого стабильного слоя:
+
+```text
+converters/text_to_anum.py      UTF-8 текст → четверичное ачисло
+converters/anum_to_text.py      четверичное ачисло → UTF-8 текст
+converters/ascii_unicode.py     ASCII ↔ Unicode нотация
+parsers/mtc_formula_prover.py   экспериментальный прувер формул
+core/axioms/validate_axioms.py  историческая валидация А0–А16
+```
+
+Эти файлы считаются совместимым практическим слоем, пока новая формальная нотация не стабилизирована.
+
+## Запуск проверок
+
+```bash
+python -m pytest tests -v
+ruff check parsers/ converters/ core/ tests/ --ignore E501,F401
+```
+
+Минимальная проверка конвертеров:
+
+```bash
+python -m pytest tests/test_converters.py -v
+```
 
 ## Структура репозитория
 
-```
+```text
 anum_docs/
-├── README.md                     # Описание проекта (этот файл)
-├── LICENSE                       # Лицензия (Unlicense)
-├── .gitignore
-│
-├── core/                         # Ядро системы
-│   ├── axioms/                   # Валидация аксиом МТС
-│   │   └── validate_axioms.py
-│   └── notation_system.py        # Система нотации абитов
-│
-├── parsers/                      # Парсеры ачисел и формул МТС
-│   ├── anum_prover.py            # Основной движок доказательств
-│   ├── mtc_formula_prover.py     # Движок доказательств формул МТС
-│   ├── complex_anum_parser.py    # Парсер сложных ачисел
-│   ├── extended_anum_parser.py   # Расширенный парсер
-│   └── mtc_original_abit_parser.py
-│
-├── converters/                   # Конвертеры между форматами нотаций
-│   ├── text_to_anum.py           # UTF-8 текст → четверичное ачисло
-│   ├── anum_to_text.py           # Четверичное ачисло → UTF-8 текст
-│   └── ascii_unicode.py          # ASCII ↔ Unicode нотации
-│
-├── tests/                        # Тесты
-│   ├── test_converters.py        # Тесты конвертеров
-│   └── mtc_formulas.mtc          # Тестовые формулы МТС
-│
-├── docs/                         # Документация
-│   ├── theory/                   # Теория МТС
-│   │   └── Метатеория связей.md  # Чистовик теории (А0–А16)
-│   ├── specs/                    # Спецификации
-│   ├── research/                 # Исследования
-│   ├── CONTRIBUTING.md           # Руководство по вкладу
-│   ├── BEST-PRACTICES.md         # Лучшие практики
-│   └── CI-CD-BEST-PRACTICES.md   # Практики CI/CD
-│
-├── faq/                          # Часто задаваемые вопросы
-├── pics/                         # Изображения
-├── pdf/                          # PDF-документы
-└── archive/                      # Архив старых файлов
+├── README.md
+├── core/
+├── parsers/
+├── converters/
+├── tests/
+├── docs/
+│   ├── theory/
+│   ├── specs/
+│   └── research/
+├── faq/
+├── archive/
+├── pics/
+└── pdf/
 ```
 
-## Быстрый старт
+## English Summary
 
-### Требования
+This repository is being refounded under issue #42. The old A0–A16 axiom system is historical context, not the current final specification. The active direction separates meaning notation, template search, anumber serialization, and ostensive link structures.
 
-- Python 3.11+
+Current root axiom:
 
-### Запуск тестов
-
-```bash
-# Тесты конвертеров
-python3 -m pytest tests/test_converters.py -v
-
-# Запуск движка формул МТС
-python3 parsers/mtc_formula_prover.py tests/mtc_formulas.mtc
+```text
+∞ : {} = {} ⟼ {}
 ```
-
-### Конвертация текста
-
-```bash
-# UTF-8 текст → ачисло
-python3 converters/text_to_anum.py
-
-# Ачисло → UTF-8 текст
-python3 converters/anum_to_text.py
-
-# ASCII ↔ Unicode нотация
-python3 converters/ascii_unicode.py
-```
-
-## Три нотации МТС
-
-| Нотация | Расширение | Описание |
-|---------|------------|----------|
-| **Формальная** | `.mtl` | Язык запросов по форме связей (основной язык теории) |
-| **Строковая** | `.astr` | UTF-8 представление как левоассоциативная цепочка |
-| **Четверичная** | `.anum` | Алфавит из 4 абитов: `[`, `]`, `1`, `0` |
-
-### Соответствие нотаций anum_docs и aprover
-
-| anum_docs | aprover | Описание |
-|-----------|---------|----------|
-| `⟼` | `->` | Конструктор связи |
-| `¬⟼` | `!->` | Отрицание стрелки |
-| `¬` | `!` | Инверсия |
-| `[` | `[` | Абит начала смысла |
-| `]` | `]` | Абит конца смысла |
-| `1` | `1` | Абит единицы смысла |
-| `0` | `0` | Абит нуля смысла |
-
-> **Примечание:** Символы абитов в anum_docs и aprover теперь унифицированы.
-
-Подробнее: [netkeep80/aprover](https://github.com/netkeep80/aprover)
-
-## Документация
-
-- **Теория МТС** — [`docs/theory/Метатеория связей.md`](docs/theory/Метатеория%20связей.md)
-- **Формальная нотация** — [`docs/specs/Формальная нотация МТС.md`](docs/specs/Формальная%20нотация%20МТС.md)
-- **FAQ** — [`faq/`](faq/)
-- **Руководство по вкладу** — [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md)
-
-## CI/CD
-
-Проект использует GitHub Actions для непрерывной интеграции:
-
-- **Lint** — проверка кода с помощью [Ruff](https://github.com/astral-sh/ruff)
-- **Tests** — запуск тестов конвертеров через pytest
-- **Structure** — проверка чистоты корневой директории и наличия обязательных каталогов
-- **Docs** — проверка размера файлов документации
 
 ## Лицензия
 
-Проект распространяется под лицензией [Unlicense](LICENSE) (общественное достояние).
+Проект распространяется под лицензией [Unlicense](LICENSE).
 
----
-
-# Metatheory of Links (MTC) — Documentation and Tools
-
-## Description
-
-**Metatheory of Links (MTC)** is a formal system where everything is a link. The system is ontologically closed: there are no external entities that cannot be expressed through links. MTC eliminates the traditional dualism between "objects" and "relations" by reducing them to a single category — directed links.
-
-This repository contains documentation, tools, and the implementation of the **anumber** (associative number) protocol based on MTC.
-
-## Core Concepts
-
-### Two Domains of MTC
-
-| Domain | Level | Symbols | Purpose |
-|--------|-------|---------|---------|
-| **Link forms** | Theoretical | `⟼`, `∞`, `♂`, `♀`, `¬` | Axioms, theorems, formal constructions |
-| **Serialization** | Practical | `[`, `]`, `1`, `0` | Data representation as sequences |
-
-### Abits
-
-**Abits** (associative bits) are four basic links around the aroot `∞`, forming a quaternary serialization system:
-
-| Abit | Form | Description |
-|------|------|-------------|
-| `[` | `∞♀` | Start of meaning — self-closed start of aroot |
-| `]` | `♂∞` | End of meaning — self-closed end of aroot |
-| `1` | `∞♀ ⟼ ♂∞` | Unit of meaning — link from start to end |
-| `0` | `♂∞ ⟼ ∞♀` | Zero of meaning — inversion of unit |
-
-> **Important:** `∞` (aroot) **is not an abit**. It is a meta-theoretical construct expressed through a combination of abits: `[] = ∞`.
-
-### Anumbers
-
-An **anumber** (associative number) is a finite sequence of abits serving as a unique link identifier. It is used for data encoding, MTC structure serialization, and UTF-8 text-to-link conversion.
-
-### Axiom System
-
-MTC is based on 17 axioms (A0–A16), the core of which (A4–A7) forms a self-closed system of logical equations:
-
-| Axiom | Formula | Description |
-|-------|---------|-------------|
-| A0. Definition | `(s : F) ⟼ (s = F)` | Definition is a link from sign to form |
-| A1. Identity | `x = x` | Structural indistinguishability |
-| A2. Congruence | `{(a = c), (b = d)} ⟼ ((a⟼b) = (c⟼d))` | Structural transparency |
-| A3. Link | `rv : r ⟼ v` | Basic constructor |
-| A4. Meaning | `∞ : ∞ ⟼ ∞` | Meaning is a complete self-closure of a link |
-| A5. Start of meaning | `∞♀ : [⟼]♀` | Start of meaning is defined by the start of the link |
-| A6. End of meaning | `♂∞ : ♂[⟼]` | End of meaning is defined by the end of the link |
-| A7. Link (unit of meaning) | `⟼ : ∞♀ ⟼ ♂∞` | Link is defined by start of meaning connected to end of meaning |
-| A8. Unit of meaning | `1 : [⟼]` | Abit of unit of meaning is defined by the link |
-| A9. Non-link | `↛ : ¬[⟼]` | Non-link is defined by the inversion of the link |
-| A10. Zero of meaning | `0 : [↛]` | Abit of zero of meaning is defined by the non-link |
-| A11. Start of link | `[⟼]♀ : [⟼] ⟼ [⟼]♀` | Start of link |
-| A12. End of link | `♂[⟼] : ♂[⟼] ⟼ [⟼]` | End of link |
-| A13. Inversion of link | `¬[⟼] : ♂[⟼] ⟼ [⟼]♀` | Inversion of link |
-| A14. Inversion | `¬(a ⟼ b) = b ⟼ a` | Direction reversal |
-| A15. Abits | `[ : ∞♀`, `] : ♂∞` | Serialization abits |
-| A16. Left-associativity | `abc = (a ⟼ b) ⟼ c` | Grouping order |
-
-Full axiom descriptions and theorems: [`docs/theory/Метатеория связей.md`](docs/theory/Метатеория%20связей.md)
-
-## Repository Structure
-
-```
-anum_docs/
-├── README.md                     # Project description (this file)
-├── LICENSE                       # License (Unlicense)
-├── .gitignore
-│
-├── core/                         # Core system
-│   ├── axioms/                   # MTC axiom validation
-│   │   └── validate_axioms.py
-│   └── notation_system.py        # Abit notation system
-│
-├── parsers/                      # Anumber and MTC formula parsers
-│   ├── anum_prover.py            # Main proof engine
-│   ├── mtc_formula_prover.py     # MTC formula proof engine
-│   ├── complex_anum_parser.py    # Complex anumber parser
-│   ├── extended_anum_parser.py   # Extended parser
-│   └── mtc_original_abit_parser.py
-│
-├── converters/                   # Notation format converters
-│   ├── text_to_anum.py           # UTF-8 text → quaternary anumber
-│   ├── anum_to_text.py           # Quaternary anumber → UTF-8 text
-│   └── ascii_unicode.py          # ASCII ↔ Unicode notation
-│
-├── tests/                        # Tests
-│   ├── test_converters.py        # Converter tests
-│   └── mtc_formulas.mtc          # MTC test formulas
-│
-├── docs/                         # Documentation
-│   ├── theory/                   # MTC theory
-│   │   └── Метатеория связей.md  # Final theory document (A0–A11)
-│   ├── specs/                    # Specifications
-│   ├── research/                 # Research
-│   ├── CONTRIBUTING.md           # Contributing guide
-│   ├── BEST-PRACTICES.md         # Best practices
-│   └── CI-CD-BEST-PRACTICES.md   # CI/CD practices
-│
-├── faq/                          # Frequently asked questions
-├── pics/                         # Images
-├── pdf/                          # PDF documents
-└── archive/                      # Archived files
-```
-
-## Quick Start
-
-### Requirements
-
-- Python 3.11+
-
-### Running Tests
-
-```bash
-# Converter tests
-python3 -m pytest tests/test_converters.py -v
-
-# Run MTC formula engine
-python3 parsers/mtc_formula_prover.py tests/mtc_formulas.mtc
-```
-
-### Text Conversion
-
-```bash
-# UTF-8 text → anumber
-python3 converters/text_to_anum.py
-
-# Anumber → UTF-8 text
-python3 converters/anum_to_text.py
-
-# ASCII ↔ Unicode notation
-python3 converters/ascii_unicode.py
-```
-
-## Three MTC Notations
-
-| Notation | Extension | Description |
-|----------|-----------|-------------|
-| **Formal** | `.mtl` | Link form query language (main theory language) |
-| **String** | `.astr` | UTF-8 representation as left-associative chain |
-| **Quaternary** | `.anum` | Alphabet of 4 abits: `[`, `]`, `1`, `0` |
-
-### Notation Correspondence: anum_docs vs aprover
-
-| anum_docs | aprover | Description |
-|-----------|---------|-------------|
-| `⟼` | `->` | Link constructor |
-| `¬⟼` | `!->` | Arrow negation |
-| `¬` | `!` | Inversion |
-| `[` | `[` | Start-of-meaning abit |
-| `]` | `]` | End-of-meaning abit |
-| `1` | `1` | Unit-of-meaning abit |
-| `0` | `0` | Zero-of-meaning abit |
-
-> **Note:** Abit symbols in anum_docs and aprover are now unified.
-
-More details: [netkeep80/aprover](https://github.com/netkeep80/aprover)
-
-## Documentation
-
-- **MTC Theory** — [`docs/theory/Метатеория связей.md`](docs/theory/Метатеория%20связей.md)
-- **Formal Notation** — [`docs/specs/Формальная нотация МТС.md`](docs/specs/Формальная%20нотация%20МТС.md)
-- **FAQ** — [`faq/`](faq/)
-- **Contributing Guide** — [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md)
-
-## CI/CD
-
-The project uses GitHub Actions for continuous integration:
-
-- **Lint** — code checking with [Ruff](https://github.com/astral-sh/ruff)
-- **Tests** — running converter tests via pytest
-- **Structure** — checking root directory cleanliness and required directories
-- **Docs** — checking documentation file sizes
-
-## License
-
-The project is released under the [Unlicense](LICENSE) (public domain).
-
-## Авторы и соавторы / Authors and co-authors
+## Авторы и соавторы
 
 - [Вертушкин Роман Павлович](https://github.com/netkeep80)
-- [Дьяченко Константин Константиновчи](https://github.com/konard)
+- [Дьяченко Константин Константинович](https://github.com/konard)
 - [Шакиров Тимур Эдуардович](https://github.com/TimaxLacs)
 - [Бурдуков Александр Николаевич](https://github.com/InAiwetrustAGI)
 - [Глазунов Иван Сергеевич](https://github.com/ivansglazunov)
-
