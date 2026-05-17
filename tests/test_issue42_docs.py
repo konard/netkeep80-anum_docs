@@ -86,8 +86,6 @@ REQUIRED_FORMULAS = [
     "{}{}{} = (({}) ⟼ {}) ⟼ {}",
     "{}{}{} = {} ⟼ {} ⟼ {}",
     "{}({}{}) : {} ⟼ ({}{})",
-    "{}{}{} != {}({}{})",
-    "{}{}{} != {} ⟼ ({} ⟼ {})",
     "♂{} : ♂{} = ♂{} ⟼ {}",
     "♂∞ = ♂∞ ⟼ ∞",
     "{}♀ : {}♀ = {} ⟼ {}♀",
@@ -130,6 +128,11 @@ GROUPING_RULE = (
 
 GROUPING_BOUNDARY_RULE = (
     "Круглые скобки фиксируют границу уже собранной формы"
+)
+
+METALINGUISTIC_SEQUENCE_RULE = (
+    "Метаязыковое ограничение: последовательная запись `{}{}{}` "
+    "не читается как правая группировка `{}({}{})`."
 )
 
 SEQUENCE_DOCS = [
@@ -246,6 +249,21 @@ def assert_balanced(line: str, opening: str, closing: str) -> None:
     assert depth == 0, line
 
 
+def registered_notation_characters() -> set[str]:
+    spec = read_doc("docs/specs/Формальная нотация МТС.md")
+    registry_entries: list[str] = []
+
+    for line in spec.splitlines():
+        if line.startswith("| `"):
+            registry_entries.extend(re.findall(r"`([^`]+)`", line.split("|", 2)[1]))
+
+    characters: set[str] = {" "}
+    for entry in registry_entries:
+        characters.update(char for char in entry if char != "s")
+
+    return characters
+
+
 def test_current_foundation_documents_exist():
     missing = [str(path.relative_to(ROOT)) for path in REQUIRED_DOCS if not path.exists()]
 
@@ -280,6 +298,18 @@ def test_mtc_formula_fixture_uses_pure_formulas():
         assert not line.startswith(FORBIDDEN_FIXTURE_PREFIXES), line
         assert_balanced(line, "{", "}")
         assert_balanced(line, "(", ")")
+
+
+def test_mtc_formula_fixture_uses_only_registered_notation_symbols():
+    allowed = registered_notation_characters()
+    unknown = {
+        char
+        for line in formula_lines()
+        for char in line
+        if char not in allowed
+    }
+
+    assert unknown == set()
 
 
 def test_active_theory_uses_template_root_axiom():
@@ -370,8 +400,6 @@ def test_axiom_system_has_symbol_statuses_and_core_cards():
         "{}{}{} = (({}) ⟼ {}) ⟼ {}",
         "{}{}{} = {} ⟼ {} ⟼ {}",
         "{}({}{}) : {} ⟼ ({}{})",
-        "{}{}{} != {}({}{})",
-        "{}{}{} != {} ⟼ ({} ⟼ {})",
         "{[}{]} = {[} ⟼ {]}",
         "{⟼} : {[}{]}",
         "{⟼} = {[} ⟼ {]}",
@@ -406,7 +434,7 @@ def test_grouping_docs_define_parentheses():
 
         assert GROUPING_RULE in text, relative_path
         assert GROUPING_BOUNDARY_RULE in text, relative_path
-        assert "{}{}{} != {}({}{})" in text, relative_path
+        assert METALINGUISTIC_SEQUENCE_RULE in text, relative_path
 
 
 def test_formal_notation_separates_candidate_and_reference():
