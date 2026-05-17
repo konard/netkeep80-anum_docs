@@ -1,1 +1,1 @@
-py ./../parsers/mtc_formula_prover.py ./mtc_formulas.mtc
+py -m pytest . -v
