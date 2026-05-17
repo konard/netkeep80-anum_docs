@@ -62,6 +62,7 @@ ACTIVE_FOUNDATION_DOCS = [
 
 ACTIVE_DOCS = [
     "README.md",
+    "docs/plan.md",
     "docs/theory/Метатеория связей.md",
     "docs/theory/Основания МТС.md",
     "docs/theory/Система аксиом МТС.md",
@@ -77,10 +78,15 @@ REQUIRED_FORMULAS = [
     "∞ : {} = {} ⟼ {}",
     "∞ = ∞ ⟼ ∞",
     "({}) = {}",
+    "{}{} : ({}) ⟼ {}",
+    "{}({}) : {} ⟼ ({})",
     "{}{} : {} ⟼ {}",
     "{}{} = {} ⟼ {}",
-    "{}{}{} : ({} ⟼ {}) ⟼ {}",
+    "{}{}{} : ({}{}) ⟼ {}",
+    "{}{}{} = (({}) ⟼ {}) ⟼ {}",
     "{}{}{} = {} ⟼ {} ⟼ {}",
+    "{}({}{}) : {} ⟼ ({}{})",
+    "{}{}{} != {}({}{})",
     "{}{}{} != {} ⟼ ({} ⟼ {})",
     "♂{} : ♂{} = ♂{} ⟼ {}",
     "♂∞ = ♂∞ ⟼ ∞",
@@ -120,6 +126,10 @@ POSITIONAL_SEQUENCE_RULE = (
 
 GROUPING_RULE = (
     "Круглые скобки не меняют смысл формы, но выделяют форму как целый операнд."
+)
+
+GROUPING_BOUNDARY_RULE = (
+    "Круглые скобки фиксируют границу уже собранной формы"
 )
 
 SEQUENCE_DOCS = [
@@ -190,6 +200,22 @@ STALE_ACTIVE_MARKERS = [
     "RULE repeated-empty-braces:",
     "NEGATIVE empty-braces:",
     "STATUS parser:",
+]
+
+PROCESS_ACTIVE_MARKERS = [
+    "issue #42",
+    "issue 42",
+    "issue42",
+    "legacy",
+    "старая система",
+    "старые",
+    "историческ",
+    "архив",
+    "прежн",
+    "временный",
+    "временные",
+    "временная",
+    "устар",
 ]
 
 
@@ -337,9 +363,14 @@ def test_axiom_system_has_symbol_statuses_and_core_cards():
 
     for formula in [
         "({}) = {}",
+        "{}{} : ({}) ⟼ {}",
+        "{}({}) : {} ⟼ ({})",
         "{}{} : {} ⟼ {}",
-        "{}{}{} : ({} ⟼ {}) ⟼ {}",
+        "{}{}{} : ({}{}) ⟼ {}",
+        "{}{}{} = (({}) ⟼ {}) ⟼ {}",
         "{}{}{} = {} ⟼ {} ⟼ {}",
+        "{}({}{}) : {} ⟼ ({}{})",
+        "{}{}{} != {}({}{})",
         "{}{}{} != {} ⟼ ({} ⟼ {})",
         "{[}{]} = {[} ⟼ {]}",
         "{⟼} : {[}{]}",
@@ -374,7 +405,8 @@ def test_grouping_docs_define_parentheses():
         text = read_doc(relative_path)
 
         assert GROUPING_RULE in text, relative_path
-        assert "({} ⟼ {}) ⟼ {} != {} ⟼ ({} ⟼ {})" in text, relative_path
+        assert GROUPING_BOUNDARY_RULE in text, relative_path
+        assert "{}{}{} != {}({}{})" in text, relative_path
 
 
 def test_formal_notation_separates_candidate_and_reference():
@@ -390,8 +422,11 @@ def test_formal_notation_supports_sequence_and_grouping_forms():
     for required in [
         'sequence   ::= form form',
         '"(" form ")"',
+        "{}{} : ({}) ⟼ {}",
+        "{}({}) : {} ⟼ ({})",
         "{}{} : {} ⟼ {}",
-        "{}{}{} : ({} ⟼ {}) ⟼ {}",
+        "{}{}{} : ({}{}) ⟼ {}",
+        "{}({}{}) : {} ⟼ ({}{})",
     ]:
         assert required in spec
 
@@ -400,7 +435,13 @@ def test_active_docs_do_not_promote_old_or_temporary_surfaces():
     for relative_path in ACTIVE_DOCS:
         text = read_doc(relative_path)
         markers = [marker for marker in STALE_ACTIVE_MARKERS if marker in text]
+        process_markers = [
+            marker
+            for marker in PROCESS_ACTIVE_MARKERS
+            if marker.casefold() in text.casefold()
+        ]
 
         assert markers == [], relative_path
+        assert process_markers == [], relative_path
         assert "[⟼]" not in text, relative_path
         assert "archive/" not in text, relative_path
