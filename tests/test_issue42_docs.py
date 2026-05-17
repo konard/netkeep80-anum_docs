@@ -76,13 +76,21 @@ ACTIVE_DOCS = [
 REQUIRED_FORMULAS = [
     "∞ : {} = {} ⟼ {}",
     "∞ = ∞ ⟼ ∞",
+    "({}) = {}",
+    "{}{} : {} ⟼ {}",
+    "{}{} = {} ⟼ {}",
+    "{}{}{} : ({} ⟼ {}) ⟼ {}",
+    "{}{}{} = {} ⟼ {} ⟼ {}",
+    "{}{}{} != {} ⟼ ({} ⟼ {})",
     "♂{} : ♂{} = ♂{} ⟼ {}",
     "♂∞ = ♂∞ ⟼ ∞",
     "{}♀ : {}♀ = {} ⟼ {}♀",
     "∞♀ = ∞ ⟼ ∞♀",
     "{[} : ∞♀",
     "{]} : ♂∞",
-    "{⟼} : {[} ⟼ {]}",
+    "{[}{]} = {[} ⟼ {]}",
+    "{⟼} : {[}{]}",
+    "{⟼} = {[} ⟼ {]}",
 ]
 
 FORBIDDEN_FIXTURE_PREFIXES = (
@@ -104,6 +112,27 @@ REPEATED_BRACE_RULE = (
     "Внутри одного исполнения шаблона все одинаковые вхождения `{}` "
     "относятся к одной и той же связи-кандидату."
 )
+
+POSITIONAL_SEQUENCE_RULE = (
+    "В последовательностной записи `{}{}...` каждое вхождение `{}` "
+    "задаёт отдельную позицию кандидата."
+)
+
+GROUPING_RULE = (
+    "Круглые скобки не меняют смысл формы, но выделяют форму как целый операнд."
+)
+
+SEQUENCE_DOCS = [
+    "docs/specs/Шаблонный поиск МТС.md",
+    "docs/specs/Формальная нотация МТС.md",
+    "docs/theory/Система аксиом МТС.md",
+    "docs/theory/Шаблон аксиом МТС.md",
+]
+
+GROUPING_DOCS = [
+    "docs/specs/Формальная нотация МТС.md",
+    "docs/theory/Система аксиом МТС.md",
+]
 
 REQUIRED_SYMBOLS = [
     "∞",
@@ -295,13 +324,28 @@ def test_axiom_system_has_symbol_statuses_and_core_cards():
 
     for heading in [
         "## А1. Акорень",
-        "## А2. Самозамкнутое начало",
-        "## А3. Самозамкнутый конец",
-        "## А4. Смысл абита начала",
-        "## А5. Смысл абита конца",
-        "## А6. Смысл конструктора связи",
+        "## А2. Группировка формы",
+        "## А3. Последовательность двух форм",
+        "## А4. Прямоассоциативность последовательности",
+        "## А5. Самозамкнутое начало",
+        "## А6. Самозамкнутый конец",
+        "## А7. Смысл абита начала",
+        "## А8. Смысл абита конца",
+        "## А9. Смысл конструктора связи",
     ]:
         assert heading in system
+
+    for formula in [
+        "({}) = {}",
+        "{}{} : {} ⟼ {}",
+        "{}{}{} : ({} ⟼ {}) ⟼ {}",
+        "{}{}{} = {} ⟼ {} ⟼ {}",
+        "{}{}{} != {} ⟼ ({} ⟼ {})",
+        "{[}{]} = {[} ⟼ {]}",
+        "{⟼} : {[}{]}",
+        "{⟼} = {[} ⟼ {]}",
+    ]:
+        assert formula in system
 
     assert "Что не входит в рабочее ядро" in system
     assert "tests/mtc_formulas.mtc" in system
@@ -320,11 +364,36 @@ def test_active_foundation_docs_bind_repeated_empty_braces():
         assert REPEATED_BRACE_RULE in read_doc(relative_path), relative_path
 
 
+def test_sequence_docs_describe_positional_candidates():
+    for relative_path in SEQUENCE_DOCS:
+        assert POSITIONAL_SEQUENCE_RULE in read_doc(relative_path), relative_path
+
+
+def test_grouping_docs_define_parentheses():
+    for relative_path in GROUPING_DOCS:
+        text = read_doc(relative_path)
+
+        assert GROUPING_RULE in text, relative_path
+        assert "({} ⟼ {}) ⟼ {} != {} ⟼ ({} ⟼ {})" in text, relative_path
+
+
 def test_formal_notation_separates_candidate_and_reference():
     spec = read_doc("docs/specs/Формальная нотация МТС.md")
 
     assert "{} не является частным случаем `{s}`" in spec
     assert "{s} не является поиском без фильтра" in spec
+
+
+def test_formal_notation_supports_sequence_and_grouping_forms():
+    spec = read_doc("docs/specs/Формальная нотация МТС.md")
+
+    for required in [
+        'sequence   ::= form form',
+        '"(" form ")"',
+        "{}{} : {} ⟼ {}",
+        "{}{}{} : ({} ⟼ {}) ⟼ {}",
+    ]:
+        assert required in spec
 
 
 def test_active_docs_do_not_promote_old_or_temporary_surfaces():
