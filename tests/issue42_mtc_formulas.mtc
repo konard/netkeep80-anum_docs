@@ -1,0 +1,28 @@
+# Статус: актуальное fixture новой рамки issue #42.
+# Формат: спецификационные строки для pytest, не вход legacy-прувера.
+
+AXIOM root: ∞ : {} = {} ⟼ {}
+EXEC root: ∞ : ∞ ⟼ ∞
+
+AXIOM self-start: ♂{} : ♂{} = ♂{} ⟼ {}
+EXEC self-start: ♂X : ♂X ⟼ X
+
+AXIOM self-end: {}♀ : {}♀ = {} ⟼ {}♀
+EXEC self-end: X♀ : X ⟼ X♀
+
+AXIOM abit-start: {[} : ∞♀
+AXIOM abit-end: {]} : ♂∞
+AXIOM arrow-meaning: {⟼} : {[} ⟼ {]}
+
+RULE repeated-empty-braces: one-candidate-per-template-execution
+RULE template-execution: candidate -> form-constraint -> found-meaning -> introduced-sign
+RULE candidate-reference-distinction: {} is not {s}
+
+NEGATIVE empty-braces: {} не пустое множество
+NEGATIVE empty-braces: {} не пустой результат поиска
+NEGATIVE empty-braces: {} не несвязь
+NEGATIVE empty-braces: {} не 0
+NEGATIVE brackets: [] не формульная группировка
+NEGATIVE brackets: старая скобочная запись связи не базовое ядро
+
+STATUS parser: parsers/mtc_formula_prover.py is legacy and does not execute this fixture
