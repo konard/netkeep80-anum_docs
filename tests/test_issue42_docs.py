@@ -86,6 +86,8 @@ REQUIRED_FORMULAS = [
     "{}{}{} = (({}) ⟼ {}) ⟼ {}",
     "{}{}{} = {} ⟼ {} ⟼ {}",
     "{}({}{}) : {} ⟼ ({}{})",
+    "{}{}{} != {}({}{})",
+    "{}{}{} != {} ⟼ ({} ⟼ {})",
     "♂{} : ♂{} = ♂{} ⟼ {}",
     "♂∞ = ♂∞ ⟼ ∞",
     "{}♀ : {}♀ = {} ⟼ {}♀",
@@ -130,10 +132,7 @@ GROUPING_BOUNDARY_RULE = (
     "Круглые скобки фиксируют границу уже собранной формы"
 )
 
-METALINGUISTIC_SEQUENCE_RULE = (
-    "Метаязыковое ограничение: последовательная запись `{}{}{}` "
-    "не читается как правая группировка `{}({}{})`."
-)
+FORMAL_SEQUENCE_DISTINCTION = "{}{}{} != {}({}{})"
 
 SEQUENCE_DOCS = [
     "docs/specs/Шаблонный поиск МТС.md",
@@ -155,6 +154,7 @@ REQUIRED_SYMBOLS = [
     "}",
     ":",
     "=",
+    "!=",
     "⟼",
     "♂",
     "♀",
@@ -177,6 +177,7 @@ SYSTEM_STATUS_ROWS = [
     "`}`",
     "`:`",
     "`=`",
+    "`!=`",
     "`⟼`",
     "`♂`",
     "`♀`",
@@ -312,6 +313,11 @@ def test_mtc_formula_fixture_uses_only_registered_notation_symbols():
     assert unknown == set()
 
 
+def test_bang_is_used_only_as_not_equal_token():
+    for line in formula_lines():
+        assert "!" not in line.replace("!=", ""), line
+
+
 def test_active_theory_uses_template_root_axiom():
     theory = read_doc("docs/theory/Метатеория связей.md")
 
@@ -400,6 +406,8 @@ def test_axiom_system_has_symbol_statuses_and_core_cards():
         "{}{}{} = (({}) ⟼ {}) ⟼ {}",
         "{}{}{} = {} ⟼ {} ⟼ {}",
         "{}({}{}) : {} ⟼ ({}{})",
+        "{}{}{} != {}({}{})",
+        "{}{}{} != {} ⟼ ({} ⟼ {})",
         "{[}{]} = {[} ⟼ {]}",
         "{⟼} : {[}{]}",
         "{⟼} = {[} ⟼ {]}",
@@ -434,7 +442,7 @@ def test_grouping_docs_define_parentheses():
 
         assert GROUPING_RULE in text, relative_path
         assert GROUPING_BOUNDARY_RULE in text, relative_path
-        assert METALINGUISTIC_SEQUENCE_RULE in text, relative_path
+        assert FORMAL_SEQUENCE_DISTINCTION in text, relative_path
 
 
 def test_formal_notation_separates_candidate_and_reference():
@@ -449,12 +457,15 @@ def test_formal_notation_supports_sequence_and_grouping_forms():
 
     for required in [
         'sequence   ::= form form',
+        'form "!=" form',
         '"(" form ")"',
         "{}{} : ({}) ⟼ {}",
         "{}({}) : {} ⟼ ({})",
         "{}{} : {} ⟼ {}",
         "{}{}{} : ({}{}) ⟼ {}",
         "{}({}{}) : {} ⟼ ({}{})",
+        "{}{}{} != {}({}{})",
+        "{}{}{} != {} ⟼ ({} ⟼ {})",
     ]:
         assert required in spec
 
