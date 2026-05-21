@@ -132,6 +132,8 @@ GROUPING_BOUNDARY_RULE = (
     "Круглые скобки фиксируют границу уже собранной формы"
 )
 
+FORMAL_SEQUENCE_DISTINCTION = "{}{}{} != {}({}{})"
+
 SEQUENCE_DOCS = [
     "docs/specs/Шаблонный поиск МТС.md",
     "docs/specs/Формальная нотация МТС.md",
@@ -152,6 +154,7 @@ REQUIRED_SYMBOLS = [
     "}",
     ":",
     "=",
+    "!=",
     "⟼",
     "♂",
     "♀",
@@ -174,6 +177,7 @@ SYSTEM_STATUS_ROWS = [
     "`}`",
     "`:`",
     "`=`",
+    "`!=`",
     "`⟼`",
     "`♂`",
     "`♀`",
@@ -246,6 +250,21 @@ def assert_balanced(line: str, opening: str, closing: str) -> None:
     assert depth == 0, line
 
 
+def registered_notation_characters() -> set[str]:
+    spec = read_doc("docs/specs/Формальная нотация МТС.md")
+    registry_entries: list[str] = []
+
+    for line in spec.splitlines():
+        if line.startswith("| `"):
+            registry_entries.extend(re.findall(r"`([^`]+)`", line.split("|", 2)[1]))
+
+    characters: set[str] = {" "}
+    for entry in registry_entries:
+        characters.update(char for char in entry if char != "s")
+
+    return characters
+
+
 def test_current_foundation_documents_exist():
     missing = [str(path.relative_to(ROOT)) for path in REQUIRED_DOCS if not path.exists()]
 
@@ -280,6 +299,23 @@ def test_mtc_formula_fixture_uses_pure_formulas():
         assert not line.startswith(FORBIDDEN_FIXTURE_PREFIXES), line
         assert_balanced(line, "{", "}")
         assert_balanced(line, "(", ")")
+
+
+def test_mtc_formula_fixture_uses_only_registered_notation_symbols():
+    allowed = registered_notation_characters()
+    unknown = {
+        char
+        for line in formula_lines()
+        for char in line
+        if char not in allowed
+    }
+
+    assert unknown == set()
+
+
+def test_bang_is_used_only_as_not_equal_token():
+    for line in formula_lines():
+        assert "!" not in line.replace("!=", ""), line
 
 
 def test_active_theory_uses_template_root_axiom():
@@ -406,7 +442,7 @@ def test_grouping_docs_define_parentheses():
 
         assert GROUPING_RULE in text, relative_path
         assert GROUPING_BOUNDARY_RULE in text, relative_path
-        assert "{}{}{} != {}({}{})" in text, relative_path
+        assert FORMAL_SEQUENCE_DISTINCTION in text, relative_path
 
 
 def test_formal_notation_separates_candidate_and_reference():
@@ -421,12 +457,15 @@ def test_formal_notation_supports_sequence_and_grouping_forms():
 
     for required in [
         'sequence   ::= form form',
+        'form "!=" form',
         '"(" form ")"',
         "{}{} : ({}) ⟼ {}",
         "{}({}) : {} ⟼ ({})",
         "{}{} : {} ⟼ {}",
         "{}{}{} : ({}{}) ⟼ {}",
         "{}({}{}) : {} ⟼ ({}{})",
+        "{}{}{} != {}({}{})",
+        "{}{}{} != {} ⟼ ({} ⟼ {})",
     ]:
         assert required in spec
 
