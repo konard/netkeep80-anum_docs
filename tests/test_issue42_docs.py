@@ -83,6 +83,21 @@ REQUIRED_FORMULAS = [
     "♂∞ = ♂∞ ⟼ ∞",
     "[]♀ : []♀ = [] ⟼ []♀",
     "∞♀ = ∞ ⟼ ∞♀",
+    "∞♀ : [⟼]♀",
+    "♂∞ : ♂[⟼]",
+    "(⟼) : [] ⟼ []",
+    "[⟼] : ∞♀ ⟼ ♂∞",
+    "¬[] : ♂[] ⟼ []♀",
+    "¬[⟼] : ♂[⟼] ⟼ [⟼]♀",
+    "¬[⟼] : ♂∞ ⟼ ∞♀",
+    "(=) : {[]♀ = []♀, ♂[] = ♂[]}",
+    "(!=) : ¬(=)",
+    "[] != [] : ¬([] = [])",
+    "↛ : ¬[⟼]",
+    "[ : ∞♀",
+    "] : ♂∞",
+    "1 : [⟼]",
+    "0 : [↛]",
     "{} != []",
     "{[]} != []",
     "{[], []} = {[]}",
@@ -126,6 +141,10 @@ REQUIRED_SYMBOL_ROWS = [
     "`=`",
     "`!=`",
     "`⟼`",
+    "`(⟼)`",
+    "`[⟼]`",
+    "`¬`",
+    "`↛`",
     "`♂`",
     "`♀`",
     "`[`",
@@ -143,6 +162,13 @@ AXIOM_HEADINGS = [
     "## R6. Самозамкнутый конец",
     "## R7. Фигурная пучковая нотация",
     "## R8. Пучковое раскрытие",
+    "## R9. Начало и конец акорня",
+    "## R10. Смысл связи и конкретная связь",
+    "## R11. Инверсия формы связи",
+    "## R12. Смысл равенства",
+    "## R13. Неравенство как инверсия смысла равенства",
+    "## R14. Несвязь",
+    "## R15. Абиты квадратной нотации",
 ]
 
 BUNDLE_FORMULAS = [
@@ -183,6 +209,10 @@ def assert_balanced(line: str, opening: str, closing: str) -> None:
     assert depth == 0, line
 
 
+def is_single_abit_definition(line: str) -> bool:
+    return line.startswith("[ : ") or line.startswith("] : ")
+
+
 def test_current_foundation_documents_exist():
     missing = [str(path.relative_to(ROOT)) for path in REQUIRED_DOCS if not path.exists()]
 
@@ -204,7 +234,8 @@ def test_mtc_formula_fixture_uses_root_bracket_system():
         assert not line.startswith(FORBIDDEN_FIXTURE_PREFIXES), line
         assert_balanced(line, "{", "}")
         assert_balanced(line, "(", ")")
-        assert_balanced(line, "[", "]")
+        if not is_single_abit_definition(line):
+            assert_balanced(line, "[", "]")
         assert "!" not in line.replace("!=", ""), line
 
 
@@ -260,6 +291,16 @@ def test_formal_notation_spec_defines_new_root_frame():
         "контейнер = область чтения данной нотации",
         ": не является процедурным присваиванием",
         "корневая библиотека апрувера",
+        "## Связь и смысл связи",
+        "## Инверсия",
+        "## Равенство и результат сравнения",
+        "## Неравенство как инверсия смысла равенства",
+        "## Абиты квадратной нотации",
+        "(⟼) : [] ⟼ []",
+        "[⟼] : ∞♀ ⟼ ♂∞",
+        "(!=) : ¬(=)",
+        "¬[=] не означает !=",
+        "∞ не является абитом",
     ]:
         assert required in spec
 
@@ -313,16 +354,46 @@ def test_bundle_notation_spec_keeps_bundle_rules_without_deletion_root():
         assert marker not in spec, marker
 
 
+def test_anum_serialization_defines_square_abits():
+    spec = read_doc("docs/specs/Ачисла и сериализация.md")
+
+    for required in [
+        "абиты квадратной нотации",
+        "[ и ] являются абитами",
+        "[] является минимальной ачисловой записью акорня",
+        "∞ не является абитом",
+        "1 вводится как абит конкретной связи",
+        "0 вводится как абит несвязи",
+        "[ : ∞♀",
+        "] : ♂∞",
+        "1 : [⟼]",
+        "0 : [↛]",
+    ]:
+        assert required in spec
+
+
+def test_template_search_distinguishes_repetition_positions_and_comparison():
+    spec = read_doc("docs/specs/Шаблонный поиск МТС.md")
+
+    for required in [
+        "внутри формулы после `:` повторные `[]` могут читаться как один образец",
+        "в последовательности `[][]` эти же `[]` читаются как позиции",
+        "в формулах равенства повторные `[]` могут читаться как позиционные сравниваемые формы",
+    ]:
+        assert required in spec
+
+
 def test_open_questions_hold_deferred_topics():
     questions = read_doc("docs/research/Открытые вопросы новой аксиоматики МТС.md")
 
     for required in [
-        "повторные пустые формы внутри шаблона",
-        "позиции в последовательности",
+        "полную формализацию позиционного чтения повторных `[]`",
+        "полную модель результата сравнения",
+        "тип результата `[] = []`",
+        "строгую семантику `↛`",
+        "связь `0` с сериализацией отсутствия",
         "пустое `()`",
-        "переменные как производный механизм",
-        "подстановку через неразличимость",
-        "смысл отдельных границ `[` и `]`",
+        "будущую теорию переменных и подстановки",
         "операционное удаление в пучковой нотации",
         "будущий апрувер должен решать систему формул одновременно",
     ]:
