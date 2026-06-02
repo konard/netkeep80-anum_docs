@@ -92,11 +92,21 @@ REQUIRED_FORMULAS = [
     "♂∞ = ♂∞ ⟼ ∞",
     "{}♀ : {}♀ = {} ⟼ {}♀",
     "∞♀ = ∞ ⟼ ∞♀",
-    "{[} : ∞♀",
-    "{]} : ♂∞",
-    "{[}{]} = {[} ⟼ {]}",
-    "{⟼} : {[}{]}",
-    "{⟼} = {[} ⟼ {]}",
+    "∞♀ : [⟼]♀",
+    "♂∞ : ♂[⟼]",
+    "(⟼) : [] ⟼ []",
+    "[⟼] : ∞♀ ⟼ ♂∞",
+    "¬[] : ♂[] ⟼ []♀",
+    "¬[⟼] : ♂[⟼] ⟼ [⟼]♀",
+    "¬[⟼] : ♂∞ ⟼ ∞♀",
+    "(=) : {[]♀ = []♀, ♂[] = ♂[]}",
+    "(!=) : ¬(=)",
+    "[] != [] : ¬([] = [])",
+    "↛ : ¬[⟼]",
+    "[ : ∞♀",
+    "] : ♂∞",
+    "1 : [⟼]",
+    "0 : [↛]",
 ]
 
 FORBIDDEN_FIXTURE_PREFIXES = (
@@ -134,6 +144,35 @@ GROUPING_BOUNDARY_RULE = (
 
 FORMAL_SEQUENCE_DISTINCTION = "{}{}{} != {}({}{})"
 
+NEW_ROOT_LAYER_FORMULAS = [
+    "∞♀ : [⟼]♀",
+    "♂∞ : ♂[⟼]",
+    "(⟼) : [] ⟼ []",
+    "[⟼] : ∞♀ ⟼ ♂∞",
+    "¬[] : ♂[] ⟼ []♀",
+    "¬[⟼] : ♂[⟼] ⟼ [⟼]♀",
+    "¬[⟼] : ♂∞ ⟼ ∞♀",
+    "(=) : {[]♀ = []♀, ♂[] = ♂[]}",
+    "(!=) : ¬(=)",
+    "[] != [] : ¬([] = [])",
+    "↛ : ¬[⟼]",
+    "[ : ∞♀",
+    "] : ♂∞",
+    "1 : [⟼]",
+    "0 : [↛]",
+]
+
+NEW_ROOT_LAYER_TERMS = [
+    "смысл связи",
+    "конкретная связь",
+    "инверсия формы связи",
+    "смысл равенства",
+    "смысл неравенства",
+    "абиты квадратной нотации",
+    "∞ не является абитом",
+    "¬[=] не означает !=",
+]
+
 SEQUENCE_DOCS = [
     "docs/specs/Шаблонный поиск МТС.md",
     "docs/specs/Формальная нотация МТС.md",
@@ -149,7 +188,6 @@ GROUPING_DOCS = [
 REQUIRED_SYMBOLS = [
     "∞",
     "{}",
-    "{s}",
     "{",
     "}",
     ":",
@@ -167,12 +205,19 @@ REQUIRED_SYMBOLS = [
     "(",
     ")",
     ",",
+    "[]",
+    "[⟼]",
+    "[↛]",
+    "(⟼)",
+    "(=)",
+    "(!=)",
+    "¬[]",
+    "¬[⟼]",
 ]
 
 SYSTEM_STATUS_ROWS = [
     "`∞`",
     "`{}`",
-    "`{s}`",
     "`{`",
     "`}`",
     "`:`",
@@ -186,6 +231,16 @@ SYSTEM_STATUS_ROWS = [
     "`1`, `0`",
     "`¬`",
     "`↛`",
+    "`[]`",
+    "`∞♀`",
+    "`♂∞`",
+    "`(⟼)`",
+    "`[⟼]`",
+    "`¬[]`",
+    "`¬[⟼]`",
+    "`(=)`",
+    "`(!=)`",
+    "`[↛]`",
 ]
 
 STALE_ACTIVE_MARKERS = [
@@ -204,6 +259,19 @@ STALE_ACTIVE_MARKERS = [
     "RULE repeated-empty-braces:",
     "NEGATIVE empty-braces:",
     "STATUS parser:",
+    "{s}",
+    "{[}",
+    "{]}",
+    "{⟼}",
+    "::=",
+    "definition ::=",
+    "definition  ::=",
+    "form ::=",
+    "form        ::=",
+    "reference ::=",
+    "reference   ::=",
+    "candidate ::=",
+    "candidate   ::=",
 ]
 
 PROCESS_ACTIVE_MARKERS = [
@@ -248,6 +316,11 @@ def assert_balanced(line: str, opening: str, closing: str) -> None:
             depth -= 1
         assert depth >= 0, line
     assert depth == 0, line
+
+
+def is_single_abit_definition(line: str) -> bool:
+    left, separator, _right = line.partition(":")
+    return bool(separator) and left.strip() in {"[", "]"}
 
 
 def registered_notation_characters() -> set[str]:
@@ -299,6 +372,8 @@ def test_mtc_formula_fixture_uses_pure_formulas():
         assert not line.startswith(FORBIDDEN_FIXTURE_PREFIXES), line
         assert_balanced(line, "{", "}")
         assert_balanced(line, "(", ")")
+        if not is_single_abit_definition(line):
+            assert_balanced(line, "[", "]")
 
 
 def test_mtc_formula_fixture_uses_only_registered_notation_symbols():
@@ -367,6 +442,31 @@ def test_formal_notation_has_complete_symbol_registry():
     assert "открыт вопрос" in spec
 
 
+def test_new_root_layer_formulas_are_documented():
+    for relative_path in [
+        "docs/specs/Формальная нотация МТС.md",
+        "docs/theory/Система аксиом МТС.md",
+        "docs/specs/Ачисла и сериализация.md",
+    ]:
+        text = read_doc(relative_path)
+        missing = [formula for formula in NEW_ROOT_LAYER_FORMULAS if formula not in text]
+
+        assert missing == [], relative_path
+
+
+def test_new_root_layer_terms_are_documented():
+    for relative_path in [
+        "docs/specs/Формальная нотация МТС.md",
+        "docs/theory/Система аксиом МТС.md",
+        "docs/specs/Ачисла и сериализация.md",
+        "docs/research/Открытые вопросы новой аксиоматики МТС.md",
+    ]:
+        text = read_doc(relative_path)
+        missing = [term for term in NEW_ROOT_LAYER_TERMS if term not in text]
+
+        assert missing == [], relative_path
+
+
 def test_axiom_template_is_normative():
     template = read_doc("docs/theory/Шаблон аксиом МТС.md")
 
@@ -391,9 +491,13 @@ def test_axiom_system_has_symbol_statuses_and_core_cards():
         "## А4. Прямоассоциативность последовательности",
         "## А5. Самозамкнутое начало",
         "## А6. Самозамкнутый конец",
-        "## А7. Смысл абита начала",
-        "## А8. Смысл абита конца",
-        "## А9. Смысл конструктора связи",
+        "## А7. Начало и конец акорня",
+        "## А8. Смысл связи и конкретная связь",
+        "## А9. Инверсия формы связи",
+        "## А10. Смысл равенства",
+        "## А11. Неравенство как инверсия смысла равенства",
+        "## А12. Несвязь",
+        "## А13. Абиты квадратной нотации",
     ]:
         assert heading in system
 
@@ -408,9 +512,7 @@ def test_axiom_system_has_symbol_statuses_and_core_cards():
         "{}({}{}) : {} ⟼ ({}{})",
         "{}{}{} != {}({}{})",
         "{}{}{} != {} ⟼ ({} ⟼ {})",
-        "{[}{]} = {[} ⟼ {]}",
-        "{⟼} : {[}{]}",
-        "{⟼} = {[} ⟼ {]}",
+        *NEW_ROOT_LAYER_FORMULAS,
     ]:
         assert formula in system
 
@@ -448,17 +550,14 @@ def test_grouping_docs_define_parentheses():
 def test_formal_notation_separates_candidate_and_reference():
     spec = read_doc("docs/specs/Формальная нотация МТС.md")
 
-    assert "{} не является частным случаем `{s}`" in spec
-    assert "{s} не является поиском без фильтра" in spec
+    assert "{} не является смысловой ссылкой на знак" in spec
+    assert "смысловые ссылки через фигурные скобки больше не используются" in spec
 
 
 def test_formal_notation_supports_sequence_and_grouping_forms():
     spec = read_doc("docs/specs/Формальная нотация МТС.md")
 
     for required in [
-        'sequence   ::= form form',
-        'form "!=" form',
-        '"(" form ")"',
         "{}{} : ({}) ⟼ {}",
         "{}({}) : {} ⟼ ({})",
         "{}{} : {} ⟼ {}",
@@ -466,6 +565,11 @@ def test_formal_notation_supports_sequence_and_grouping_forms():
         "{}({}{}) : {} ⟼ ({}{})",
         "{}{}{} != {}({}{})",
         "{}{}{} != {} ⟼ ({} ⟼ {})",
+        "(⟼) : [] ⟼ []",
+        "[⟼] : ∞♀ ⟼ ♂∞",
+        "¬[] : ♂[] ⟼ []♀",
+        "(=) : {[]♀ = []♀, ♂[] = ♂[]}",
+        "(!=) : ¬(=)",
     ]:
         assert required in spec
 
@@ -482,5 +586,4 @@ def test_active_docs_do_not_promote_old_or_temporary_surfaces():
 
         assert markers == [], relative_path
         assert process_markers == [], relative_path
-        assert "[⟼]" not in text, relative_path
         assert "archive/" not in text, relative_path
