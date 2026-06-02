@@ -16,6 +16,7 @@ REQUIRED_DOCS = [
     ROOT / "docs/specs/Шаблонный поиск МТС.md",
     ROOT / "docs/specs/Ачисла и сериализация.md",
     ROOT / "docs/specs/Формальная нотация МТС.md",
+    ROOT / "docs/specs/Пучковая нотация МТС.md",
     ROOT / "docs/research/Открытые вопросы новой аксиоматики МТС.md",
     ROOT / "tests/mtc_formulas.mtc",
 ]
@@ -36,6 +37,7 @@ REMOVED_TEST_FIXTURES = [
 ]
 
 ACTIVE_THEORY_FILES = {
+    "Ключевые идеи МТС.md",
     "Метатеория связей.md",
     "Основания МТС.md",
     "Система аксиом МТС.md",
@@ -47,6 +49,7 @@ ACTIVE_SPEC_FILES = {
     "Слои нотации МТС.md",
     "Формальная нотация МТС.md",
     "Шаблонный поиск МТС.md",
+    "Пучковая нотация МТС.md",
 }
 
 ACTIVE_RESEARCH_FILES = {
@@ -75,28 +78,37 @@ ACTIVE_DOCS = [
 ]
 
 REQUIRED_FORMULAS = [
-    "∞ : {} = {} ⟼ {}",
+    "∞ : □ = □ ⟼ □",
     "∞ = ∞ ⟼ ∞",
-    "({}) = {}",
-    "{}{} : ({}) ⟼ {}",
-    "{}({}) : {} ⟼ ({})",
-    "{}{} : {} ⟼ {}",
-    "{}{} = {} ⟼ {}",
-    "{}{}{} : ({}{}) ⟼ {}",
-    "{}{}{} = (({}) ⟼ {}) ⟼ {}",
-    "{}{}{} = {} ⟼ {} ⟼ {}",
-    "{}({}{}) : {} ⟼ ({}{})",
-    "{}{}{} != {}({}{})",
-    "{}{}{} != {} ⟼ ({} ⟼ {})",
-    "♂{} : ♂{} = ♂{} ⟼ {}",
+    "(□) = □",
+    "□□ : (□) ⟼ □",
+    "□(□) : □ ⟼ (□)",
+    "□□ : □ ⟼ □",
+    "□□ = □ ⟼ □",
+    "□□□ : (□□) ⟼ □",
+    "□□□ = ((□) ⟼ □) ⟼ □",
+    "□□□ = □ ⟼ □ ⟼ □",
+    "□(□□) : □ ⟼ (□□)",
+    "□□□ != □(□□)",
+    "□□□ != □ ⟼ (□ ⟼ □)",
+    "♂□ : ♂□ = ♂□ ⟼ □",
     "♂∞ = ♂∞ ⟼ ∞",
-    "{}♀ : {}♀ = {} ⟼ {}♀",
+    "□♀ : □♀ = □ ⟼ □♀",
     "∞♀ = ∞ ⟼ ∞♀",
-    "{[} : ∞♀",
-    "{]} : ♂∞",
-    "{[}{]} = {[} ⟼ {]}",
-    "{⟼} : {[}{]}",
-    "{⟼} = {[} ⟼ {]}",
+    "⟦[⟧Q : ∞♀",
+    "⟦]⟧Q : ♂∞",
+    "⟦[⟧Q⟦]⟧Q = ⟦[⟧Q ⟼ ⟦]⟧Q",
+    "⟦⟼⟧F : ⟦[⟧Q⟦]⟧Q",
+    "⟦⟼⟧F = ⟦[⟧Q ⟼ ⟦]⟧Q",
+]
+
+# Overloaded brace forms that must no longer appear in the canonical fixture.
+RETIRED_FIXTURE_FORMS = [
+    "∞ : {} = {} ⟼ {}",
+    "{[}",
+    "{]}",
+    "{⟼}",
+    "{s}",
 ]
 
 FORBIDDEN_FIXTURE_PREFIXES = (
@@ -107,20 +119,20 @@ FORBIDDEN_FIXTURE_PREFIXES = (
     "STATUS ",
 )
 
-BRACE_NEGATIONS = [
-    "{} ≠ пустое множество",
-    "{} ≠ пустой результат поиска",
-    "{} ≠ несвязь",
-    "{} ≠ 0",
+SLOT_NEGATIONS = [
+    "□ ≠ пустое множество",
+    "□ ≠ пустой результат поиска",
+    "□ ≠ несвязь",
+    "□ ≠ 0",
 ]
 
-REPEATED_BRACE_RULE = (
-    "Внутри одного исполнения шаблона все одинаковые вхождения `{}` "
+REPEATED_SLOT_RULE = (
+    "Внутри одного исполнения шаблона все одинаковые вхождения `□` "
     "относятся к одной и той же связи-кандидату."
 )
 
 POSITIONAL_SEQUENCE_RULE = (
-    "В последовательностной записи `{}{}...` каждое вхождение `{}` "
+    "В последовательностной записи `□□...` каждое вхождение `□` "
     "задаёт отдельную позицию кандидата."
 )
 
@@ -132,7 +144,7 @@ GROUPING_BOUNDARY_RULE = (
     "Круглые скобки фиксируют границу уже собранной формы"
 )
 
-FORMAL_SEQUENCE_DISTINCTION = "{}{}{} != {}({}{})"
+FORMAL_SEQUENCE_DISTINCTION = "□□□ != □(□□)"
 
 SEQUENCE_DOCS = [
     "docs/specs/Шаблонный поиск МТС.md",
@@ -148,8 +160,11 @@ GROUPING_DOCS = [
 
 REQUIRED_SYMBOLS = [
     "∞",
+    "□",
     "{}",
-    "{s}",
+    "⟦s⟧N",
+    "Q",
+    "F",
     "{",
     "}",
     ":",
@@ -171,10 +186,9 @@ REQUIRED_SYMBOLS = [
 
 SYSTEM_STATUS_ROWS = [
     "`∞`",
+    "`□`",
+    "`⟦s⟧N`",
     "`{}`",
-    "`{s}`",
-    "`{`",
-    "`}`",
     "`:`",
     "`=`",
     "`!=`",
@@ -186,6 +200,32 @@ SYSTEM_STATUS_ROWS = [
     "`1`, `0`",
     "`¬`",
     "`↛`",
+]
+
+BUNDLE_AXIOM_HEADINGS = [
+    "### B0. Пустой пучок",
+    "### B1. Одноэлементный пучок",
+    "### B2. Экстенсиональность пучка",
+    "### B3. Правое пучковое раскрытие",
+    "### B4. Левое пучковое раскрытие",
+    "### B5. Двустороннее пучковое раскрытие",
+    "### B6. Пустой правый пучок",
+    "### B7. Пустой левый пучок",
+    "### B8. Частичное удаление исходящих связей",
+    "### B9. Частичное удаление входящих связей",
+]
+
+BUNDLE_RULES = [
+    "{x} ≠ x",
+    "{x, y} = {y, x}",
+    "{x, x} = {x}",
+    "a{x, y} = {a ⟼ x, a ⟼ y}",
+    "{x, y}a = {x ⟼ a, y ⟼ a}",
+    "{x, y}{a, b}",
+    "delete {a ⟼ □}",
+    "delete {□ ⟼ a}",
+    "NF(a{x, y})",
+    "OP(a{})",
 ]
 
 STALE_ACTIVE_MARKERS = [
@@ -260,7 +300,7 @@ def registered_notation_characters() -> set[str]:
 
     characters: set[str] = {" "}
     for entry in registry_entries:
-        characters.update(char for char in entry if char != "s")
+        characters.update(char for char in entry if char not in {"s", "N"})
 
     return characters
 
@@ -301,6 +341,16 @@ def test_mtc_formula_fixture_uses_pure_formulas():
         assert_balanced(line, "(", ")")
 
 
+def test_mtc_formula_fixture_drops_overloaded_brace_forms():
+    lines = formula_lines()
+
+    for retired in RETIRED_FIXTURE_FORMS:
+        assert all(retired not in line for line in lines), retired
+
+    for char in "{}":
+        assert all(char not in line for line in lines), char
+
+
 def test_mtc_formula_fixture_uses_only_registered_notation_symbols():
     allowed = registered_notation_characters()
     unknown = {
@@ -321,7 +371,7 @@ def test_bang_is_used_only_as_not_equal_token():
 def test_active_theory_uses_template_root_axiom():
     theory = read_doc("docs/theory/Метатеория связей.md")
 
-    assert "∞ : {} = {} ⟼ {}" in theory
+    assert "∞ : □ = □ ⟼ □" in theory
     assert "∞ = ∞ ⟼ ∞" in read_doc("tests/mtc_formulas.mtc")
 
 
@@ -349,10 +399,12 @@ def test_readme_links_point_to_existing_local_files():
         assert path.exists(), target
 
 
-def test_formal_notation_treats_braces_as_template_search():
+def test_formal_notation_treats_slot_as_template_search():
     spec = read_doc("docs/specs/Формальная нотация МТС.md")
 
-    assert "{} — шаблонный поиск без фильтра" in spec
+    assert "□ — шаблонный слот / кандидат шаблонного поиска" in spec
+    assert "пучок связей" in spec
+    assert "{} — шаблонный поиск без фильтра" not in spec
     assert "Множества связей" not in spec
 
 
@@ -398,19 +450,19 @@ def test_axiom_system_has_symbol_statuses_and_core_cards():
         assert heading in system
 
     for formula in [
-        "({}) = {}",
-        "{}{} : ({}) ⟼ {}",
-        "{}({}) : {} ⟼ ({})",
-        "{}{} : {} ⟼ {}",
-        "{}{}{} : ({}{}) ⟼ {}",
-        "{}{}{} = (({}) ⟼ {}) ⟼ {}",
-        "{}{}{} = {} ⟼ {} ⟼ {}",
-        "{}({}{}) : {} ⟼ ({}{})",
-        "{}{}{} != {}({}{})",
-        "{}{}{} != {} ⟼ ({} ⟼ {})",
-        "{[}{]} = {[} ⟼ {]}",
-        "{⟼} : {[}{]}",
-        "{⟼} = {[} ⟼ {]}",
+        "(□) = □",
+        "□□ : (□) ⟼ □",
+        "□(□) : □ ⟼ (□)",
+        "□□ : □ ⟼ □",
+        "□□□ : (□□) ⟼ □",
+        "□□□ = ((□) ⟼ □) ⟼ □",
+        "□□□ = □ ⟼ □ ⟼ □",
+        "□(□□) : □ ⟼ (□□)",
+        "□□□ != □(□□)",
+        "□□□ != □ ⟼ (□ ⟼ □)",
+        "⟦[⟧Q⟦]⟧Q = ⟦[⟧Q ⟼ ⟦]⟧Q",
+        "⟦⟼⟧F : ⟦[⟧Q⟦]⟧Q",
+        "⟦⟼⟧F = ⟦[⟧Q ⟼ ⟦]⟧Q",
     ]:
         assert formula in system
 
@@ -418,17 +470,17 @@ def test_axiom_system_has_symbol_statuses_and_core_cards():
     assert "tests/mtc_formulas.mtc" in system
 
 
-def test_active_foundation_docs_keep_brace_search_boundaries():
+def test_active_foundation_docs_keep_slot_search_boundaries():
     for relative_path in ACTIVE_FOUNDATION_DOCS:
         text = read_doc(relative_path)
-        missing = [line for line in BRACE_NEGATIONS if line not in text]
+        missing = [line for line in SLOT_NEGATIONS if line not in text]
 
         assert missing == [], relative_path
 
 
-def test_active_foundation_docs_bind_repeated_empty_braces():
+def test_active_foundation_docs_bind_repeated_slot():
     for relative_path in ACTIVE_FOUNDATION_DOCS:
-        assert REPEATED_BRACE_RULE in read_doc(relative_path), relative_path
+        assert REPEATED_SLOT_RULE in read_doc(relative_path), relative_path
 
 
 def test_sequence_docs_describe_positional_candidates():
@@ -448,8 +500,8 @@ def test_grouping_docs_define_parentheses():
 def test_formal_notation_separates_candidate_and_reference():
     spec = read_doc("docs/specs/Формальная нотация МТС.md")
 
-    assert "{} не является частным случаем `{s}`" in spec
-    assert "{s} не является поиском без фильтра" in spec
+    assert "не является частным случаем `⟦s⟧N`" in spec
+    assert "`⟦s⟧N` не является поиском без фильтра" in spec
 
 
 def test_formal_notation_supports_sequence_and_grouping_forms():
@@ -459,15 +511,34 @@ def test_formal_notation_supports_sequence_and_grouping_forms():
         'sequence   ::= form form',
         'form "!=" form',
         '"(" form ")"',
-        "{}{} : ({}) ⟼ {}",
-        "{}({}) : {} ⟼ ({})",
-        "{}{} : {} ⟼ {}",
-        "{}{}{} : ({}{}) ⟼ {}",
-        "{}({}{}) : {} ⟼ ({}{})",
-        "{}{}{} != {}({}{})",
-        "{}{}{} != {} ⟼ ({} ⟼ {})",
+        'slot        ::= "□"',
+        'reference   ::= "⟦" sign "⟧" context',
+        "□□ : (□) ⟼ □",
+        "□(□) : □ ⟼ (□)",
+        "□□ : □ ⟼ □",
+        "□□□ : (□□) ⟼ □",
+        "□(□□) : □ ⟼ (□□)",
+        "□□□ != □(□□)",
+        "□□□ != □ ⟼ (□ ⟼ □)",
     ]:
         assert required in spec
+
+
+def test_bundle_notation_spec_defines_bundle_operations():
+    spec = read_doc("docs/specs/Пучковая нотация МТС.md")
+
+    assert "пучок связей" in spec
+    assert "пучковая нотация" in spec.casefold()
+
+    for heading in BUNDLE_AXIOM_HEADINGS:
+        assert heading in spec, heading
+
+    for rule in BUNDLE_RULES:
+        assert rule in spec, rule
+
+    # The bundle spec records the migration away from the overloaded braces.
+    assert "∞ : □ = □ ⟼ □" in spec
+    assert "⟦[⟧Q : ∞♀" in spec
 
 
 def test_active_docs_do_not_promote_old_or_temporary_surfaces():
