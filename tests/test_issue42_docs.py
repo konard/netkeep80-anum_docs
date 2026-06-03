@@ -20,12 +20,12 @@ REQUIRED_DOCS = [
     ROOT / "docs/specs/Ачисла и сериализация.md",
     ROOT / "docs/specs/Формальная нотация МТС.md",
     ROOT / "docs/specs/Пучковая нотация МТС.md",
+    ROOT / "docs/research/Ключевые идеи МТС.md",
     ROOT / "docs/research/Открытые вопросы новой аксиоматики МТС.md",
     ROOT / "tests/mtc_formulas.mtc",
 ]
 
 THEORY_SURFACE_FILES = {
-    "Ключевые идеи МТС.md",
     "Метатеория связей.md",
     "Основания МТС.md",
     "Система аксиом МТС.md",
@@ -41,6 +41,7 @@ ACTIVE_SPEC_FILES = {
 }
 
 ACTIVE_RESEARCH_FILES = {
+    "Ключевые идеи МТС.md",
     "Открытые вопросы новой аксиоматики МТС.md",
 }
 
@@ -105,6 +106,8 @@ REQUIRED_FORMULAS = [
     "[]{[], [][]} = {[] ⟼ [], [] ⟼ [][]}",
     "{[], [][]}[] = {[] ⟼ [], [][] ⟼ []}",
     "{[], [][]}{[], [][]} = {[] ⟼ [], [] ⟼ [][], [][] ⟼ [], [][] ⟼ [][]}",
+    "[]{} = {}",
+    "{}[] = {}",
 ]
 
 FORBIDDEN_ACTIVE_MARKERS = [
@@ -179,6 +182,8 @@ BUNDLE_FORMULAS = [
     "[]{[], [][]} = {[] ⟼ [], [] ⟼ [][]}",
     "{[], [][]}[] = {[] ⟼ [], [][] ⟼ []}",
     "{[], [][]}{[], [][]} = {[] ⟼ [], [] ⟼ [][], [][] ⟼ [], [][] ⟼ [][]}",
+    "[]{} = {}",
+    "{}[] = {}",
 ]
 
 
@@ -269,6 +274,18 @@ def test_readme_is_current_entrypoint():
         assert required in readme
 
 
+def test_readme_softens_unresolved_formula_layer():
+    readme = read_doc("README.md")
+
+    for required in [
+        "Практически стабильно:",
+        "Рабочий слой текущего fixture:",
+        "`(=)`, `(!=)`, `¬[]`, `¬[⟼]`, `↛` и `0`",
+        "не считаются окончательно стабилизированной семантикой",
+    ]:
+        assert required in readme
+
+
 def test_readme_links_point_to_existing_local_files():
     readme = read_doc("README.md")
 
@@ -343,6 +360,10 @@ def test_bundle_notation_spec_keeps_bundle_rules_without_deletion_root():
         "пучок не тождественен элементу",
         "порядок элементов не важен",
         "повтор элемента не создаёт новый элемент пучка",
+        "## Пустое пучковое раскрытие",
+        "[]{} = {}",
+        "{}[] = {}",
+        "пустой исходящий / входящий пучок в описательном смысле",
         "операционное удаление не входит в корневое ядро",
     ]:
         assert required in spec
@@ -395,6 +416,7 @@ def test_open_questions_hold_deferred_topics():
         "пустое `()`",
         "будущую теорию переменных и подстановки",
         "операционное удаление в пучковой нотации",
+        "Операционное чтение `[]{}` и `{}[]`",
         "будущий апрувер должен решать систему формул одновременно",
     ]:
         assert required in questions
