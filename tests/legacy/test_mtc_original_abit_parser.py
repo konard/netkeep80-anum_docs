@@ -1,22 +1,27 @@
 # -*- coding: utf-8 -*-
 """
-Тесты парсера оригинальной нотации абитов МТС
+Legacy-тесты парсера оригинальной нотации абитов МТС
 (parsers/mtc_original_abit_parser.py).
 
-Покрывают (issue #46, пункт 5):
+Историческая оригинальная нотация оставлена только как compatibility layer.
+Эти тесты не нормируют текущую квадратную нотацию МТС, где абиты — только
+`[`, `]`, `1`, `0`, а `∞` не является абитом.
+
+Покрывают:
 * нотацию MTCAbitNotation (♂, ♀, →, ∞ и контекстные разделители);
 * контекстное разрешение запятых (ContextualCommaResolver);
 * лексер MTCOriginalLexer.
 
 Запуск:
-  python3 tests/test_mtc_original_abit_parser.py
+  python3 tests/legacy/test_mtc_original_abit_parser.py
 """
 
 import sys
 import os
 import unittest
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'parsers'))
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(_REPO_ROOT, 'parsers'))
 
 from mtc_original_abit_parser import (  # noqa: E402
     MTCAbitNotation, ContextualCommaResolver, MTCOriginalLexer
@@ -24,7 +29,7 @@ from mtc_original_abit_parser import (  # noqa: E402
 
 
 class TestMTCAbitNotation(unittest.TestCase):
-    """Оригинальная нотация абитов."""
+    """Историческая оригинальная нотация абитов."""
 
     def setUp(self):
         self.n = MTCAbitNotation()

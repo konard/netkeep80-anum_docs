@@ -2,6 +2,12 @@
 """
 MTC Notation System - Система разграничения и обработки нотаций МТС
 
+Legacy helper for early notation conversions.
+
+Этот файл остаётся переходным compatibility-модулем. Автоопределение здесь
+является эвристикой (`guess_*`), а не нормативным reader'ом формальной нотации.
+Текущий reader корневых формул находится в ``core.mtc_reader``.
+
 Реализует три типа нотаций:
 1. Четверичные ачисла (Quaternary Anums) - только [, ], 1, 0
 2. Строковые ачисла (String Anums) - текст с ссылками на абиты {1}, {0}, etc.
@@ -38,7 +44,11 @@ class ValidationResult:
     suggestions: Optional[List[str]] = None
 
 class NotationDetector:
-    """Детектор типов нотаций МТС"""
+    """Эвристическая подсказка типа нотации.
+
+    Для формальной проверки используйте reader с явным слоем. Старое имя
+    ``detect_notation_type`` сохранено только для совместимости.
+    """
     
     # Индикаторы формул МТС
     FORMULA_OPERATORS = ['==', '=', '≠', '!=', '→', '↛', '->']
@@ -47,13 +57,13 @@ class NotationDetector:
     # Четверичные абиты
     QUATERNARY_ABITS = set('[]10 ')
     
-    # Паттерн для ссылок на абиты в строках (исправлен)
+    # Паттерн для ссылок на квадратные абиты и акорень в строках.
     ABIT_REFERENCE_PATTERN = r'\{([10\[\]∞])\}'
     
     @classmethod
-    def detect_notation_type(cls, input_text: str) -> NotationType:
+    def guess_notation_type(cls, input_text: str) -> NotationType:
         """
-        Автоматическое определение типа нотации
+        Эвристическая подсказка типа нотации.
         
         Args:
             input_text: Входной текст для анализа
@@ -70,12 +80,17 @@ class NotationDetector:
         if cls._is_pure_quaternary(text):
             return NotationType.QUATERNARY
         
-        # Проверка на формулу МТС (содержит операторы или символы формул)
+        # Эвристика формулы МТС (содержит операторы или символы формул)
         if cls._is_mtc_formula(text):
             return NotationType.FORMULA
         
         # По умолчанию - строковое ачисло
         return NotationType.STRING
+
+    @classmethod
+    def detect_notation_type(cls, input_text: str) -> NotationType:
+        """Compatibility wrapper for old callers; use ``guess_notation_type``."""
+        return cls.guess_notation_type(input_text)
     
     @classmethod
     def _is_pure_quaternary(cls, text: str) -> bool:
@@ -130,15 +145,19 @@ class NotationDetector:
                 return 0.7
 
 class AbitReferenceResolver:
-    """Резолвер ссылок на абиты"""
+    """Резолвер ссылок на квадратные абиты и акорень в строковом слое."""
     
-    # Карта ссылок на абиты - обновлено для унификации с aprover
+    # Карта ссылок на квадратные абиты.
     ABIT_MAP = {
         '1': '1',        # абит связи (истина)
         '0': '0',        # абит несвязи (ложь)
         '[': '[',        # абит начала связи
         ']': ']',        # абит конца связи
-        '∞': '[]',       # ассоциативный корень выражается как [] = ∞
+    }
+
+    # ∞ не является абитом; это отдельная ссылка на акорень.
+    ROOT_REFERENCE_MAP = {
+        '∞': '[]',
     }
     
     @classmethod
@@ -147,17 +166,19 @@ class AbitReferenceResolver:
         Разрешение ссылки на абит
         
         Args:
-            abit_ref: Ссылка на абит (например, '+', '-', '∞')
+            abit_ref: Ссылка на абит или акорень
             
         Returns:
             str: Разрешенное значение абита
         """
-        return cls.ABIT_MAP.get(abit_ref, '')
+        if abit_ref in cls.ABIT_MAP:
+            return cls.ABIT_MAP[abit_ref]
+        return cls.ROOT_REFERENCE_MAP.get(abit_ref, '')
     
     @classmethod
     def resolve_all_references(cls, text: str) -> str:
         """
-        Разрешение всех ссылок на абиты в тексте
+        Разрешение всех ссылок на квадратные абиты и акорень в тексте
         
         Args:
             text: Текст со ссылками на абиты {+}, {-}, etc.
@@ -271,7 +292,7 @@ class NotationValidator:
         # Проверка корректности ссылок на абиты
         abit_refs = NotationDetector.extract_abit_references(text)
         
-        valid_refs = set(AbitReferenceResolver.ABIT_MAP.keys())
+        valid_refs = set(AbitReferenceResolver.ABIT_MAP.keys()) | set(AbitReferenceResolver.ROOT_REFERENCE_MAP.keys())
         invalid_refs = [ref for ref in abit_refs if ref not in valid_refs]
         
         if invalid_refs:
@@ -319,7 +340,7 @@ class MTC_NotationAPI:
             ParsedExpression: Результат парсинга
         """
         if notation_type is None:
-            notation_type = self.detector.detect_notation_type(input_data)
+            notation_type = self.detector.guess_notation_type(input_data)
         
         confidence = self.detector.get_confidence(input_data, notation_type)
         abit_references = self.detector.extract_abit_references(input_data)

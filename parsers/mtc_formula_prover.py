@@ -48,8 +48,8 @@ if os.name == 'nt':
     except Exception:
         pass
 
-# Shared base classes (deduplicated into parsers/anum_core.py — see issue #46)
-from anum_core import (  # noqa: E402
+# Legacy AST nodes shared only by the old parser/prover compatibility layer.
+from legacy_ast import (  # noqa: E402
     AnumToken,
     AnumExpression,
     Symbol,

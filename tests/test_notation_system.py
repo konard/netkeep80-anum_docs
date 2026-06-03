@@ -3,7 +3,7 @@
 Тесты системы разграничения нотаций МТС (core/notation_system.py).
 
 Покрывают (issue #46, пункт 5):
-* детектор типов нотаций (NotationDetector);
+* legacy-подсказку типов нотаций (NotationDetector);
 * резолвер ссылок на абиты (AbitReferenceResolver);
 * конвертер и валидатор нотаций;
 * унифицированный API MTC_NotationAPI.
@@ -25,33 +25,39 @@ from core.notation_system import (  # noqa: E402
 
 
 class TestNotationDetector(unittest.TestCase):
-    """Автоопределение типа нотации."""
+    """Эвристическая подсказка типа нотации."""
 
     def test_quaternary(self):
         for text in ('1100', '[[]]', '10[]', '[ ] 1 0'):
             self.assertEqual(
-                NotationDetector.detect_notation_type(text),
+                NotationDetector.guess_notation_type(text),
                 NotationType.QUATERNARY, text
             )
 
     def test_formula(self):
         for text in ('♂♀ = ∞', '1 == 1', '[] == ∞', 'a -> b'):
             self.assertEqual(
-                NotationDetector.detect_notation_type(text),
+                NotationDetector.guess_notation_type(text),
                 NotationType.FORMULA, text
             )
 
     def test_string(self):
         for text in ('hello', 'abc', '"начало{[}конец"'):
             self.assertEqual(
-                NotationDetector.detect_notation_type(text),
+                NotationDetector.guess_notation_type(text),
                 NotationType.STRING, text
             )
 
     def test_empty_is_quaternary(self):
         self.assertEqual(
-            NotationDetector.detect_notation_type(''),
+            NotationDetector.guess_notation_type(''),
             NotationType.QUATERNARY
+        )
+
+    def test_detect_name_is_legacy_wrapper(self):
+        self.assertEqual(
+            NotationDetector.detect_notation_type('♂♀ = ∞'),
+            NotationDetector.guess_notation_type('♂♀ = ∞')
         )
 
     def test_extract_abit_references(self):
@@ -80,8 +86,9 @@ class TestAbitReferenceResolver(unittest.TestCase):
         for a in ('1', '0', '[', ']'):
             self.assertEqual(AbitReferenceResolver.resolve_abit_reference(a), a)
 
-    def test_infinity_expands_to_brackets(self):
-        # ∞ выражается через абиты [] — не отдельный абит.
+    def test_infinity_reference_expands_to_brackets_but_is_not_abit(self):
+        # ∞ выражается через [] как ссылка на акорень, но не входит в ABIT_MAP.
+        self.assertNotIn('∞', AbitReferenceResolver.ABIT_MAP)
         self.assertEqual(AbitReferenceResolver.resolve_abit_reference('∞'), '[]')
 
     def test_unknown_reference_empty(self):

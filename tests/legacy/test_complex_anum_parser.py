@@ -1,20 +1,25 @@
 # -*- coding: utf-8 -*-
 """
-Тесты парсера сложных ачисел (parsers/complex_anum_parser.py).
+Legacy-тесты парсера сложных ачисел (parsers/complex_anum_parser.py).
 
-Покрывают (issue #46, пункт 5) обработку выражений вида
+Эти проверки сохраняют поведение старого compatibility parser до его замены
+reader'ом формальной нотации МТС. Они не являются спецификацией текущей
+корневой нотации.
+
+Покрывают обработку выражений вида
 window(position)(10)(int) с корректным разграничением абитов,
 идентификаторов и чисел внутри скобок.
 
 Запуск:
-  python3 tests/test_complex_anum_parser.py
+  python3 tests/legacy/test_complex_anum_parser.py
 """
 
 import sys
 import os
 import unittest
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'parsers'))
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(_REPO_ROOT, 'parsers'))
 
 from extended_anum_parser import AbitNotation  # noqa: E402
 from complex_anum_parser import (  # noqa: E402

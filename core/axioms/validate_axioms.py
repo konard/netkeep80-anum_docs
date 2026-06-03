@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-Комплексная валидация аксиом МТС (А0-А16) + аксиомы абитов.
+Legacy-валидация аксиом МТС (А0-А16) + аксиомы абитов.
 
-В отличие от прежней версии (issue #46), где каждый под-тест хардкодил
-``True`` в :meth:`MTCAxiomValidator.log_test`, теперь КАЖДЫЙ результат
-вычисляется реально:
+Этот модуль оставлен как compatibility runner для старого Python prover. Он
+не является корневым валидатором формальной нотации МТС и не задаёт источник
+истины для нотации. Каноническая библиотека формул должна загружаться из
+``.mtc`` через ``core.root_library`` / ``core.validate_root``.
+
+В отличие от ранней версии (issue #46), где каждый под-тест хардкодил
+``True`` в :meth:`MTCAxiomValidator.log_test`, каждый результат здесь
+вычисляется legacy prover'ом или структурной проверкой:
 
 * формульные эквивалентности (♂♀ = ∞, ∞ = ∞→∞, ♂∞♀ = (♂∞)♀, конгруэнция,
   ориентированность связи и т. п.) проверяются настоящим доказателем
@@ -12,8 +17,9 @@
 * структурные утверждения об абитах ([, ], 1, 0 и исключение ∞) проверяются
   через :meth:`validate_abit_sequence` и операции над множеством абитов.
 
-Таким образом, если доказатель или структура нотации сломается, валидация
-честно сообщит о провале — это полноценный тест-сьют, а не документация.
+``check_formula()`` возвращает структурированный ``ProofResult``. Ошибка
+разбора или неподдержанная конструкция больше не считается смысловым
+опровержением.
 """
 
 import os
@@ -21,9 +27,13 @@ import sys
 
 # Доказатель живёт в parsers/; добавляем его в путь, чтобы импортировать.
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, _REPO_ROOT)
 sys.path.insert(0, os.path.join(_REPO_ROOT, 'parsers'))
 
-from anum_prover import EnhancedAnumProver  # noqa: E402
+from core.proof_result import ProofResult  # noqa: E402
+from core.layers import Layer  # noqa: E402
+from core.mtc_reader import read_formula  # noqa: E402
+from anum_prover import EnhancedAnumLexer, EnhancedAnumParser, EnhancedAnumProver  # noqa: E402
 
 # Четыре абита унифицированной нотации.
 ABITS = ('[', ']', '1', '0')
@@ -44,24 +54,59 @@ class MTCAxiomValidator(object):
     # ------------------------------------------------------------------
     # Базовые проверки, на которых строятся все под-тесты
     # ------------------------------------------------------------------
-    def prove(self, formula):
-        """Вернуть True, если доказатель подтверждает формулу (X = Y / X ≠ Y).
+    def check_formula(self, formula):
+        """Вернуть структурированный результат проверки формулы.
 
-        Любая ошибка разбора трактуется как «не доказано» (False), а не
-        как исключение, чтобы валидатор всегда давал булев результат.
+        Legacy prover умеет только ограниченную проверку равенств/неравенств.
+        Поэтому ``disproved`` означает структурную неэквивалентность в рамках
+        текущего legacy prover'а, а не полное метатеоретическое опровержение.
         """
+        read_result = read_formula(formula, expected_layer=Layer.FORMAL_FORM)
+        if not read_result.is_valid:
+            return ProofResult('parse_error', formula, "; ".join(read_result.diagnostics))
+
         try:
-            return bool(self.prover.parse_and_prove(formula))
-        except Exception:
-            return False
+            lexer = EnhancedAnumLexer(formula)
+            parser = EnhancedAnumParser(lexer)
+            parsed_result = parser.parse()
+        except Exception as exc:
+            return ProofResult('parse_error', formula, str(exc))
+
+        if not hasattr(self.prover, 'equivalent') and hasattr(self.prover, 'parse_and_prove'):
+            try:
+                if self.prover.parse_and_prove(formula):
+                    return ProofResult('proved', formula)
+                return ProofResult('disproved', formula, "legacy parse_and_prove returned False")
+            except Exception as exc:
+                return ProofResult('unsupported', formula, str(exc))
+
+        if parsed_result[0] == 'EQUATION':
+            _, left, right = parsed_result
+            if self.prover.equivalent(left, right):
+                return ProofResult('proved', formula)
+            return ProofResult('disproved', formula, "legacy prover found non-equivalence")
+
+        if parsed_result[0] == 'NOT_EQUATION':
+            _, left, right = parsed_result
+            if self.prover.equivalent(left, right):
+                return ProofResult('disproved', formula, "negated equality is false")
+            return ProofResult('proved', formula)
+
+        if parsed_result[0] == 'EXPRESSION':
+            return ProofResult('proved', formula, "formula parsed as expression")
+
+        return ProofResult('unsupported', formula, "unsupported parser result: {0}".format(parsed_result[0]))
+
+    def prove(self, formula):
+        """Вернуть True только для статуса ``proved``."""
+        return self.check_formula(formula).is_proved
 
     def refute(self, formula):
-        """Вернуть True, если доказатель НЕ подтверждает формулу.
+        """Вернуть True только для статуса ``disproved``.
 
-        Используется для проверки различий/ориентированности
-        (например, что a→b ≠ b→a).
+        ``parse_error`` и ``unsupported`` не являются refutation.
         """
-        return not self.prove(formula)
+        return self.check_formula(formula).is_disproved
 
     def log_test(self, test_name, result, details=""):
         """Логирование результата теста."""

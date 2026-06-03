@@ -21,7 +21,7 @@ from core.axioms.validate_axioms import MTCAxiomValidator, ABITS, ABIT_INVERSE
 
 
 class TestProverBackedChecks(unittest.TestCase):
-    """prove()/refute() обёрнуты вокруг настоящего доказателя."""
+    """Legacy prove()/refute() обёрнуты вокруг структурированного результата."""
 
     def setUp(self):
         self.v = MTCAxiomValidator()
@@ -43,6 +43,14 @@ class TestProverBackedChecks(unittest.TestCase):
         self.assertTrue(self.v.refute('a = b'))
         self.assertTrue(self.v.refute('a→b = b→a'))
         self.assertFalse(self.v.refute('a = a'))
+
+    def test_proof_result_distinguishes_statuses(self):
+        self.assertEqual(self.v.check_formula('a = a').status, 'proved')
+        self.assertEqual(self.v.check_formula('a = b').status, 'disproved')
+        self.assertEqual(self.v.check_formula('() ) (').status, 'parse_error')
+
+    def test_parse_error_is_not_refutation(self):
+        self.assertFalse(self.v.refute('() ) ('))
 
     def test_prove_never_raises(self):
         # Любой мусор должен возвращать булев результат, а не исключение.
