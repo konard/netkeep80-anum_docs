@@ -27,6 +27,11 @@ import re
 import sys
 import os
 
+# Allow running both as a script (`py parsers/anum_prover.py`) and as a module
+# (`from parsers.anum_prover import ...`) by ensuring the parsers/ directory is
+# importable so the shared base classes module can be located.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 # Windows encoding setup
 if os.name == 'nt':
     import locale
@@ -37,112 +42,21 @@ if os.name == 'nt':
     except Exception:
         pass
 
-# Base classes (standalone version)
-class AnumToken(object):
-    def __init__(self, type_, value, position=0):
-        self.type = type_
-        self.value = value
-        self.position = position
-    def __repr__(self):
-        return "Token({0}, '{1}')".format(self.type, self.value)
+# Shared base classes (deduplicated into parsers/anum_core.py — see issue #46)
+from anum_core import (  # noqa: E402
+    AnumToken,
+    AnumExpression,
+    Symbol,
+    Connection,
+    AbitStart,
+    AbitEnd,
+    AbitConnect,
+    AbitDisconnect,
+    AssociativeRoot,
+    ConnectionForm,
+    ComplexClosure,
+)
 
-class AnumExpression(object):
-    def __repr__(self):
-        return self.__str__()
-
-class Symbol(AnumExpression):
-    def __init__(self, name):
-        self.name = name
-    def __str__(self):
-        return self.name
-    def __eq__(self, other):
-        return isinstance(other, Symbol) and self.name == other.name
-    def __hash__(self):
-        return hash(('Symbol', self.name))
-
-class Connection(AnumExpression):
-    def __init__(self, reference, value):
-        self.reference = reference
-        self.value = value
-    def __str__(self):
-        return "({0}→{1})".format(self.reference, self.value)
-    def __eq__(self, other):
-        return (isinstance(other, Connection) and
-                self.reference == other.reference and
-                self.value == other.value)
-    def __hash__(self):
-        return hash(('Connection', self.reference, self.value))
-
-class AbitStart(AnumExpression):
-    def __str__(self):
-        return "("
-    def __eq__(self, other):
-        return isinstance(other, AbitStart)
-    def __hash__(self):
-        return hash(('AbitStart',))
-
-class AbitEnd(AnumExpression):
-    def __str__(self):
-        return ")"
-    def __eq__(self, other):
-        return isinstance(other, AbitEnd)
-    def __hash__(self):
-        return hash(('AbitEnd',))
-
-class AbitConnect(AnumExpression):
-    def __str__(self):
-        return "+"
-    def __eq__(self, other):
-        return isinstance(other, AbitConnect)
-    def __hash__(self):
-        return hash(('AbitConnect',))
-
-class AbitDisconnect(AnumExpression):
-    def __str__(self):
-        return "-"
-    def __eq__(self, other):
-        return isinstance(other, AbitDisconnect)
-    def __hash__(self):
-        return hash(('AbitDisconnect',))
-
-class AssociativeRoot(AnumExpression):
-    def __str__(self):
-        return "∞"
-    def __eq__(self, other):
-        return isinstance(other, AssociativeRoot)
-    def __hash__(self):
-        return hash(('AssociativeRoot',))
-    @staticmethod
-    def from_abit_combination():
-        return AssociativeRoot()
-
-class ConnectionForm(AnumExpression):
-    def __init__(self, form_type):
-        self.form_type = form_type
-    def __str__(self):
-        if self.form_type == 'REF':
-            return "♂"
-        elif self.form_type == 'VAL':
-            return "♀"
-        elif self.form_type == 'ARROW':
-            return "→"
-        return "unknown_form"
-    def __eq__(self, other):
-        return isinstance(other, ConnectionForm) and self.form_type == other.form_type
-    def __hash__(self):
-        return hash(('ConnectionForm', self.form_type))
-
-# Enhanced classes for complex formulas
-class ComplexClosure(AnumExpression):
-    """Complex closure expression like ♂∞♀"""
-    def __init__(self, parts):
-        self.parts = parts
-    def __str__(self):
-        return ''.join(str(part) for part in self.parts)
-    def __eq__(self, other):
-        return isinstance(other, ComplexClosure) and self.parts == other.parts
-    def __hash__(self):
-        return hash(('ComplexClosure', tuple(self.parts)))
 
 class EnhancedAnumLexer(object):
     """Enhanced lexer for complex MTC formulas - FORMULA NOTATION ONLY
