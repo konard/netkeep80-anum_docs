@@ -80,7 +80,7 @@
 
 ¬[] : ♂[] ⟼ []♀
 ¬[⟼] : ♂[⟼] ⟼ [⟼]♀
-¬[⟼] : ♂∞ ⟼ ∞♀
+¬[⟼] = ♂∞ ⟼ ∞♀
 
 (=) : {[]♀ = []♀, ♂[] = ♂[]}
 (!=) : ¬(=)
@@ -166,7 +166,10 @@ tests/mtc_formulas.mtc
 
 ```bash
 python -m pytest tests -v --tb=short
-ruff check parsers/ converters/ core/ tests/ --ignore E501,F401
+python -m pytest tests/test_mtc_reader.py -q
+python -m pytest tests/test_root_library.py -q
+python -m pytest tests/test_issue42_docs.py -q
+ruff check converters/ core/ tests/ --ignore E501,F401
 git diff --check
 ```
 
@@ -179,14 +182,16 @@ python -m pytest tests/test_converters.py -v
 ## Инструменты
 
 ```text
+core/mtc_reader.py            технический reader формул с явным слоем чтения
+core/root_library.py          загрузка корневой .mtc-библиотеки формул
+core/validate_root.py         структурная валидация корневой библиотеки
+tests/mtc_formulas.mtc        каноническая корневая библиотека формул
 converters/text_to_anum.py      UTF-8 текст → четверичное ачисло
 converters/anum_to_text.py      четверичное ачисло → UTF-8 текст
 converters/ascii_unicode.py     ASCII ↔ Unicode нотация
-parsers/mtc_formula_prover.py   практический прувер поддерживаемых формул
-core/axioms/validate_axioms.py  валидация текущих кодовых инвариантов
 ```
 
-Кодовые инструменты сохраняют практические проверки сериализации и формул. Нормативная поверхность текущей аксиоматики задаётся документацией и `tests/mtc_formulas.mtc`.
+Кодовые инструменты сохраняют практические проверки сериализации и корневой библиотеки. Нормативная поверхность текущей аксиоматики задаётся документацией и `tests/mtc_formulas.mtc`.
 
 ## Структура репозитория
 
@@ -194,7 +199,6 @@ core/axioms/validate_axioms.py  валидация текущих кодовых
 anum_docs/
 ├── README.md
 ├── core/
-├── parsers/
 ├── converters/
 ├── tests/
 ├── docs/

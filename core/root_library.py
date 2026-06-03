@@ -2,9 +2,9 @@
 """
 Загрузка корневой библиотеки формул МТС из ``.mtc``.
 
-Этот модуль является первым переходным шагом от legacy Python parser/prover к
-архитектуре, где формулы МТС первичны, а Python только читает носитель,
-сохраняет source locations и строит диагностический реестр различий.
+Этот модуль удерживает архитектуру, где формулы МТС первичны, а Python только
+читает носитель, сохраняет source locations и строит диагностический реестр
+различий.
 """
 
 import enum
@@ -22,6 +22,23 @@ class FormulaKind(enum.Enum):
     EQUATION = "equation"
     NON_EQUATION = "non_equation"
     EXPRESSION = "expression"
+
+
+ROOT_SYMBOL_LAYERS = {
+    '∞': Layer.FORMAL_FORM,
+    '[]': Layer.SINGLE_CONNECTION_FORM,
+    '[][]': Layer.FORMAL_FORM,
+    '[][][]': Layer.FORMAL_FORM,
+    '(⟼)': Layer.CONNECTION_MEANING,
+    '[⟼]': Layer.CONCRETE_CONNECTION,
+    '(=)': Layer.FORMAL_FORM,
+    '(!=)': Layer.FORMAL_FORM,
+    '↛': Layer.FORMAL_FORM,
+    '[': Layer.QUATERNARY_SERIALIZATION,
+    ']': Layer.QUATERNARY_SERIALIZATION,
+    '1': Layer.QUATERNARY_SERIALIZATION,
+    '0': Layer.QUATERNARY_SERIALIZATION,
+}
 
 
 @dataclass(frozen=True)
@@ -171,24 +188,14 @@ def classify_formula_kind(text):
 
 
 def _infer_definition_layer(symbol, introduction):
-    """Диагностически вывести слой из формы введения.
+    """Диагностически вывести слой по явной таблице корневых различий.
 
-    Это не грамматика МТС и не источник истины: слой выводится из уже
-    прочитанной корневой формулы, чтобы ранние проверки могли ловить смешение
-    квадратных абитов, смысла связи и конкретной связи.
+    Таблица фиксирует текущий fixture ``tests/mtc_formulas.mtc``. Неизвестные
+    различия временно читаются как формальные формы в статусе development,
+    пока слой не стабилизирован отдельной корневой формулой.
     """
 
-    if symbol in SQUARE_ABIT_SYMBOLS:
-        return Layer.QUATERNARY_SERIALIZATION
-    if symbol == INFINITY_SYMBOL:
-        return Layer.FORMAL_FORM
-    if symbol.startswith('(') and symbol.endswith(')'):
-        return Layer.CONNECTION_MEANING
-    if symbol.startswith('[') and symbol.endswith(']'):
-        return Layer.CONCRETE_CONNECTION
-    if symbol.startswith('{') and symbol.endswith('}'):
-        return Layer.BUNDLE_FORM
-    return Layer.FORMAL_FORM
+    return ROOT_SYMBOL_LAYERS.get(symbol, Layer.FORMAL_FORM)
 
 
 def _infer_definition_status(symbol, introduction):

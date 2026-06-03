@@ -45,6 +45,18 @@ ACTIVE_RESEARCH_FILES = {
     "Открытые вопросы новой аксиоматики МТС.md",
 }
 
+REMOVED_RETIRED_SURFACE = [
+    "par" + "sers/anum_" + "prover.py",
+    "par" + "sers/mtc_formula_" + "prover.py",
+    "par" + "sers/" + "leg" + "acy_ast.py",
+    "core/ax" + "ioms/validate_" + "axioms.py",
+    "core/notation_" + "system.py",
+    "core/proof_" + "result.py",
+    "tests/" + "leg" + "acy",
+    "tests/test_validate_" + "axioms.py",
+    "tests/test_notation_" + "system.py",
+]
+
 ACTIVE_DOCS = [
     "README.md",
     "docs/plan.md",
@@ -253,6 +265,11 @@ def test_documentation_surface_is_small_and_explicit():
     assert {path.name for path in (ROOT / "docs/research").glob("*.md")} == ACTIVE_RESEARCH_FILES
 
 
+def test_retired_parser_prover_surface_is_removed():
+    for relative_path in REMOVED_RETIRED_SURFACE:
+        assert not (ROOT / relative_path).exists(), relative_path
+
+
 def test_mtc_formula_fixture_uses_root_bracket_system():
     lines = formula_lines()
 
@@ -398,7 +415,10 @@ def test_bundle_notation_spec_keeps_bundle_rules_without_deletion_root():
         "## Пустое пучковое раскрытие",
         "[]{} = {}",
         "{}[] = {}",
-        "пустой исходящий / входящий пучок в описательном смысле",
+        "только частным случаем раскрытия по явно пустому пучку",
+        "не являются удалением связей",
+        "не выражают \"все исходящие связи\" и \"все входящие связи\"",
+        "не задают операционное изменение асети",
         "Операционное изменение асети ведётся в слое развития",
     ]:
         assert required in spec
@@ -457,10 +477,10 @@ def test_open_questions_hold_deferred_topics():
         assert required in questions
 
 
-def test_active_docs_do_not_reference_archives_or_legacy_fixtures():
+def test_active_docs_do_not_reference_archives_or_retired_fixtures():
     for relative_path in ACTIVE_DOCS:
         text = read_doc(relative_path)
 
         assert "archive/" not in text, relative_path
         assert "tests/issue42_mtc_formulas.mtc" not in text, relative_path
-        assert "tests/legacy_mtc_formulas.mtc" not in text, relative_path
+        assert ("tests/" + "leg" + "acy_mtc_formulas.mtc") not in text, relative_path

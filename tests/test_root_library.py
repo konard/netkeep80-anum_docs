@@ -3,7 +3,7 @@
 Тесты загрузки корневой библиотеки формул МТС.
 
 Эти проверки фиксируют новое направление issue #46: первичный источник
-формальной нотации находится в ``tests/mtc_formulas.mtc``, а не в legacy
+формальной нотации находится в ``tests/mtc_formulas.mtc``, а не в старых
 Python AST/parser правилах.
 """
 
@@ -15,7 +15,7 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.layers import Layer  # noqa: E402
-from core.root_library import FormulaKind, load_root_library  # noqa: E402
+from core.root_library import FormulaKind, ROOT_SYMBOL_LAYERS, load_root_library  # noqa: E402
 from core.validate_root import validate_root_library  # noqa: E402
 
 
@@ -87,6 +87,21 @@ class TestRootLibrary(unittest.TestCase):
         entry = self.library.registry.lookup('∞')
         self.assertIsNotNone(entry)
         self.assertNotEqual(entry.layer, Layer.QUATERNARY_SERIALIZATION)
+
+    def test_definition_layers_come_from_root_symbol_table(self):
+        self.assertEqual(ROOT_SYMBOL_LAYERS['[]'], Layer.SINGLE_CONNECTION_FORM)
+
+        registry = self.library.registry
+        self.assertEqual(registry.lookup('∞').layer, Layer.FORMAL_FORM)
+        self.assertEqual(registry.lookup('[][]').layer, Layer.FORMAL_FORM)
+        self.assertEqual(registry.lookup('[][][]').layer, Layer.FORMAL_FORM)
+        self.assertEqual(registry.lookup('(⟼)').layer, Layer.CONNECTION_MEANING)
+        self.assertEqual(registry.lookup('[⟼]').layer, Layer.CONCRETE_CONNECTION)
+        self.assertEqual(registry.lookup('(=)').layer, Layer.FORMAL_FORM)
+        self.assertEqual(registry.lookup('(!=)').layer, Layer.FORMAL_FORM)
+        self.assertEqual(registry.lookup('↛').layer, Layer.FORMAL_FORM)
+        for symbol in ('[', ']', '1', '0'):
+            self.assertEqual(registry.lookup(symbol).layer, Layer.QUATERNARY_SERIALIZATION)
 
 
 class TestRootValidation(unittest.TestCase):
