@@ -27,17 +27,14 @@ class FormulaKind(enum.Enum):
 ROOT_SYMBOL_LAYERS = {
     '∞': Layer.FORMAL_FORM,
     '[]': Layer.SINGLE_CONNECTION_FORM,
-    '[][]': Layer.FORMAL_FORM,
-    '[][][]': Layer.FORMAL_FORM,
+    '()': Layer.FORMAL_FORM,
+    '([)': Layer.FORMAL_FORM,
+    '(])': Layer.FORMAL_FORM,
     '(⟼)': Layer.CONNECTION_MEANING,
-    '[⟼]': Layer.CONCRETE_CONNECTION,
+    '(↛)': Layer.CONNECTION_MEANING,
+    '[1]': Layer.QUATERNARY_SERIALIZATION,
+    '[0]': Layer.QUATERNARY_SERIALIZATION,
     '(=)': Layer.FORMAL_FORM,
-    '(!=)': Layer.FORMAL_FORM,
-    '↛': Layer.FORMAL_FORM,
-    '[': Layer.QUATERNARY_SERIALIZATION,
-    ']': Layer.QUATERNARY_SERIALIZATION,
-    '1': Layer.QUATERNARY_SERIALIZATION,
-    '0': Layer.QUATERNARY_SERIALIZATION,
 }
 
 
@@ -199,8 +196,6 @@ def _infer_definition_layer(symbol, introduction):
 
 
 def _infer_definition_status(symbol, introduction):
-    if introduction.startswith('¬'):
-        return 'derived'
     if symbol in SQUARE_ABIT_SYMBOLS or symbol == INFINITY_SYMBOL:
         return 'root'
     return 'development'

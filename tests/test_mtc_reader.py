@@ -2,8 +2,7 @@
 """
 Тесты технического reader'а формальной нотации МТС.
 
-Reader проверяет границы контейнеров и source span, но не является EBNF-
-грамматикой и не задаёт смысл формул.
+Reader проверяет границы контейнеров и source span, но не задаёт смысл формул.
 """
 
 import os
@@ -31,12 +30,38 @@ class TestMTCReader(unittest.TestCase):
         self.assertEqual([c.kind for c in result.containers], ['curly', 'square', 'square', 'curly', 'square'])
 
     def test_preserves_layer_distinction_in_containers(self):
-        meaning = read_formula('(⟼) : [] ⟼ []', expected_layer=Layer.CONNECTION_MEANING)
-        concrete = read_formula('[⟼] : ∞♀ ⟼ ♂∞', expected_layer=Layer.CONCRETE_CONNECTION)
+        meaning = read_formula('(⟼) : (♀∞ ⟼ ∞♂)', expected_layer=Layer.CONNECTION_MEANING)
+        concrete = read_formula('[1] : (⟼)', expected_layer=Layer.CONCRETE_CONNECTION)
         self.assertTrue(meaning.is_valid, meaning.diagnostics)
         self.assertTrue(concrete.is_valid, concrete.diagnostics)
         self.assertEqual(meaning.layer, Layer.CONNECTION_MEANING)
         self.assertEqual(concrete.layer, Layer.CONCRETE_CONNECTION)
+
+    def test_reads_literal_square_abits_inside_round_forms(self):
+        left = read_formula('([) : (♀∞)', expected_layer=Layer.FORMAL_FORM)
+        right = read_formula('(]) : (∞♂)', expected_layer=Layer.FORMAL_FORM)
+
+        self.assertTrue(left.is_valid, left.diagnostics)
+        self.assertTrue(right.is_valid, right.diagnostics)
+        self.assertEqual([c.kind for c in left.containers], ['round', 'round'])
+        self.assertEqual([c.kind for c in right.containers], ['round', 'round'])
+        self.assertIn('[', [token.value for token in left.tokens])
+        self.assertIn(']', [token.value for token in right.tokens])
+
+    def test_reads_empty_round_form_as_current_formal_form(self):
+        result = read_formula('() : ♀() ⟼ ()♂', expected_layer=Layer.FORMAL_FORM)
+
+        self.assertTrue(result.is_valid, result.diagnostics)
+        self.assertEqual([c.kind for c in result.containers], ['round', 'round', 'round'])
+
+    def test_reads_square_abit_forms(self):
+        connection = read_formula('[1] : (⟼)', expected_layer=Layer.FORMAL_FORM)
+        nonconnection = read_formula('[0] : (↛)', expected_layer=Layer.FORMAL_FORM)
+
+        self.assertTrue(connection.is_valid, connection.diagnostics)
+        self.assertTrue(nonconnection.is_valid, nonconnection.diagnostics)
+        self.assertEqual(connection.containers[0].kind, 'square')
+        self.assertEqual(nonconnection.containers[0].kind, 'square')
 
     def test_unclosed_container_is_invalid(self):
         result = read_formula('{[]', expected_layer=Layer.FORMAL_FORM)
@@ -53,8 +78,10 @@ class TestMTCReader(unittest.TestCase):
     def test_finds_only_top_level_definition_operator(self):
         self.assertEqual(find_top_level_operator('∞ : [] = [] ⟼ []', ':'), 2)
         self.assertIsNone(find_top_level_operator('(a : b)', ':'))
-        self.assertEqual(find_top_level_operator('[ : ∞♀', ':'), 2)
-        self.assertEqual(find_top_level_operator('] : ♂∞', ':'), 2)
+        self.assertEqual(find_top_level_operator('([) : (♀∞)', ':'), 4)
+        self.assertEqual(find_top_level_operator('(]) : (∞♂)', ':'), 4)
+        self.assertEqual(find_top_level_operator('[1] : (⟼)', ':'), 4)
+        self.assertEqual(find_top_level_operator('[0] : (↛)', ':'), 4)
 
 
 if __name__ == '__main__':
