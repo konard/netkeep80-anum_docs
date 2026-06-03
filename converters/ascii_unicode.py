@@ -43,17 +43,29 @@ _UNICODE_TO_ASCII = [
     ('∞', 'INF'),
 ]
 
-# Обратная таблица: aprover (ASCII) → anum_docs (Unicode)
-# Порядок важен: длинные токены проверяются первыми
-_ASCII_TO_UNICODE = [
+# Обратная таблица: aprover (ASCII) → anum_docs (Unicode).
+#
+# Токены разделены на две группы, потому что у них разные правила сопоставления:
+#   * символьные токены (операторы) состоят из пунктуации и заменяются в любом
+#     месте строки (длинные — раньше коротких, чтобы '!->' не распался на '!' и '->');
+#   * словесные токены (M, F, INF) состоят из букв и заменяются ТОЛЬКО как
+#     отдельные слова. Иначе наивный str.replace повредил бы обычный текст:
+#     например, "FORM" → "♀OR♂" (см. issue #46).
+_ASCII_SYMBOL_TOKENS = [
     ('!->', '¬⟼'),
     ('->', '⟼'),
     ('!=', '≠'),
     ('!', '¬'),
+]
+
+_ASCII_WORD_TOKENS = [
     ('INF', '∞'),
     ('M', '♂'),
     ('F', '♀'),
 ]
+
+# Объединённая таблица для справки/обратной совместимости (порядок: длинные раньше).
+_ASCII_TO_UNICODE = _ASCII_SYMBOL_TOKENS + _ASCII_WORD_TOKENS
 
 # Абиты: anum_docs и aprover теперь используют одинаковые символы
 # Конвертация — тождественная (для обратной совместимости)
@@ -143,8 +155,18 @@ def unicode_to_ascii(formula: str) -> str:
     return ''.join(parts)
 
 
+def _is_word_char(c: str) -> bool:
+    """Символ, образующий «слово» (буква, цифра или подчёркивание)."""
+    return c.isalnum() or c == '_'
+
+
 def ascii_to_unicode(formula: str) -> str:
     """Конвертация формулы из ASCII (aprover) в Unicode (anum_docs).
+
+    Символьные операторы (->, !->, !=, !) заменяются в любом месте строки.
+    Буквенные токены (M, F, INF) заменяются только тогда, когда образуют
+    отдельное слово, поэтому обычный текст не повреждается:
+    например, "FORM" остаётся "FORM", а не превращается в "♀OR♂".
 
     Args:
         formula: Формула в ASCII нотации (M, F, ->, INF).
@@ -152,7 +174,39 @@ def ascii_to_unicode(formula: str) -> str:
     Returns:
         Формула в Unicode нотации (♂, ♀, →, ∞).
     """
-    return _replace_tokens(formula, _ASCII_TO_UNICODE)
+    result = []
+    i = 0
+    n = len(formula)
+    while i < n:
+        # Сначала символьные операторы (длинные раньше коротких).
+        matched = False
+        for src, dst in _ASCII_SYMBOL_TOKENS:
+            if formula.startswith(src, i):
+                result.append(dst)
+                i += len(src)
+                matched = True
+                break
+        if matched:
+            continue
+
+        if _is_word_char(formula[i]):
+            # Берём слово целиком и заменяем только при точном совпадении.
+            j = i
+            while j < n and _is_word_char(formula[j]):
+                j += 1
+            word = formula[i:j]
+            replacement = word
+            for src, dst in _ASCII_WORD_TOKENS:
+                if word == src:
+                    replacement = dst
+                    break
+            result.append(replacement)
+            i = j
+        else:
+            result.append(formula[i])
+            i += 1
+
+    return ''.join(result)
 
 
 def abits_to_aprover(anum: str) -> str:
