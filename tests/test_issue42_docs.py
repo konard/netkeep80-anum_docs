@@ -186,6 +186,29 @@ BUNDLE_FORMULAS = [
     "{}[] = {}",
 ]
 
+AXIOM_CARD_DOCS = [
+    "docs/theory/Система аксиом МТС.md",
+    "docs/theory/Шаблон аксиом МТС.md",
+]
+
+AXIOM_CARD_POSITIVE_SECTIONS = [
+    "Формула:",
+    "Вводимые различия:",
+    "Чтение:",
+    "Слои различения:",
+    "Связанные формулы:",
+    "Слой развития:",
+]
+
+RETIRED_CARD_SECTIONS = [
+    "Что запрещает",
+    "**Какие различия вводит**",
+    "**Как читается**",
+    "**Что запрещает**",
+    "**Следствия**",
+    "**Открытые вопросы**",
+]
+
 
 def read_doc(relative_path: str) -> str:
     return (ROOT / relative_path).read_text(encoding="utf-8")
@@ -349,6 +372,17 @@ def test_axiom_system_matches_root_fixture():
         assert formula in system, formula
 
     assert "Система аксиом как корневая библиотека апрувера" in system
+
+
+def test_axiom_cards_use_positive_template():
+    for relative_path in AXIOM_CARD_DOCS:
+        text = read_doc(relative_path)
+
+        for section in AXIOM_CARD_POSITIVE_SECTIONS:
+            assert section in text, (relative_path, section)
+
+        for retired in RETIRED_CARD_SECTIONS:
+            assert retired not in text, (relative_path, retired)
 
 
 def test_bundle_notation_spec_keeps_bundle_rules_without_deletion_root():
