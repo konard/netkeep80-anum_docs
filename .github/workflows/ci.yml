@@ -58,7 +58,7 @@ jobs:
 
       - name: Run Ruff linter
         run: |
-          ruff check parsers/ converters/ core/ tests/ --ignore E501,F401
+          ruff check converters/ core/ tests/ --ignore E501,F401
 
   check-file-limits:
     runs-on: ubuntu-latest
@@ -141,7 +141,7 @@ jobs:
 
       - name: Check required directories exist
         run: |
-          for dir in core parsers converters docs tests; do
+          for dir in core converters docs tests; do
             if [ ! -d "$dir" ]; then
               echo "::error::Required directory missing: $dir"
               exit 1

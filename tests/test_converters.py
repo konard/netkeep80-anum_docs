@@ -211,6 +211,32 @@ class TestAsciiToUnicode(unittest.TestCase):
         result = ascii_to_unicode('INF : INF -> INF')
         self.assertEqual(result, '∞ : ∞ ⟼ ∞')
 
+    def test_plain_word_not_corrupted(self):
+        # Регрессия issue #46: наивный str.replace превращал "FORM" в "♀OR♂".
+        # Буквы M и F внутри обычного слова не должны заменяться.
+        self.assertEqual(ascii_to_unicode('FORM'), 'FORM')
+
+    def test_words_containing_mtc_letters(self):
+        for word in ('FORM', 'MTC', 'INFO', 'FROM', 'MODEM', 'FF', 'MM'):
+            self.assertEqual(
+                ascii_to_unicode(word), word,
+                f'Слово "{word}" не должно изменяться'
+            )
+
+    def test_standalone_tokens_still_converted(self):
+        self.assertEqual(ascii_to_unicode('M'), '♂')
+        self.assertEqual(ascii_to_unicode('F'), '♀')
+        self.assertEqual(ascii_to_unicode('M F'), '♂ ♀')
+
+    def test_tokens_in_sentence(self):
+        # Токены конвертируются, окружающие слова — нет.
+        self.assertEqual(ascii_to_unicode('the FORM of M'), 'the FORM of ♂')
+
+    def test_roundtrip_via_ascii(self):
+        # unicode_to_ascii вставляет пробелы между M/F/INF, поэтому обратная
+        # конвертация восстанавливает исходные символы (с разделителями).
+        self.assertEqual(ascii_to_unicode(unicode_to_ascii('♂∞♀')), '♂ ∞ ♀')
+
 
 class TestAbitConversion(unittest.TestCase):
     """Тесты конвертации абитов между anum_docs и aprover.

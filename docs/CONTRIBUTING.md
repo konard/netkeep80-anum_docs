@@ -17,8 +17,9 @@
 ```
 ROOT/                           # Только README.md, LICENSE, .gitignore
 ├── core/                       # Ядро системы MTC
-│   └── axioms/                 # Аксиомы и их валидация
-├── parsers/                    # Парсеры ачисел
+│   ├── mtc_reader.py           # Технический reader формул
+│   ├── root_library.py         # Загрузка корневой библиотеки
+│   └── validate_root.py        # Структурная валидация
 ├── converters/                 # Конвертеры между форматами нотаций
 ├── tests/                      # Тесты
 ├── docs/                       # Документация
@@ -44,7 +45,7 @@ ROOT/                           # Только README.md, LICENSE, .gitignore
 | Тип файла | Каталог |
 |-----------|---------|
 | Тестовые файлы (`.anum`, `.mtc`) | `tests/` |
-| Скрипты парсеров | `parsers/` |
+| Код reader/root-library | `core/` |
 | Документация | `docs/` |
 | Примеры | `examples/` (если будет создан) |
 | Инструменты | `tools/` (если будет создан) |
@@ -62,7 +63,7 @@ python3 -m pytest tests -v
 py -m pytest tests -v
 
 # Проверка с помощью ruff (если установлен)
-ruff check parsers/ converters/ core/ tests/ --ignore E501,F401
+ruff check converters/ core/ tests/ --ignore E501,F401
 ```
 
 `tests/mtc_formulas.mtc` — актуальная спецификационная fixture рабочей рамки. Файл должен содержать только формулы МТС и комментарии.
