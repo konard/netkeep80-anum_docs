@@ -4,7 +4,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from core.layers import SQUARE_ABIT_SYMBOLS
+from core.layers import SQUARE_ABIT_SYMBOLS, Layer
 from core.root_library import RootLibrary, load_root_library
 
 
@@ -40,6 +40,17 @@ def validate_root_library(path):
                 )
             )
 
+    for symbol, first, second in library.registry.duplicates():
+        messages.append(
+            "Повторное введение различия {0}: {1}:{2} и {3}:{4}".format(
+                symbol,
+                first.source_formula.source_path,
+                first.source_formula.line_no,
+                second.source_formula.source_path,
+                second.source_formula.line_no,
+            )
+        )
+
     required_symbols = ('∞', '(⟼)', '[⟼]', '(=)', '(!=)', '[', ']', '1', '0')
     for symbol in required_symbols:
         if library.registry.lookup(symbol) is None:
@@ -55,8 +66,9 @@ def validate_root_library(path):
             )
         )
 
-    if library.registry.lookup('∞') is not None and '∞' in square_abits:
-        messages.append("∞ не является абитом квадратной нотации")
+    infinity = library.registry.lookup('∞')
+    if infinity is not None and infinity.layer == Layer.QUATERNARY_SERIALIZATION:
+        messages.append("∞ не должен находиться в слое QUATERNARY_SERIALIZATION")
 
     return RootValidationResult(
         status='invalid' if messages else 'valid',

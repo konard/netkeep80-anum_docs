@@ -15,6 +15,10 @@ class ProofResult:
     formula: str
     reason: str = None
 
+    def __post_init__(self):
+        if self.status not in PROOF_STATUSES:
+            raise ValueError("Unknown proof status: {0}".format(self.status))
+
     @property
     def is_proved(self):
         return self.status == 'proved'

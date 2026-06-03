@@ -18,6 +18,7 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.axioms.validate_axioms import MTCAxiomValidator, ABITS, ABIT_INVERSE
+from core.proof_result import ProofResult
 
 
 class TestProverBackedChecks(unittest.TestCase):
@@ -39,10 +40,13 @@ class TestProverBackedChecks(unittest.TestCase):
         self.assertFalse(self.v.prove('a→b = b→a'))
         self.assertFalse(self.v.prove('♂v = ♂w'))
 
-    def test_refute_is_negation_of_prove(self):
+    def test_refute_uses_disproved_status_only(self):
         self.assertTrue(self.v.refute('a = b'))
         self.assertTrue(self.v.refute('a→b = b→a'))
         self.assertFalse(self.v.refute('a = a'))
+        self.assertFalse(self.v.prove('() ) ('))
+        self.assertFalse(self.v.refute('() ) ('))
+        self.assertEqual(self.v.check_formula('() ) (').status, 'parse_error')
 
     def test_proof_result_distinguishes_statuses(self):
         self.assertEqual(self.v.check_formula('a = a').status, 'proved')
@@ -51,6 +55,15 @@ class TestProverBackedChecks(unittest.TestCase):
 
     def test_parse_error_is_not_refutation(self):
         self.assertFalse(self.v.refute('() ) ('))
+
+    def test_expression_is_not_proved_by_parse_only(self):
+        result = self.v.check_formula('a')
+        self.assertEqual(result.status, 'unsupported')
+        self.assertFalse(result.is_proved)
+
+    def test_invalid_proof_status_rejected(self):
+        with self.assertRaises(ValueError):
+            ProofResult('bad_status', 'a = a')
 
     def test_prove_never_raises(self):
         # Любой мусор должен возвращать булев результат, а не исключение.

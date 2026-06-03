@@ -55,10 +55,9 @@ class TestNotationDetector(unittest.TestCase):
         )
 
     def test_detect_name_is_legacy_wrapper(self):
-        self.assertEqual(
-            NotationDetector.detect_notation_type('♂♀ = ∞'),
-            NotationDetector.guess_notation_type('♂♀ = ∞')
-        )
+        with self.assertWarns(DeprecationWarning):
+            detected = NotationDetector.detect_notation_type('♂♀ = ∞')
+        self.assertEqual(detected, NotationDetector.guess_notation_type('♂♀ = ∞'))
 
     def test_extract_abit_references(self):
         refs = NotationDetector.extract_abit_references('a{1}b{0}c{∞}d{[}')

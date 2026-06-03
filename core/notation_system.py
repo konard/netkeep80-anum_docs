@@ -19,6 +19,7 @@ py core/notation_system.py
 
 import re
 import enum
+import warnings
 from typing import Union, List, Tuple, Optional
 from dataclasses import dataclass
 
@@ -89,7 +90,18 @@ class NotationDetector:
 
     @classmethod
     def detect_notation_type(cls, input_text: str) -> NotationType:
-        """Compatibility wrapper for old callers; use ``guess_notation_type``."""
+        """Deprecated compatibility wrapper.
+
+        Do not use in new code. Use explicit-layer reader from
+        ``core.mtc_reader`` for formal checks, or ``guess_notation_type`` only
+        for diagnostics.
+        """
+        warnings.warn(
+            "detect_notation_type() is deprecated; use guess_notation_type() only "
+            "for diagnostics or core.mtc_reader.read_formula() with an explicit layer",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return cls.guess_notation_type(input_text)
     
     @classmethod

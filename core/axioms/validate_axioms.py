@@ -93,7 +93,11 @@ class MTCAxiomValidator(object):
             return ProofResult('proved', formula)
 
         if parsed_result[0] == 'EXPRESSION':
-            return ProofResult('proved', formula, "formula parsed as expression")
+            return ProofResult(
+                'unsupported',
+                formula,
+                "standalone expression is parsed but not a proof target",
+            )
 
         return ProofResult('unsupported', formula, "unsupported parser result: {0}".format(parsed_result[0]))
 

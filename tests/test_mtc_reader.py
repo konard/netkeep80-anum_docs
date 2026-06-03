@@ -13,7 +13,7 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.layers import Layer  # noqa: E402
-from core.mtc_reader import read_formula  # noqa: E402
+from core.mtc_reader import find_top_level_operator, read_formula  # noqa: E402
 
 
 class TestMTCReader(unittest.TestCase):
@@ -43,6 +43,18 @@ class TestMTCReader(unittest.TestCase):
         self.assertFalse(result.is_valid)
         self.assertEqual(result.status, 'invalid')
         self.assertTrue(any('Незакрытый контейнер' in d for d in result.diagnostics))
+
+    def test_reader_without_layer_is_ambiguous_not_valid_specification(self):
+        result = read_formula('[] = ∞')
+        self.assertEqual(result.status, 'ambiguous')
+        self.assertFalse(result.is_valid)
+        self.assertTrue(any('Слой чтения не указан' in d for d in result.diagnostics))
+
+    def test_finds_only_top_level_definition_operator(self):
+        self.assertEqual(find_top_level_operator('∞ : [] = [] ⟼ []', ':'), 2)
+        self.assertIsNone(find_top_level_operator('(a : b)', ':'))
+        self.assertEqual(find_top_level_operator('[ : ∞♀', ':'), 2)
+        self.assertEqual(find_top_level_operator('] : ♂∞', ':'), 2)
 
 
 if __name__ == '__main__':

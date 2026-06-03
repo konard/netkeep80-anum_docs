@@ -9,11 +9,13 @@ Python AST/parser правилах.
 
 import os
 import sys
+import tempfile
 import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from core.root_library import load_root_library  # noqa: E402
+from core.layers import Layer  # noqa: E402
+from core.root_library import FormulaKind, load_root_library  # noqa: E402
 from core.validate_root import validate_root_library  # noqa: E402
 
 
@@ -60,6 +62,32 @@ class TestRootLibrary(unittest.TestCase):
         self.assertEqual(set(self.library.square_abits()), {'[', ']', '1', '0'})
         self.assertNotIn('∞', self.library.square_abits())
 
+    def test_formula_kinds_are_detected_from_top_level_operators(self):
+        kinds = {formula.text: formula.kind for formula in self.library.formulas}
+        self.assertEqual(kinds['∞ : [] = [] ⟼ []'], FormulaKind.DEFINITION)
+        self.assertEqual(kinds['[] = ∞'], FormulaKind.EQUATION)
+        self.assertEqual(kinds['{} != []'], FormulaKind.NON_EQUATION)
+
+    def test_colon_inside_container_is_not_a_definition(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            formula_path = os.path.join(tmpdir, 'nested_colon.mtc')
+            with open(formula_path, 'w', encoding='utf-8') as target:
+                target.write('(a : b)\n')
+
+            library = load_root_library(formula_path)
+            self.assertEqual(library.formulas[0].kind, FormulaKind.EXPRESSION)
+            self.assertEqual(library.registry.symbols(), [])
+
+    def test_literal_square_abit_definitions_still_work(self):
+        registry = self.library.registry
+        self.assertEqual(registry.lookup('[').introduction, '∞♀')
+        self.assertEqual(registry.lookup(']').introduction, '♂∞')
+
+    def test_infinity_layer_is_not_quaternary(self):
+        entry = self.library.registry.lookup('∞')
+        self.assertIsNotNone(entry)
+        self.assertNotEqual(entry.layer, Layer.QUATERNARY_SERIALIZATION)
+
 
 class TestRootValidation(unittest.TestCase):
     """Минимальная валидация корневой библиотеки."""
@@ -68,6 +96,20 @@ class TestRootValidation(unittest.TestCase):
         result = validate_root_library(ROOT_FORMULAS)
         self.assertTrue(result.is_valid, result.messages)
         self.assertEqual(result.status, 'valid')
+
+    def test_duplicate_definitions_are_reported(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            formula_path = os.path.join(tmpdir, 'duplicate_defs.mtc')
+            with open(formula_path, 'w', encoding='utf-8') as target:
+                target.write('∞ : [] = [] ⟼ []\n')
+                target.write('∞ : []\n')
+
+            result = validate_root_library(formula_path)
+            self.assertFalse(result.is_valid)
+            self.assertTrue(
+                any('Повторное введение различия' in message for message in result.messages),
+                result.messages,
+            )
 
 
 if __name__ == '__main__':

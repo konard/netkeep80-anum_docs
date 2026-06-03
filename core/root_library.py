@@ -7,11 +7,21 @@
 сохраняет source locations и строит диагностический реестр различий.
 """
 
+import enum
 from dataclasses import dataclass
 from typing import List
 
 from core.layers import INFINITY_SYMBOL, SQUARE_ABIT_SYMBOLS, Layer
-from core.mtc_reader import MTCReadResult, read_formula
+from core.mtc_reader import MTCReadResult, find_top_level_operators, read_formula
+
+
+class FormulaKind(enum.Enum):
+    """Минимальная классификация корневой формулы по top-level операторам."""
+
+    DEFINITION = "definition"
+    EQUATION = "equation"
+    NON_EQUATION = "non_equation"
+    EXPRESSION = "expression"
 
 
 @dataclass(frozen=True)
@@ -22,6 +32,7 @@ class RootFormula:
     source_path: str
     line_no: int
     read_result: MTCReadResult
+    kind: FormulaKind
 
 
 @dataclass(frozen=True)
@@ -40,8 +51,13 @@ class DifferenceRegistry(object):
 
     def __init__(self):
         self._entries = {}
+        self._duplicates = []
 
     def register(self, entry):
+        existing = self._entries.get(entry.symbol)
+        if existing is not None:
+            self._duplicates.append((entry.symbol, existing, entry))
+            return
         self._entries[entry.symbol] = entry
 
     def lookup(self, symbol):
@@ -52,6 +68,9 @@ class DifferenceRegistry(object):
 
     def entries(self):
         return list(self._entries.values())
+
+    def duplicates(self):
+        return list(self._duplicates)
 
 
 @dataclass(frozen=True)
@@ -95,6 +114,7 @@ def load_root_library(path):
                     source_path=path,
                     line_no=line_no,
                     read_result=read_result,
+                    kind=classify_formula_kind(stripped),
                 )
             )
 
@@ -126,15 +146,28 @@ def build_difference_registry(formulas):
 
 
 def _extract_definition(text):
-    if ':' not in text:
+    positions = find_top_level_operators(text, ':')
+    if len(positions) != 1:
         return None
 
-    symbol, introduction = text.split(':', 1)
-    symbol = symbol.strip()
-    introduction = introduction.strip()
+    pos = positions[0]
+    symbol = text[:pos].strip()
+    introduction = text[pos + 1:].strip()
     if not symbol or not introduction:
         return None
     return symbol, introduction
+
+
+def classify_formula_kind(text):
+    """Классифицировать формулу без введения внешней grammar."""
+
+    if len(find_top_level_operators(text, ':')) == 1:
+        return FormulaKind.DEFINITION
+    if find_top_level_operators(text, '!='):
+        return FormulaKind.NON_EQUATION
+    if find_top_level_operators(text, '='):
+        return FormulaKind.EQUATION
+    return FormulaKind.EXPRESSION
 
 
 def _infer_definition_layer(symbol, introduction):

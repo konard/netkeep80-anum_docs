@@ -70,6 +70,12 @@ def read_formula(text, expected_layer=None, source_path=None, line_no=None):
     """Прочитать строковую формулу как носитель различий и контейнеров."""
 
     diagnostics = []
+    top_level_colons = find_top_level_operators(text, ':')
+    if len(top_level_colons) > 1:
+        diagnostics.append(
+            "Оператор введения различия ':' должен быть единственным на верхнем уровне"
+        )
+
     containers = []
     stack = []
     tokens = []
@@ -155,6 +161,50 @@ def read_formula(text, expected_layer=None, source_path=None, line_no=None):
     )
 
 
+def find_top_level_operator(text, operator):
+    """Вернуть позицию оператора вне контейнеров или ``None``."""
+
+    positions = find_top_level_operators(text, operator)
+    if not positions:
+        return None
+    return positions[0]
+
+
+def find_top_level_operators(text, operator):
+    """Найти все позиции оператора вне ``()``, ``[]`` и ``{}``.
+
+    Это технический scanner строкового носителя, а не грамматика МТС. Он нужен
+    для ранней классификации формул и корректного чтения ``A : F`` без split по
+    двоеточию внутри контейнеров.
+    """
+
+    if not operator:
+        raise ValueError("operator must not be empty")
+
+    positions = []
+    stack = []
+    literal_lhs_span = _literal_definition_lhs_span(text) if operator == ':' else None
+    pos = 0
+
+    while pos < len(text):
+        if text.startswith(operator, pos) and not stack:
+            positions.append(pos)
+            pos += len(operator)
+            continue
+
+        char = text[pos]
+        if char in _OPEN_TO_CLOSE and not _in_span(pos, literal_lhs_span):
+            stack.append(char)
+        elif char in _CLOSE_TO_OPEN and not _in_span(pos, literal_lhs_span):
+            expected_open = _CLOSE_TO_OPEN[char]
+            if stack and stack[-1] == expected_open:
+                stack.pop()
+
+        pos += 1
+
+    return positions
+
+
 def _literal_definition_lhs_span(text):
     """Вернуть span одиночного bracket-символа перед ``:``.
 
@@ -162,16 +212,18 @@ def _literal_definition_lhs_span(text):
     позиции bracket не является границей контейнера.
     """
 
-    if ':' not in text:
+    start = len(text) - len(text.lstrip())
+    if start >= len(text) or text[start] not in ('[', ']'):
         return None
 
-    before_colon = text.split(':', 1)[0]
-    lhs = before_colon.strip()
-    if lhs not in ('[', ']'):
+    pos = start + 1
+    while pos < len(text) and text[pos].isspace():
+        pos += 1
+
+    if pos >= len(text) or text[pos] != ':':
         return None
 
-    start = before_colon.index(lhs)
-    return start, start + len(lhs)
+    return start, start + 1
 
 
 def _in_span(pos, span):
