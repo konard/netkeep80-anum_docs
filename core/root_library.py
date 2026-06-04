@@ -34,7 +34,12 @@ ROOT_SYMBOL_LAYERS = {
     '(↛)': Layer.CONNECTION_MEANING,
     '[1]': Layer.QUATERNARY_SERIALIZATION,
     '[0]': Layer.QUATERNARY_SERIALIZATION,
+    # Начало и конец формы связи в актуальной ориентации (♀F — начало, F♂ — конец).
+    # Старая ориентация []♀ / ♂[] больше не является активным корневым символом.
+    '♀[]': Layer.SINGLE_CONNECTION_FORM,
+    '[]♂': Layer.SINGLE_CONNECTION_FORM,
     '(=)': Layer.FORMAL_FORM,
+    '(!=)': Layer.FORMAL_FORM,
 }
 
 

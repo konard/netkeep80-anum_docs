@@ -32,7 +32,7 @@ class TestRootLibrary(unittest.TestCase):
         self.library = load_root_library(ROOT_FORMULAS)
 
     def test_loads_mtc_formulas(self):
-        self.assertEqual(len(self.library.formulas), 11)
+        self.assertEqual(len(self.library.formulas), 34)
         self.assertTrue(all(formula.text for formula in self.library.formulas))
 
     def test_source_locations_are_preserved(self):
@@ -51,7 +51,12 @@ class TestRootLibrary(unittest.TestCase):
         self.assertIn('(↛) : (∞♂ ⟼ ♀∞)', texts)
         self.assertIn('[1] : (⟼)', texts)
         self.assertIn('[0] : (↛)', texts)
-        self.assertIn('(=) : {[]♀ = []♀, ♂[] = ♂[]}', texts)
+        self.assertIn('♀[] : ♀[] = ♀[] ⟼ []', texts)
+        self.assertIn('[]♂ : []♂ = [] ⟼ []♂', texts)
+        self.assertIn('(=) : {♀[] = ♀[], []♂ = []♂}', texts)
+        self.assertIn('(!=) : ¬(=)', texts)
+        self.assertIn('{} != []', texts)
+        self.assertNotIn('(=) : {[]♀ = []♀, ♂[] = ♂[]}', texts)
 
     def test_difference_registry_is_built_from_definitions(self):
         registry = self.library.registry
@@ -63,7 +68,10 @@ class TestRootLibrary(unittest.TestCase):
         self.assertIsNotNone(registry.lookup('(↛)'))
         self.assertIsNotNone(registry.lookup('[1]'))
         self.assertIsNotNone(registry.lookup('[0]'))
+        self.assertIsNotNone(registry.lookup('♀[]'))
+        self.assertIsNotNone(registry.lookup('[]♂'))
         self.assertIsNotNone(registry.lookup('(=)'))
+        self.assertIsNotNone(registry.lookup('(!=)'))
 
     def test_square_abits_are_exactly_four_and_infinity_is_not_abit(self):
         self.assertEqual(set(self.library.square_abits()), {'([)', '(])', '[1]', '[0]'})
@@ -73,7 +81,12 @@ class TestRootLibrary(unittest.TestCase):
         kinds = {formula.text: formula.kind for formula in self.library.formulas}
         self.assertEqual(kinds['∞ : [] = [] ⟼ []'], FormulaKind.DEFINITION)
         self.assertEqual(kinds['[] = ∞'], FormulaKind.EQUATION)
-        self.assertEqual(kinds['(=) : {[]♀ = []♀, ♂[] = ♂[]}'], FormulaKind.DEFINITION)
+        self.assertEqual(kinds['(=) : {♀[] = ♀[], []♂ = []♂}'], FormulaKind.DEFINITION)
+        self.assertEqual(kinds['(!=) : ¬(=)'], FormulaKind.DEFINITION)
+        self.assertEqual(kinds['[][] : [] ⟼ []'], FormulaKind.DEFINITION)
+        self.assertEqual(kinds['[][] = [] ⟼ []'], FormulaKind.EQUATION)
+        self.assertEqual(kinds['{} != []'], FormulaKind.NON_EQUATION)
+        self.assertEqual(kinds['[][][] != []([][])'], FormulaKind.NON_EQUATION)
 
     def test_colon_inside_container_is_not_a_definition(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -107,7 +120,10 @@ class TestRootLibrary(unittest.TestCase):
         self.assertEqual(registry.lookup('(↛)').layer, Layer.CONNECTION_MEANING)
         self.assertEqual(registry.lookup('[1]').layer, Layer.QUATERNARY_SERIALIZATION)
         self.assertEqual(registry.lookup('[0]').layer, Layer.QUATERNARY_SERIALIZATION)
+        self.assertEqual(registry.lookup('♀[]').layer, Layer.SINGLE_CONNECTION_FORM)
+        self.assertEqual(registry.lookup('[]♂').layer, Layer.SINGLE_CONNECTION_FORM)
         self.assertEqual(registry.lookup('(=)').layer, Layer.FORMAL_FORM)
+        self.assertEqual(registry.lookup('(!=)').layer, Layer.FORMAL_FORM)
 
 
 class TestRootValidation(unittest.TestCase):

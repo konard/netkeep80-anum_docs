@@ -63,6 +63,45 @@ class TestMTCReader(unittest.TestCase):
         self.assertEqual(connection.containers[0].kind, 'square')
         self.assertEqual(nonconnection.containers[0].kind, 'square')
 
+    def test_reads_start_end_link_forms(self):
+        start = read_formula('♀[] : ♀[] = ♀[] ⟼ []', expected_layer=Layer.SINGLE_CONNECTION_FORM)
+        end = read_formula('[]♂ : []♂ = [] ⟼ []♂', expected_layer=Layer.SINGLE_CONNECTION_FORM)
+
+        self.assertTrue(start.is_valid, start.diagnostics)
+        self.assertTrue(end.is_valid, end.diagnostics)
+        self.assertEqual([c.kind for c in start.containers], ['square', 'square', 'square', 'square'])
+        self.assertEqual([c.kind for c in end.containers], ['square', 'square', 'square', 'square'])
+
+    def test_reads_equality_with_current_polarity(self):
+        result = read_formula('(=) : {♀[] = ♀[], []♂ = []♂}', expected_layer=Layer.FORMAL_FORM)
+
+        self.assertTrue(result.is_valid, result.diagnostics)
+        self.assertEqual(
+            [c.kind for c in result.containers],
+            ['round', 'curly', 'square', 'square', 'square', 'square'],
+        )
+
+    def test_reads_nonequality_negation_definition(self):
+        result = read_formula('(!=) : ¬(=)', expected_layer=Layer.FORMAL_FORM)
+
+        self.assertTrue(result.is_valid, result.diagnostics)
+        self.assertEqual([c.kind for c in result.containers], ['round', 'round'])
+
+    def test_reads_grouped_sequence_form(self):
+        result = read_formula('[]([][]) : [] ⟼ ([][])', expected_layer=Layer.SINGLE_CONNECTION_FORM)
+
+        self.assertTrue(result.is_valid, result.diagnostics)
+        self.assertEqual(
+            [c.kind for c in result.containers],
+            ['square', 'round', 'square', 'square', 'square', 'round', 'square', 'square'],
+        )
+
+    def test_reads_nonconnection_assertion(self):
+        result = read_formula('{} != []', expected_layer=Layer.FORMAL_FORM)
+
+        self.assertTrue(result.is_valid, result.diagnostics)
+        self.assertEqual([c.kind for c in result.containers], ['curly', 'square'])
+
     def test_unclosed_container_is_invalid(self):
         result = read_formula('{[]', expected_layer=Layer.FORMAL_FORM)
         self.assertFalse(result.is_valid)
@@ -82,6 +121,9 @@ class TestMTCReader(unittest.TestCase):
         self.assertEqual(find_top_level_operator('(]) : (∞♂)', ':'), 4)
         self.assertEqual(find_top_level_operator('[1] : (⟼)', ':'), 4)
         self.assertEqual(find_top_level_operator('[0] : (↛)', ':'), 4)
+        self.assertEqual(find_top_level_operator('(!=) : ¬(=)', ':'), 5)
+        self.assertIsNone(find_top_level_operator('(!=) : ¬(=)', '!='))
+        self.assertEqual(find_top_level_operator('{} != []', '!='), 3)
 
 
 if __name__ == '__main__':

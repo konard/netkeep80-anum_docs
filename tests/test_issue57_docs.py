@@ -39,6 +39,8 @@ ACTIVE_SPEC_FILES = {
     "Шаблонный поиск МТС.md",
 }
 
+# ``pics`` is intentionally NOT forbidden: the owner asked to keep the
+# illustrations (issue #57 review: "картинки удалять не надо было").
 FORBIDDEN_DIRECTORIES = [
     "archive",
     "archive2",
@@ -47,11 +49,15 @@ FORBIDDEN_DIRECTORIES = [
     "legacy",
     "old",
     "pdf",
-    "pics",
     "drafts",
     "docs/history",
     "docs/legacy",
     "docs/" + "research",
+]
+
+# Illustrations must remain available in the repository.
+REQUIRED_DIRECTORIES = [
+    "pics",
 ]
 
 ACTIVE_DOCS = [
@@ -69,7 +75,8 @@ ACTIVE_DOCS = [
     "docs/specs/Шаблонный поиск МТС.md",
 ]
 
-REQUIRED_FORMULAS = [
+# Core dictionary of the current root: every entry must stay in the fixture.
+REQUIRED_ROOT_FORMULAS = [
     "∞ : [] = [] ⟼ []",
     "[] = ∞",
     "∞ = ∞ ⟼ ∞",
@@ -80,7 +87,53 @@ REQUIRED_FORMULAS = [
     "(↛) : (∞♂ ⟼ ♀∞)",
     "[1] : (⟼)",
     "[0] : (↛)",
+    # Start/end of the link form in the current orientation (♀F — start, F♂ — end).
+    "♀[] : ♀[] = ♀[] ⟼ []",
+    "[]♂ : []♂ = [] ⟼ []♂",
+    # Equality as a match of self-closure forms, plus its negation.
+    "(=) : {♀[] = ♀[], []♂ = []♂}",
+    "(!=) : ¬(=)",
+]
+
+# Minimal sequence layer that must remain available in the root fixture.
+REQUIRED_SEQUENCE_FORMULAS = [
+    "([]) = []",
+    "([][]) = [][]",
+    "([] ⟼ []) = [] ⟼ []",
+    "[][] : [] ⟼ []",
+    "[][] = [] ⟼ []",
+    "[][][] : ([][]) ⟼ []",
+    "[][][] = ([] ⟼ []) ⟼ []",
+    "[][][] = [] ⟼ [] ⟼ []",
+    "[]([][]) : [] ⟼ ([][])",
+    "[][][] != []([][])",
+    "[][][] != [] ⟼ ([] ⟼ [])",
+]
+
+# Minimal bundle layer and the distinctness of the empty bundle from the link form.
+REQUIRED_BUNDLE_FORMULAS = [
+    "{} != []",
+    "{[]} != []",
+    "{[], []} = {[]}",
+    "{[], [][]} = {[][], []}",
+    "[]{} = {}",
+    "{}[] = {}",
+    "[]{[], [][]} = {[] ⟼ [], [] ⟼ [][]}",
+    "{[], [][]}[] = {[] ⟼ [], [][] ⟼ []}",
+    "{[], [][]}{[], [][]} = {[] ⟼ [], [] ⟼ [][], [][] ⟼ [], [][] ⟼ [][]}",
+]
+
+# The retired equality polarity and the contradictory empty-form inequality must
+# never come back to the active root surface.
+FORBIDDEN_ROOT_FORMULAS = [
     "(=) : {[]♀ = []♀, ♂[] = ♂[]}",
+    "[] != [] : ¬([] = [])",
+]
+
+# The old start/end orientation must not appear as a literal in the fixture.
+FORBIDDEN_FIXTURE_SUBSTRINGS = [
+    "[]♀",
+    "♂[]",
 ]
 
 FORBIDDEN_ACTIVE_MARKERS = [
@@ -181,11 +234,29 @@ def test_legacy_directories_are_removed():
     assert existing == []
 
 
+def test_illustrations_are_preserved():
+    # The owner explicitly asked to keep the illustrations of issue #57.
+    for relative_path in REQUIRED_DIRECTORIES:
+        directory = ROOT / relative_path
+        assert directory.is_dir(), relative_path
+        assert any(directory.iterdir()), relative_path
+
+
 def test_mtc_formula_fixture_uses_current_root_dictionary():
     lines = formula_lines()
+    line_set = set(lines)
 
-    assert lines == REQUIRED_FORMULAS
-    assert set(lines).isdisjoint(FORBIDDEN_FIXTURE_LINES)
+    for required in (
+        REQUIRED_ROOT_FORMULAS + REQUIRED_SEQUENCE_FORMULAS + REQUIRED_BUNDLE_FORMULAS
+    ):
+        assert required in line_set, required
+
+    assert line_set.isdisjoint(FORBIDDEN_ROOT_FORMULAS)
+    assert line_set.isdisjoint(FORBIDDEN_FIXTURE_LINES)
+
+    fixture_text = read_doc("tests/mtc_formulas.mtc")
+    for forbidden in FORBIDDEN_FIXTURE_SUBSTRINGS:
+        assert forbidden not in fixture_text, forbidden
 
     for line in lines:
         assert_balanced(line, "{", "}")
@@ -336,7 +407,8 @@ def test_equality_is_read_as_form_self_closure_match():
         "формы связей являются видами самозамыканий",
         "рекурсивная процедура сравнения различает формы рекурсий",
         "равенство не требует бесконечного раскрытия рекурсивных связей",
-        "(=) : {[]♀ = []♀, ♂[] = ♂[]}",
+        "(=) : {♀[] = ♀[], []♂ = []♂}",
+        "(!=) : ¬(=)",
     ]:
         assert required in combined
 
@@ -344,5 +416,39 @@ def test_equality_is_read_as_form_self_closure_match():
         "равенство является простой идентичностью определения",
         "равенство — это текстовое совпадение определений",
         "равенство требует полного раскрытия связи",
+        "(=) : {[]♀ = []♀, ♂[] = ♂[]}",
     ]:
         assert forbidden not in combined
+
+
+def test_empty_forms_are_documented_as_distinct():
+    combined = "\n".join(read_doc(relative_path) for relative_path in ACTIVE_DOCS)
+
+    for required in [
+        "[] != ()",
+        "() != {}",
+        "{} != []",
+    ]:
+        assert required in combined, required
+
+
+def test_fixture_records_nonconnection_assertions():
+    lines = set(formula_lines())
+
+    for required in [
+        "{} != []",
+        "{[]} != []",
+        "[][][] != []([][])",
+        "[][][] != [] ⟼ ([] ⟼ [])",
+    ]:
+        assert required in lines, required
+
+
+def test_current_start_end_polarity_is_documented():
+    combined = "\n".join(read_doc(relative_path) for relative_path in ACTIVE_DOCS)
+
+    for required in [
+        "♀[] : ♀[] = ♀[] ⟼ []",
+        "[]♂ : []♂ = [] ⟼ []♂",
+    ]:
+        assert required in combined, required
