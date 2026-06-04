@@ -17,5 +17,5 @@ class Layer(enum.Enum):
     QUATERNARY_SERIALIZATION = "quaternary_serialization"
 
 
-SQUARE_ABIT_SYMBOLS = ('[', ']', '1', '0')
+SQUARE_ABIT_SYMBOLS = ('([)', '(])', '[1]', '[0]')
 INFINITY_SYMBOL = '∞'

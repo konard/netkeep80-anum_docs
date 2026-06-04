@@ -3,8 +3,8 @@
 Технический reader формальной нотации МТС.
 
 Reader фиксирует строковый носитель, границы контейнеров и source span. Он
-намеренно не задаёт EBNF-грамматику и не является источником смысла нотации:
-смысл должен приходить из корневой библиотеки ``.mtc``-формул.
+намеренно не задаёт источник смысла нотации: смысл должен приходить из
+корневой библиотеки ``.mtc``-формул.
 """
 
 from dataclasses import dataclass
@@ -92,6 +92,12 @@ def read_formula(text, expected_layer=None, source_path=None, line_no=None):
         if char.isspace():
             flush_token(pos)
             token_start = None
+            continue
+
+        if _is_literal_square_abit_in_round_form(text, pos, stack):
+            if token_start is None:
+                token_start = pos
+            token_chars.append(char)
             continue
 
         if char in _OPEN_TO_CLOSE and not _in_span(pos, literal_lhs_span):
@@ -193,6 +199,10 @@ def find_top_level_operators(text, operator):
             continue
 
         char = text[pos]
+        if _is_literal_square_abit_in_round_form(text, pos, stack):
+            pos += 1
+            continue
+
         if char in _OPEN_TO_CLOSE and not _in_span(pos, literal_lhs_span):
             stack.append(char)
         elif char in _CLOSE_TO_OPEN and not _in_span(pos, literal_lhs_span):
@@ -224,6 +234,24 @@ def _literal_definition_lhs_span(text):
         return None
 
     return start, start + 1
+
+
+def _is_literal_square_abit_in_round_form(text, pos, stack):
+    """Проверить ``([)`` и ``(])`` как круглые формы с буквальным абитом."""
+
+    if text[pos] not in ('[', ']'):
+        return False
+    if not stack or _stack_open_symbol(stack[-1]) != '(':
+        return False
+    if pos == 0 or text[pos - 1] != '(':
+        return False
+    return pos + 1 < len(text) and text[pos + 1] == ')'
+
+
+def _stack_open_symbol(item):
+    if isinstance(item, tuple):
+        return item[0]
+    return item
 
 
 def _in_span(pos, span):
