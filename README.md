@@ -136,3 +136,11 @@ git diff --check
 ## Лицензия
 
 Проект распространяется под лицензией [Unlicense](LICENSE).
+
+## Авторы и соавторы
+
+- [Вертушкин Роман Павлович](https://github.com/netkeep80)
+- [Дьяченко Константин Константинович](https://github.com/konard)
+- [Шакиров Тимур Эдуардович](https://github.com/TimaxLacs)
+- [Бурдуков Александр Николаевич](https://github.com/InAiwetrustAGI)
+- [Глазунов Иван Сергеевич](https://github.com/ivansglazunov)
