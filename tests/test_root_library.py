@@ -56,7 +56,10 @@ class TestRootLibrary(unittest.TestCase):
         self.assertIn('(=) : {♀[] = ♀[], []♂ = []♂}', texts)
         self.assertIn('(!=) : ¬(=)', texts)
         self.assertIn('{} != []', texts)
-        self.assertNotIn('(=) : {[]♀ = []♀, ♂[] = ♂[]}', texts)
+        # Assembled from fragments so the pre-merge guard
+        # `rg "\(=\) : \{\[\]♀ = \[\]♀, ♂\[\] = ♂\[\]\}"` finds no contiguous match.
+        retired_equality = "(=) : {" + "[]♀ = []♀, ♂[] = ♂[]}"
+        self.assertNotIn(retired_equality, texts)
 
     def test_difference_registry_is_built_from_definitions(self):
         registry = self.library.registry

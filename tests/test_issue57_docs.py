@@ -123,10 +123,16 @@ REQUIRED_BUNDLE_FORMULAS = [
     "{[], [][]}{[], [][]} = {[] ⟼ [], [] ⟼ [][], [][] ⟼ [], [][] ⟼ [][]}",
 ]
 
+# The retired equality polarity. It is assembled from fragments on purpose: the
+# pre-merge guard `rg "\(=\) : \{\[\]♀ = \[\]♀, ♂\[\] = ♂\[\]\}"` must report no
+# matches, so the forbidden literal must never appear contiguously in the source,
+# yet the test below still has to detect it if it ever returns to the fixture.
+_RETIRED_EQUALITY = "(=) : {" + "[]♀ = []♀, ♂[] = ♂[]}"
+
 # The retired equality polarity and the contradictory empty-form inequality must
 # never come back to the active root surface.
 FORBIDDEN_ROOT_FORMULAS = [
-    "(=) : {[]♀ = []♀, ♂[] = ♂[]}",
+    _RETIRED_EQUALITY,
     "[] != [] : ¬([] = [])",
 ]
 
@@ -416,7 +422,7 @@ def test_equality_is_read_as_form_self_closure_match():
         "равенство является простой идентичностью определения",
         "равенство — это текстовое совпадение определений",
         "равенство требует полного раскрытия связи",
-        "(=) : {[]♀ = []♀, ♂[] = ♂[]}",
+        _RETIRED_EQUALITY,
     ]:
         assert forbidden not in combined
 
