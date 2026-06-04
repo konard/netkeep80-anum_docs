@@ -51,7 +51,7 @@ def validate_root_library(path):
             )
         )
 
-    required_symbols = ('∞', '(⟼)', '[⟼]', '(=)', '(!=)', '[', ']', '1', '0')
+    required_symbols = ('∞', '()', '([)', '(])', '(⟼)', '(↛)', '[1]', '[0]', '(=)')
     for symbol in required_symbols:
         if library.registry.lookup(symbol) is None:
             messages.append("Не найдено корневое различие: {0}".format(symbol))
