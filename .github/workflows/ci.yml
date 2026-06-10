@@ -121,6 +121,25 @@ jobs:
           done
           echo "Documentation check complete."
 
+  protect-readonly-files:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check protected files are not modified
+        run: |
+          PROTECTED_FILE="docs/research/Исходные мысли МТС.md"
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          if git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep -Fxq "$PROTECTED_FILE"; then
+            echo "::error::The file '$PROTECTED_FILE' is protected and may not be modified in a pull request. Only the repository owner may edit this file directly."
+            exit 1
+          fi
+          echo "Protected file check passed."
+
   validate-structure:
     runs-on: ubuntu-latest
     steps:
