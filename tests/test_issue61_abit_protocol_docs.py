@@ -72,14 +72,30 @@ def test_issue61_protocol_separates_load_decode_project_realize_and_find():
 
 def test_issue61_is_linked_from_anum_serialization_without_replacing_root_fixture():
     anum_spec = read_doc(ANUM_SPEC)
+    protocol_spec = read_doc(PROTOCOL_SPEC)
     root_fixture = read_doc(ROOT_FIXTURE)
 
     assert "Протокол абитов ачисел" in anum_spec
     assert "Протокол абитов ачисел.md" in anum_spec
+    assert "пока не записывается напрямую в `tests/mtc_formulas.mtc`" in anum_spec
+
+    for required in [
+        "Текущий корневой fixture сохраняется без прямой записи новой проекции",
+        "[ := ∞♀",
+        "] := ♂∞",
+        "[] := 0",
+        "][ := 1",
+        "пока не записывается напрямую в `tests/mtc_formulas.mtc`",
+    ]:
+        assert required in protocol_spec, required
 
     for forbidden in [
         "[ : ∞♀",
         "] : ♂∞",
+        "[ := ∞♀",
+        "] := ♂∞",
+        "[] := 0",
+        "][ := 1",
         "0 : ∞♀ ⟼ ♂∞",
         "1 : ♂∞ ⟼ ∞♀",
     ]:
