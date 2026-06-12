@@ -94,11 +94,10 @@ def _command_project(path: str) -> None:
 
 def _command_normalize(path: str) -> None:
     source = _read_source(path)
-    if isinstance(source, AnumForm):
-        print(normalize_anum_form(source))
-        return
+    if not isinstance(source, AnumForm):
+        raise ValueError("normalize поддерживает только quaternary *.anum")
 
-    print(source.text)
+    print(normalize_anum_form(source))
 
 
 def _command_realize(path: str) -> None:

@@ -3,26 +3,38 @@
 
 import pytest
 
-from core.anum_model import AnumSource
+from core.anum_model import AnumForm, AnumSource
 from core.anum_parser import parse_anum_file, parse_quaternary_anum
 
 
-def test_strict_quaternary_accepts_only_quaternary_payload():
+def test_quaternary_rejects_string_tokens():
     parse_quaternary_anum("[01000001]")
 
+    for source in ("window(position)", "a b", "∞ ⟼ ∞"):
+        with pytest.raises(ValueError, match="Недопустимый символ"):
+            parse_quaternary_anum(source)
+
+
+def test_string_mode_does_not_parse_as_quaternary():
+    source = parse_anum_file("# anum-format: string\nwindow(position)\n")
+
+    assert isinstance(source, AnumSource)
+    assert source.format == "string"
+    assert source.text == "window(position)"
+
+
+def test_quaternary_mode_rejects_string_content():
     with pytest.raises(ValueError, match="Недопустимый символ"):
-        parse_quaternary_anum("window(position)")
+        parse_anum_file("# anum-format: quaternary\nwindow(position)\n")
 
 
-def test_explicit_string_mode_keeps_text_payload_as_string_source():
-    source = parse_anum_file("# anum-format: string\nwindow(position)")
+def test_utf8_payload_example_is_quaternary_not_string():
+    form = parse_anum_file(
+        "# anum-format: quaternary\n"
+        "[01101000][01100101][01101100][01101100][01101111]\n"
+    )
 
-    assert source == AnumSource(text="window(position)", format="string")
-
-
-def test_explicit_quaternary_mode_rejects_string_payload():
-    with pytest.raises(ValueError, match="Недопустимый символ"):
-        parse_anum_file("# anum-format: quaternary\nwindow(position)")
+    assert isinstance(form, AnumForm)
 
 
 def test_string_mode_header_is_required_for_named_payloads():

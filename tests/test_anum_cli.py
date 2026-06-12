@@ -46,6 +46,21 @@ def test_cli_normalize_removes_comments_and_whitespace(tmp_path):
     assert result.stdout.strip() == "[01]"
 
 
+def test_cli_normalize_rejects_string_mode(tmp_path):
+    anum_file = tmp_path / "string.anum"
+    anum_file.write_text("# anum-format: string\na b\n", encoding="utf-8")
+
+    result = subprocess.run(
+        [sys.executable, "-m", "converters.anum_cli", "normalize", str(anum_file)],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode != 0
+    assert "normalize" in result.stderr
+    assert "quaternary" in result.stderr
+
+
 def test_cli_realize_string_symbolic_link(tmp_path):
     anum_file = tmp_path / "link.anum"
     anum_file.write_text("# anum-format: string\na b\n", encoding="utf-8")

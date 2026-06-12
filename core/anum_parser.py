@@ -2,9 +2,9 @@
 """Parser for practical *.anum files.
 
 This parser is intentionally separate from ``core.mtc_reader`` and from the
-UTF-8 payload codec in ``converters.anum_to_text``. The strict quaternary mode
-does not apply ordinary bracket-balance rules: ``][``, ``[[`` and ``]]`` are
-valid two-abit forms.
+UTF-8 payload codec in ``converters.text_to_anum`` / ``converters.anum_to_text``.
+The strict quaternary mode does not apply ordinary bracket-balance rules:
+``][``, ``[[`` and ``]]`` are valid two-abit forms.
 """
 
 from core.anum_model import Abit, AnumForm, AnumSource, AnumToken
@@ -58,7 +58,7 @@ def parse_anum_file(text: str) -> AnumForm | AnumSource:
     """Parse a complete *.anum file.
 
     Without an explicit header the file is parsed as strict quaternary.
-    ``# anum-format: string`` keeps the payload as a string source and never
+    ``# anum-format: string`` keeps the body as a symbolic source and never
     feeds it into the quaternary parser.
     """
 
