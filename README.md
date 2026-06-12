@@ -121,8 +121,12 @@
 core/mtc_reader.py        технический reader формул
 core/root_library.py      загрузка корневой библиотеки формул
 core/validate_root.py     структурная валидация корневой библиотеки
-converters/text_to_anum.py
-converters/anum_to_text.py
+core/anum_parser.py       parser контейнерных файлов *.anum
+core/anum_projector.py    проекция двухабитных форм
+core/anum_memory.py       тестовая модель load/find/realize
+converters/text_to_anum.py  кодер UTF-8 payload в четверичную абитовую запись
+converters/anum_to_text.py  декодер UTF-8 payload из четверичной абитовой записи
+converters/anum_cli.py
 converters/ascii_unicode.py
 ```
 
