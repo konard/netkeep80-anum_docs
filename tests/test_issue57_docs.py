@@ -15,6 +15,7 @@ REQUIRED_DOCS = [
     ROOT / "docs/theory/Система аксиом МТС.md",
     ROOT / "docs/theory/Шаблон аксиом МТС.md",
     ROOT / "docs/specs/Ачисла и сериализация.md",
+    ROOT / "docs/specs/Протокол абитов ачисел.md",
     ROOT / "docs/specs/Пучковая нотация МТС.md",
     ROOT / "docs/specs/Семантика вхождений МТС.md",
     ROOT / "docs/specs/Слои нотации МТС.md",
@@ -32,6 +33,7 @@ THEORY_SURFACE_FILES = {
 
 ACTIVE_SPEC_FILES = {
     "Ачисла и сериализация.md",
+    "Протокол абитов ачисел.md",
     "Пучковая нотация МТС.md",
     "Семантика вхождений МТС.md",
     "Слои нотации МТС.md",
@@ -39,10 +41,12 @@ ACTIVE_SPEC_FILES = {
     "Шаблонный поиск МТС.md",
 }
 
-# ``pics`` is intentionally NOT forbidden: the owner asked to keep the
+# ``archive`` and ``docs/research`` are intentionally not forbidden on current
+# main: archival material has returned, and ``docs/research`` contains the
+# protected read-only source notes guarded by CI.
+# ``pics`` is also intentionally NOT forbidden: the owner asked to keep the
 # illustrations (issue #57 review: "картинки удалять не надо было").
 FORBIDDEN_DIRECTORIES = [
-    "archive",
     "archive2",
     "faq",
     "history",
@@ -52,7 +56,6 @@ FORBIDDEN_DIRECTORIES = [
     "drafts",
     "docs/history",
     "docs/legacy",
-    "docs/" + "research",
 ]
 
 # Illustrations must remain available in the repository.
@@ -68,6 +71,7 @@ ACTIVE_DOCS = [
     "docs/theory/Система аксиом МТС.md",
     "docs/theory/Шаблон аксиом МТС.md",
     "docs/specs/Ачисла и сериализация.md",
+    "docs/specs/Протокол абитов ачисел.md",
     "docs/specs/Пучковая нотация МТС.md",
     "docs/specs/Семантика вхождений МТС.md",
     "docs/specs/Слои нотации МТС.md",
