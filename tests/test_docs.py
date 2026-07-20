@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Regression checks for issue #57: current MTS core only."""
+"""Regression checks for the documentation surface of the current MTS core."""
 
 import re
 from pathlib import Path
@@ -41,12 +41,12 @@ ACTIVE_SPEC_FILES = {
     "Шаблонный поиск МТС.md",
 }
 
-# ``archive`` and ``docs/research`` are intentionally not forbidden on current
-# main: archival material has returned, and ``docs/research`` contains the
-# protected read-only source notes guarded by CI.
+# ``docs/research`` is intentionally not forbidden: it contains the protected
+# read-only source notes guarded by CI.
 # ``pics`` is also intentionally NOT forbidden: the owner asked to keep the
 # illustrations (issue #57 review: "картинки удалять не надо было").
 FORBIDDEN_DIRECTORIES = [
+    "archive",
     "archive2",
     "faq",
     "history",
@@ -462,3 +462,97 @@ def test_current_start_end_polarity_is_documented():
         "[]♂ : []♂ = [] ⟼ []♂",
     ]:
         assert required in combined, required
+
+
+ROOT = Path(__file__).resolve().parents[1]
+PROTOCOL_SPEC = ROOT / "docs/specs/Протокол абитов ачисел.md"
+ANUM_SPEC = ROOT / "docs/specs/Ачисла и сериализация.md"
+ROOT_FIXTURE = ROOT / "tests/mtc_formulas.mtc"
+
+
+def test_issue61_protocol_spec_exists_and_records_arrow_hypothesis():
+    assert PROTOCOL_SPEC.exists()
+
+    spec = PROTOCOL_SPEC.read_text(encoding="utf-8")
+    for required in [
+        "абиты нельзя мыслить как символы строки",
+        "минимальные стрелочные формы вокруг акорня",
+        "α := ∞♀",
+        "β := ♂∞",
+        "[ := α",
+        "] := β",
+        "0 := [] := α ⟼ β",
+        "1 := ][ := β ⟼ α",
+        "[[ := α ⟼ α",
+        "[] := α ⟼ β",
+        "][ := β ⟼ α",
+        "]] := β ⟼ β",
+        "project_protocol([]) = 0",
+        "project_protocol(][) = 1",
+    ]:
+        assert required in spec, required
+
+
+def test_issue61_protocol_does_not_reject_two_abit_forms_as_invalid_strings():
+    spec = PROTOCOL_SPEC.read_text(encoding="utf-8")
+
+    for required in [
+        "Все четыре двухабитные формы существуют",
+        "`][` не является ошибкой ведущей закрывающей скобки",
+        "`[[` и `]]` не являются ошибками",
+        "`[]` и `][` читаются не как строки, а как связи",
+    ]:
+        assert required in spec, required
+
+
+def test_issue61_protocol_separates_load_decode_project_realize_and_find():
+    spec = PROTOCOL_SPEC.read_text(encoding="utf-8")
+
+    for required in [
+        "load(A)",
+        "decode(A)",
+        "project_K(A)",
+        "realize(A)",
+        "find(A)",
+        "raw(∞ab) = ((∞ ⟼ a) ⟼ b)",
+        "den(∞ab) = a ⟼ b",
+        "raw(∞ab) не содержит a ⟼ b",
+        "load(∞ab) не создаёт a ⟼ b",
+        "realize(∞ab) создаёт или получает a ⟼ b",
+        "find(∞ab) проверяет наличие a ⟼ b, но не создаёт её",
+        "D([∞ab]) = ∞ab",
+        "D([[∞ab]]) = [∞ab]",
+    ]:
+        assert required in spec, required
+
+
+def test_issue61_is_linked_from_anum_serialization_without_replacing_root_fixture():
+    anum_spec = ANUM_SPEC.read_text(encoding="utf-8")
+    protocol_spec = PROTOCOL_SPEC.read_text(encoding="utf-8")
+    root_fixture = ROOT_FIXTURE.read_text(encoding="utf-8")
+
+    assert "Протокол абитов ачисел" in anum_spec
+    assert "Протокол абитов ачисел.md" in anum_spec
+    assert "пока не записывается напрямую в `tests/mtc_formulas.mtc`" in anum_spec
+
+    for required in [
+        "Текущий корневой fixture сохраняется без прямой записи новой проекции",
+        "[ := ∞♀",
+        "] := ♂∞",
+        "[] := 0",
+        "][ := 1",
+        "пока не записывается напрямую в `tests/mtc_formulas.mtc`",
+    ]:
+        assert required in protocol_spec, required
+
+    for forbidden in [
+        "[ : ∞♀",
+        "] : ♂∞",
+        "[ := ∞♀",
+        "] := ♂∞",
+        "[] := 0",
+        "][ := 1",
+        "0 : ∞♀ ⟼ ♂∞",
+        "1 : ♂∞ ⟼ ∞♀",
+    ]:
+        assert forbidden not in root_fixture, forbidden

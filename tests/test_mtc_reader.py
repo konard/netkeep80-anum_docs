@@ -12,7 +12,7 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.layers import Layer  # noqa: E402
-from core.mtc_reader import find_top_level_operator, read_formula  # noqa: E402
+from core.mtc_reader import find_top_level_operators, read_formula  # noqa: E402
 
 
 class TestMTCReader(unittest.TestCase):
@@ -115,15 +115,19 @@ class TestMTCReader(unittest.TestCase):
         self.assertTrue(any('Слой чтения не указан' in d for d in result.diagnostics))
 
     def test_finds_only_top_level_definition_operator(self):
-        self.assertEqual(find_top_level_operator('∞ : [] = [] ⟼ []', ':'), 2)
-        self.assertIsNone(find_top_level_operator('(a : b)', ':'))
-        self.assertEqual(find_top_level_operator('([) : (♀∞)', ':'), 4)
-        self.assertEqual(find_top_level_operator('(]) : (∞♂)', ':'), 4)
-        self.assertEqual(find_top_level_operator('[1] : (⟼)', ':'), 4)
-        self.assertEqual(find_top_level_operator('[0] : (↛)', ':'), 4)
-        self.assertEqual(find_top_level_operator('(!=) : ¬(=)', ':'), 5)
-        self.assertIsNone(find_top_level_operator('(!=) : ¬(=)', '!='))
-        self.assertEqual(find_top_level_operator('{} != []', '!='), 3)
+        def first_top_level_operator(text, operator):
+            positions = find_top_level_operators(text, operator)
+            return positions[0] if positions else None
+
+        self.assertEqual(first_top_level_operator('∞ : [] = [] ⟼ []', ':'), 2)
+        self.assertIsNone(first_top_level_operator('(a : b)', ':'))
+        self.assertEqual(first_top_level_operator('([) : (♀∞)', ':'), 4)
+        self.assertEqual(first_top_level_operator('(]) : (∞♂)', ':'), 4)
+        self.assertEqual(first_top_level_operator('[1] : (⟼)', ':'), 4)
+        self.assertEqual(first_top_level_operator('[0] : (↛)', ':'), 4)
+        self.assertEqual(first_top_level_operator('(!=) : ¬(=)', ':'), 5)
+        self.assertIsNone(first_top_level_operator('(!=) : ¬(=)', '!='))
+        self.assertEqual(first_top_level_operator('{} != []', '!='), 3)
 
 
 if __name__ == '__main__':

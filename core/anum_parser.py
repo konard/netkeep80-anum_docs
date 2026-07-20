@@ -13,7 +13,6 @@ from core.anum_model import Abit, AnumForm, AnumSource, AnumToken
 ANUM_FORMAT_HEADER = "# anum-format:"
 FORMAT_QUATERNARY = "quaternary"
 FORMAT_STRING = "string"
-SUPPORTED_FORMATS = (FORMAT_QUATERNARY, FORMAT_STRING)
 
 _ABIT_BY_SYMBOL = {abit.value: abit for abit in Abit}
 
@@ -70,13 +69,6 @@ def parse_anum_file(text: str) -> AnumForm | AnumSource:
         return AnumSource(text=body.strip(), format=FORMAT_STRING)
 
     raise ValueError(f'Неизвестный формат anum: "{format_name}"')
-
-
-def normalize_quaternary_anum(text: str) -> str:
-    """Return quaternary text without whitespace and comments."""
-
-    form = parse_quaternary_anum(text)
-    return normalize_anum_form(form)
 
 
 def normalize_anum_form(form: AnumForm) -> str:

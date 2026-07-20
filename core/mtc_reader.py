@@ -167,15 +167,6 @@ def read_formula(text, expected_layer=None, source_path=None, line_no=None):
     )
 
 
-def find_top_level_operator(text, operator):
-    """Вернуть позицию оператора вне контейнеров или ``None``."""
-
-    positions = find_top_level_operators(text, operator)
-    if not positions:
-        return None
-    return positions[0]
-
-
 def find_top_level_operators(text, operator):
     """Найти все позиции оператора вне ``()``, ``[]`` и ``{}``.
 
